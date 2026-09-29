@@ -60,7 +60,6 @@ export class FakeSwarmChat {
   });
   sendMessage = vi.fn(async () => {});
   retrySendMessage = vi.fn(async () => {});
-  retryBroadcastUserMessage = vi.fn(async () => {});
   fetchPreviousMessages = vi.fn(async () => {});
   hasPreviousMessages = vi.fn(() => this.previousMessages);
 

@@ -19,8 +19,7 @@ export { READ_ONLY_PRIVATE_KEY } from '../chatSettings';
 
 interface ChatProps {
   chat: ChatConfig;
-  /** The stream's feed owner and topic, which name the stream's chat. */
-  owner: string;
+  /** The stream's topic, which names the stream's chat. */
   topic: string;
 }
 
@@ -28,7 +27,7 @@ interface ChatProps {
 type PendingReactions = Record<string, string>;
 
 /** The chat beside a stream: read by anyone, written to by a viewer who has chosen a name. */
-export function Chat({ chat, owner, topic }: ChatProps) {
+export function Chat({ chat, topic }: ChatProps) {
   const { session, setIsLoginModalOpen } = useChatUser();
   const settings = useMemo(() => chatSettings(chat, topic, session), [chat, topic, session]);
   const ownAddress = session?.address ?? null;
@@ -45,7 +44,7 @@ export function Chat({ chat, owner, topic }: ChatProps) {
     fetchOlderMessages,
     retrySendMessage,
     restart,
-  } = useSwarmChat(settings, `${owner}/${topic}`, ownAddress);
+  } = useSwarmChat(settings, ownAddress);
 
   const [threadId, setThreadId] = useState<string | null>(null);
   const [pendingReactions, setPendingReactions] = useState<PendingReactions>({});

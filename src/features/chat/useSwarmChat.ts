@@ -22,11 +22,6 @@ export const CHAT_UNREACHABLE = 'unreachable';
 
 export type ChatStatus = typeof CHAT_LOADING | typeof CHAT_READY | typeof CHAT_UNREACHABLE;
 
-/** Carried on every message, so the aggregator can tell which stream it belongs to. */
-type MessageExtras = {
-  streamId: string;
-};
-
 function byTimestamp(a: MessageData, b: MessageData): number {
   return a.timestamp - b.timestamp;
 }
@@ -60,7 +55,7 @@ const START_DELAY_MS = 0;
  * messages on screen stay through that restart, since it is the same chat read again, and only a
  * different stream's chat starts from an empty list.
  */
-export function useSwarmChat(settings: ChatSettings, streamId: string, ownAddress: string | null) {
+export function useSwarmChat(settings: ChatSettings, ownAddress: string | null) {
   const settingsKey = JSON.stringify(settings);
   const chatKey = JSON.stringify(settings.infra);
   const chatRef = useRef<SwarmChat | null>(null);
@@ -189,13 +184,9 @@ export function useSwarmChat(settings: ChatSettings, streamId: string, ownAddres
     [grouped.replies],
   );
 
-  const send = useCallback(
-    async (text: string, type: MessageType, targetMessageId?: string) => {
-      const extras: MessageExtras = { streamId };
-      await chatRef.current?.sendMessage(text, type, targetMessageId, undefined, extras);
-    },
-    [streamId],
-  );
+  const send = useCallback(async (text: string, type: MessageType, targetMessageId?: string) => {
+    await chatRef.current?.sendMessage(text, type, targetMessageId);
+  }, []);
 
   const sendMessage = useCallback((text: string) => send(text, MessageType.TEXT), [send]);
   const sendReaction = useCallback(
@@ -212,20 +203,9 @@ export function useSwarmChat(settings: ChatSettings, streamId: string, ownAddres
     }
   }, []);
 
-  /**
-   * A message that failed is sent again whole. One that reached the sender's own feed but was never
-   * read back from the chat feed is only handed to the aggregator again.
-   */
+  /** A message that failed, or one still waiting to be read back, is sent again with its identical bytes. */
   const retrySendMessage = useCallback((message: VisibleMessage) => {
-    const chat = chatRef.current;
-    if (!chat) {
-      return;
-    }
-    if (message.error) {
-      void chat.retrySendMessage(message);
-    } else if (message.requested && message.uploaded) {
-      void chat.retryBroadcastUserMessage(message);
-    }
+    chatRef.current?.retrySendMessage(message);
   }, []);
 
   const restart = useCallback(() => setRestarts((count) => count + 1), []);

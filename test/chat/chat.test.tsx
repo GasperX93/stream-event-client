@@ -38,7 +38,6 @@ vi.mock('emoji-picker-react', () => ({
   Theme: { DARK: 'dark' },
 }));
 
-const OWNER = 'a'.repeat(40);
 const FEED_OWNER = '0x' + 'b'.repeat(40);
 const OTHER = 'c'.repeat(40);
 
@@ -76,7 +75,7 @@ function emit(event: string, data: unknown, chat = FakeSwarmChat.latest()) {
 }
 
 function panel(topic = 'stream-one', chat: ChatConfig = CHAT): ReactNode {
-  return createElement(ChatUserProvider, null, createElement(Chat, { chat, owner: OWNER, topic }));
+  return createElement(ChatUserProvider, null, createElement(Chat, { chat, topic }));
 }
 
 async function open(node: ReactNode = panel()) {
@@ -116,7 +115,6 @@ describe('the chat on a watch page', () => {
       gsocTopic: 'gsoc-topic',
       chatTopic: 'chat-stream-one',
       chatAddress: FEED_OWNER,
-      enveloped: false,
       pollingInterval: 750,
     });
     expect(infra.stamp).toBeUndefined();
@@ -179,7 +177,7 @@ describe('the chat on a watch page', () => {
         ChatUserProvider,
         null,
         createElement(LoginButton),
-        createElement(Chat, { chat: CHAT, owner: OWNER, topic: 'stream-one' }),
+        createElement(Chat, { chat: CHAT, topic: 'stream-one' }),
       ),
     );
     emit(EVENTS.CRITICAL_ERROR, new Error('unreachable'));
@@ -215,9 +213,7 @@ describe('sending', () => {
     type(input('Message'), '  hello there  ');
     press(input('Message'), 'Enter');
     await settle();
-    expect(chat.sendMessage).toHaveBeenCalledWith('hello there', MessageType.TEXT, undefined, undefined, {
-      streamId: `${OWNER}/stream-one`,
-    });
+    expect(chat.sendMessage).toHaveBeenCalledWith('hello there', MessageType.TEXT, undefined);
     expect(input('Message').value).toBe('');
 
     const own = message({ id: 'own', message: 'hello there', username: 'Ada', address: session!.address });
@@ -305,9 +301,7 @@ describe('reactions', () => {
     expect(button('👍 1').getAttribute('aria-pressed')).toBe('true');
     click(button('👍 1'));
     await settle();
-    expect(chat.sendMessage).toHaveBeenCalledWith('👍', MessageType.REACTION, 'm', undefined, {
-      streamId: `${OWNER}/stream-one`,
-    });
+    expect(chat.sendMessage).toHaveBeenCalledWith('👍', MessageType.REACTION, 'm');
   });
 
   it('are added from the message actions', async () => {
@@ -318,7 +312,7 @@ describe('reactions', () => {
     click(button('Message actions'));
     click(button('React with 😂'));
     await settle();
-    expect(chat.sendMessage).toHaveBeenCalledWith('😂', MessageType.REACTION, 'm', undefined, expect.anything());
+    expect(chat.sendMessage).toHaveBeenCalledWith('😂', MessageType.REACTION, 'm');
   });
 
   it('ask a viewer with no name for one instead of sending', async () => {
@@ -351,9 +345,7 @@ describe('threads', () => {
     type(input('Reply'), 'another answer');
     click(button('Send'));
     await settle();
-    expect(chat.sendMessage).toHaveBeenCalledWith('another answer', MessageType.THREAD, 'parent', undefined, {
-      streamId: `${OWNER}/stream-one`,
-    });
+    expect(chat.sendMessage).toHaveBeenCalledWith('another answer', MessageType.THREAD, 'parent');
 
     click(button('Back to the chat'));
     expect(messageTexts()).toEqual(['the question']);

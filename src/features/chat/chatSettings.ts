@@ -32,7 +32,6 @@ export function chatSettings(config: ChatConfig, streamTopic: string, session: S
       gsocTopic: config.gsocTopic,
       chatTopic: `chat-${streamTopic}`,
       chatAddress: config.feedOwner,
-      enveloped: false,
       pollingInterval: config.pollIntervalMs,
       feedReadTimeout: FEED_READ_TIMEOUT_MS,
       gsocWriteTimeout: GSOC_WRITE_TIMEOUT_MS,
