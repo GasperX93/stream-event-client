@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { EVENTS, MessageType, type MessageData } from '@solarpunkltd/swarm-chat-js';
+import { ChatMessageError, EVENTS, MessageType, type MessageData } from '@solarpunkltd/swarm-chat-js';
 import { act, createElement, StrictMode, type ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -240,7 +240,7 @@ describe('sending', () => {
     expect(FakeSwarmChat.latest().settings.user.nickname).toBe('Ada');
   });
 
-  it('sends the text with the stream it belongs to, shows it as sending, then as sent', async () => {
+  it('sends the text, shows it as sending, then as sent', async () => {
     signIn();
     await open();
     const chat = FakeSwarmChat.latest();
@@ -272,6 +272,42 @@ describe('sending', () => {
     click(button('Send'));
     await settle();
     expect(chat.sendMessage).toHaveBeenCalledTimes(1);
+  });
+
+  it('counts a message as the chat does, and does not send one the chat would refuse', async () => {
+    signIn();
+    await open();
+    const chat = FakeSwarmChat.latest();
+    type(input('Message'), 'a'.repeat(500));
+    expect(button('Send').disabled).toBe(false);
+    expect(text()).not.toContain('at most 500 characters');
+
+    type(input('Message'), 'a'.repeat(501));
+    expect(button('Send').disabled).toBe(true);
+    expect(text()).toContain('A message is at most 500 characters.');
+    press(input('Message'), 'Enter');
+    await settle();
+    expect(chat.sendMessage).not.toHaveBeenCalled();
+
+    type(input('Message'), '🐝'.repeat(400));
+    expect(button('Send').disabled).toBe(false);
+
+    type(input('Message'), '🐝'.repeat(500));
+    expect(button('Send').disabled).toBe(true);
+    expect(text()).toContain('This message is too long to send.');
+    expect(text()).not.toContain('at most 500 characters');
+  });
+
+  it('says why when the chat refuses a message', async () => {
+    signIn();
+    await open();
+    const chat = FakeSwarmChat.latest();
+    chat.sendMessage.mockRejectedValueOnce(new ChatMessageError('too-large', 'over the cap'));
+    type(input('Message'), 'hi');
+    click(button('Send'));
+    await settle();
+    expect(text()).toContain('This message is too long to send.');
+    expect(input('Message').value).toBe('hi');
   });
 
   it('adds an emoji from the picker to the message being written', async () => {
