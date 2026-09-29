@@ -13,14 +13,14 @@ let container: HTMLDivElement;
 let root: Root;
 let opener: HTMLButtonElement;
 
-function renderDialog(open: boolean, onClose = vi.fn()) {
+function renderDialog(open: boolean, onClose = vi.fn(), { autoFocusFirst = false } = {}) {
   act(() => {
     root.render(
       open
         ? createElement(
             Dialog,
             { title: 'Pick one', onClose },
-            createElement('input', { 'aria-label': 'first' }),
+            createElement('input', { 'aria-label': 'first', autoFocus: autoFocusFirst }),
             createElement('button', { type: 'button' }, 'last'),
           )
         : null,
@@ -112,6 +112,13 @@ describe('a dialog', () => {
 
   it('gives focus back to what had it before it opened', () => {
     renderDialog(true);
+    renderDialog(false);
+    assert.equal(document.activeElement, opener);
+  });
+
+  it('gives focus back to the opener when a control inside took focus on its own', () => {
+    renderDialog(true, vi.fn(), { autoFocusFirst: true });
+    assert.equal(document.activeElement?.getAttribute('aria-label'), 'first');
     renderDialog(false);
     assert.equal(document.activeElement, opener);
   });
