@@ -15,8 +15,12 @@
     height: auto;
   }
 
+  // A desktop has no fold button, so a chat folded on a narrower window shows again when it widens.
   @include media.desktop-up {
-    height: var(--size-chat-height-desktop);
+    &,
+    &.folded {
+      height: var(--size-chat-height-desktop);
+    }
   }
 }
 
@@ -30,6 +34,10 @@
 
   .folded & {
     border-bottom: none;
+
+    @include media.desktop-up {
+      border-bottom: 1px solid var(--color-border);
+    }
   }
 }
 
@@ -65,6 +73,10 @@
 
   &[hidden] {
     display: none;
+
+    @include media.desktop-up {
+      display: flex;
+    }
   }
 }
 
