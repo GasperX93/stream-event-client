@@ -131,6 +131,18 @@ describe('the chat on a watch page', () => {
     expect(FakeSwarmChat.latest().settings.user).toEqual({ privateKey: session?.privateKey, nickname: 'Ada' });
   });
 
+  it('keeps loading through an error the library recovers from while opening, and never calls it unreachable', async () => {
+    mounted = mount(panel());
+    await settle();
+    emit(EVENTS.LOADING_INIT, true);
+    emit(EVENTS.ERROR, new Error('the head lookup timed out, opening from slot 0'));
+    expect(text()).toContain('Loading the chat');
+    expect(text()).not.toContain('The chat cannot be reached right now');
+    emit(EVENTS.LOADING_INIT, false);
+    expect(text()).not.toContain('Loading the chat');
+    expect(text()).toContain('No messages yet.');
+  });
+
   it('says it is loading until the chat has read its history', async () => {
     mounted = mount(panel());
     await settle();
@@ -318,6 +330,20 @@ describe('sending', () => {
     click(await waitFor(() => queryButton('pick 🎉')));
     expect(input('Message').value).toBe('party 🎉');
     expect(dialog()).toBeNull();
+  });
+
+  it('shows a message as sending through a reconnect, and as not sent once the library reports it after', async () => {
+    signIn();
+    await open();
+    const own = message({ id: 'own', username: 'Ada', address: session!.address, index: -1 });
+    emit(EVENTS.MESSAGE_REQUEST_INITIATED, own);
+    emit(EVENTS.STATUS, 'reconnecting');
+    expect(text()).toContain('Sending');
+    expect(text()).not.toContain('Not sent');
+    emit(EVENTS.STATUS, 'live');
+    emit(EVENTS.MESSAGE_REQUEST_ERROR, own);
+    expect(text()).toContain('Not sent');
+    expect(button('Retry')).toBeTruthy();
   });
 
   it('says a message did not send and sends it again on retry', async () => {
