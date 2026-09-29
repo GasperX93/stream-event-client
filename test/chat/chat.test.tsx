@@ -346,6 +346,30 @@ describe('sending', () => {
     expect(button('Retry')).toBeTruthy();
   });
 
+  it('offers a resend for a message not confirmed after a while, but only while the chat is live', async () => {
+    signIn();
+    await open();
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      const own = message({ id: 'own', username: 'Ada', address: session!.address, index: -1 });
+      emit(EVENTS.MESSAGE_REQUEST_INITIATED, own);
+      emit(EVENTS.MESSAGE_REQUEST_UPLOADED, own);
+      emit(EVENTS.STATUS, 'reconnecting');
+      act(() => vi.advanceTimersByTime(20_000));
+      expect(text()).toContain('Sending');
+      expect(text()).not.toContain('Not confirmed yet');
+
+      emit(EVENTS.STATUS, 'live');
+      expect(text()).toContain('Not confirmed yet');
+      expect(button('Resend')).toBeTruthy();
+
+      emit(EVENTS.STATUS, 'stalled');
+      expect(text()).not.toContain('Not confirmed yet');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('says a message did not send and sends it again on retry', async () => {
     signIn();
     await open();
