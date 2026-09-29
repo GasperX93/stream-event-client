@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { FeedHealthTracker } from '../src/components/SwarmHlsPlayer/feedState';
+import { FeedHealthTracker } from '../src/features/player/feedState';
 import {
   attachReturningBroadcastRejoin,
   bufferedAheadOf,
   hasReachedEndOfPlayback,
   type PlaybackPosition,
-} from '../src/components/SwarmHlsPlayer/returningBroadcast';
+} from '../src/features/player/returningBroadcast';
 
 const TOPIC = 'the-broadcast-this-viewer-linked-to';
 

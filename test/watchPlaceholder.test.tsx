@@ -3,14 +3,14 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it } from 'vitest';
 
-import { WatchPlaceholder } from '../src/pages/StreamWatcher/WatchPlaceholder';
+import { WatchPlaceholder } from '../src/features/player/StreamWatcher/WatchPlaceholder';
 import {
   WATCH_VIEW_LOADING,
   WATCH_VIEW_NOT_STARTED,
   WATCH_VIEW_PLAYER,
   WATCH_VIEW_UNAVAILABLE,
   type WatchPageView,
-} from '../src/utils/watchPageView';
+} from '../src/features/catalog/watchPageView';
 
 const render = (view: WatchPageView, startsAt: string | null = null): string =>
   renderToStaticMarkup(createElement(WatchPlaceholder, { view, startsAt }));

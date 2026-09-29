@@ -2,9 +2,9 @@
  * The viewer's readers of a catalog entry and of a rung before the contracts package held them, copied as they were
  * so catalogReaderParity.test.ts can show the contract reads every entry the same way.
  */
-import { mediaTypeSchema } from '@swarm-hls-stream/shared';
+import { mediaTypeSchema } from '@/shared/mediaType';
 
-import { Rendition, Stream } from '@/types/stream';
+import { Rendition, Stream } from '@/features/catalog/stream';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;

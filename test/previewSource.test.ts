@@ -8,7 +8,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { previewSourceFrom } from '../src/components/StreamPreview/previewSource';
+import { previewSourceFrom } from '../src/features/catalog/StreamPreview/previewSource';
 
 const OK = { ok: true, status: 200 };
 

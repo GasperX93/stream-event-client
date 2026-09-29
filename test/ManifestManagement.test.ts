@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { beforeEach, describe, it } from 'vitest';
 
-import { ManifestStateManager } from '../src/components/SwarmHlsPlayer/ManifestManagement';
-import { parseManifest } from '../src/components/SwarmHlsPlayer/playlist';
+import { ManifestStateManager } from '../src/features/player/ManifestManagement';
+import { parseManifest } from '../src/features/player/playlist';
 
 // Tags a fixture repeats get a name. Single-use header tags stay inline so each fixture still
 // reads like the playlist it stands in for.

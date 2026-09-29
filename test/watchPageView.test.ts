@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { STREAM_STATUS_LIVE, STREAM_STATUS_SCHEDULED, STREAM_STATUS_VOD } from '../src/types/stream';
+import { STREAM_STATUS_LIVE, STREAM_STATUS_SCHEDULED, STREAM_STATUS_VOD } from '../src/features/catalog/stream';
 import {
   isWaitingForStart,
   WATCH_VIEW_LOADING,
@@ -9,7 +9,7 @@ import {
   WATCH_VIEW_PLAYER,
   WATCH_VIEW_UNAVAILABLE,
   watchPageView,
-} from '../src/utils/watchPageView';
+} from '../src/features/catalog/watchPageView';
 
 const scheduled = { state: STREAM_STATUS_SCHEDULED };
 const live = { state: STREAM_STATUS_LIVE };

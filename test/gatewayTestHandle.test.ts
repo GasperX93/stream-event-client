@@ -4,7 +4,7 @@ import {
   exposeGatewayForInstrumentation,
   GATEWAY_HANDLE,
   type GatewaySwitch,
-} from '../src/providers/gatewayTestHandle';
+} from '../src/app/gatewayTestHandle';
 
 /**
  * That a harness can move a running viewer between gateways, and that nothing else can.

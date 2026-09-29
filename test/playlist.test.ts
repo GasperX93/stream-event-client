@@ -1,9 +1,5 @@
-import {
-  buildMasterPlaylist as sharedBuildMasterPlaylist,
-  buildSwarmUri as sharedBuildSwarmUri,
-  parseManifest as sharedParseManifest,
-  parseSwarmUri as sharedParseSwarmUri,
-} from '@swarm-hls-stream/shared';
+import { parseManifest as sharedParseManifest } from '@/shared/manifest';
+import { buildMasterPlaylist as sharedBuildMasterPlaylist, buildSwarmUri as sharedBuildSwarmUri, parseSwarmUri as sharedParseSwarmUri } from '@/shared/masterPlaylist';
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
@@ -15,8 +11,8 @@ import {
   masterVariants,
   parseManifest,
   parseSwarmUri,
-} from '../src/components/SwarmHlsPlayer/playlist.js';
-import type { Rendition } from '../src/types/stream.js';
+} from '../src/features/player/playlist.js';
+import type { Rendition } from '../src/features/catalog/stream.js';
 
 /** A ladder to build a master from, so `masterVariants` has real published text to read back. */
 const rendition = (name: string, width: number, height: number, bandwidth: number): Rendition => ({

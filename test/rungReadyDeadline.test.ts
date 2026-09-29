@@ -6,8 +6,8 @@ import {
   ManifestStateManager,
   RUNG_READY_DEADLINE_POLLS,
   RungNotReadyError,
-} from '../src/components/SwarmHlsPlayer/ManifestManagement';
-import { RequestJitter } from '../src/utils/requestJitter';
+} from '../src/features/player/ManifestManagement';
+import { RequestJitter } from '../src/shared/requestJitter';
 
 /**
  * A level request for a rung the gateway cannot read used to wait for ever.

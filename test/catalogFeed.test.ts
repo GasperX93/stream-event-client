@@ -1,8 +1,8 @@
 import { Topic } from '@ethersphere/bee-js';
 import { describe, expect, it } from 'vitest';
 
-import { CatalogFeedReader } from '@/utils/catalogFeed';
-import type { TimedResponse } from '@/utils/fetchWithTimeout';
+import { CatalogFeedReader } from '@/features/catalog/catalogFeed';
+import type { TimedResponse } from '@/shared/fetchWithTimeout';
 
 /**
  * That the catalog is followed by walking rather than by resolving its head on every poll.

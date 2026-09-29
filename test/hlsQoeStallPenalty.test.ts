@@ -3,8 +3,8 @@ import { ErrorDetails, ErrorTypes, Events } from 'hls.js';
 import assert from 'node:assert/strict';
 import { afterEach, beforeEach, describe, it, vi } from 'vitest';
 
-import { attachQoeTracking, type QoeMetrics } from '../src/components/SwarmHlsPlayer/overlays/qoe/useHlsQoeMetrics';
-import { LIVE_SYNC_DURATION_S } from '../src/components/SwarmHlsPlayer/playerConfig';
+import { attachQoeTracking, type QoeMetrics } from '../src/features/player/overlays/qoe/useHlsQoeMetrics';
+import { LIVE_SYNC_DURATION_S } from '../src/features/player/playerConfig';
 
 /**
  * How often `attachQoeTracking` polls the player for the numbers it cannot get from an event.

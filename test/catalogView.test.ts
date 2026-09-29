@@ -7,7 +7,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { CATALOG_VIEW_MESSAGE, catalogViewFrom } from '../src/pages/StreamBrowser/catalogView';
+import { CATALOG_VIEW_MESSAGE, catalogViewFrom } from '../src/features/catalog/StreamBrowser/catalogView';
 
 describe('what the browse page shows for a catalog fetch', () => {
   it('shows streams when there are streams', () => {

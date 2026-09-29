@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { viewerCatalogEntrySchema, viewerCatalogRungSchema } from '@swarm-hls-stream/shared';
+import { viewerCatalogEntrySchema, viewerCatalogRungSchema } from '@/shared/catalog';
 
 import { isRendition, isStream } from './helpers/catalogReaderBeforeContract';
 

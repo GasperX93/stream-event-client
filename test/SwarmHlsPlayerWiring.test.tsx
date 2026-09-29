@@ -5,9 +5,9 @@ import assert from 'node:assert/strict';
 import { Topic } from '@ethersphere/bee-js';
 import { afterEach, beforeEach, describe, it, vi } from 'vitest';
 
-import { FEED_STATE_STALLED, type FeedState } from '../src/components/SwarmHlsPlayer/feedState';
-import { SwarmHlsPlayer, type HlsPlayerProps } from '../src/components/SwarmHlsPlayer/SwarmHlsPlayer';
-import { MEDIA_TYPE_VIDEO } from '../src/types/stream';
+import { FEED_STATE_STALLED, type FeedState } from '../src/features/player/feedState';
+import { SwarmHlsPlayer, type HlsPlayerProps } from '../src/features/player/SwarmHlsPlayer';
+import { MEDIA_TYPE_VIDEO } from '../src/features/catalog/stream';
 
 /**
  * The player's two wirings that outlive, or end with, one hls.js instance, checked by mounting the
@@ -35,13 +35,13 @@ const fakes = vi.hoisted(() => {
   };
 });
 
-vi.mock('../src/components/SwarmHlsPlayer/CustomManifestLoader', () => ({
+vi.mock('../src/features/player/CustomManifestLoader', () => ({
   CustomManifestLoader: class {},
   CustomFragmentLoader: class {},
   manifestFetcher: { feedHealth: fakes.feedHealth, registerLadder: vi.fn(), unregisterLadder: vi.fn() },
 }));
 
-vi.mock('../src/components/SwarmHlsPlayer/playbackHealth', () => ({
+vi.mock('../src/features/player/playbackHealth', () => ({
   attachPlaybackStallReporter: fakes.attachStallReporter,
 }));
 

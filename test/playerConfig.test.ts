@@ -9,10 +9,10 @@ import {
   buildPlayerConfig,
   LIVE_MAX_LATENCY_DURATION_S,
   LIVE_SYNC_DURATION_S,
-} from '../src/components/SwarmHlsPlayer/playerConfig';
+} from '../src/features/player/playerConfig';
 
 const CLIENT_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
-const PLAYER_SOURCE = join(CLIENT_ROOT, 'src/components/SwarmHlsPlayer/SwarmHlsPlayer.tsx');
+const PLAYER_SOURCE = join(CLIENT_ROOT, 'src/features/player/SwarmHlsPlayer.tsx');
 
 /** Loaders of the right shape, so a config can be built without importing the real ones. */
 const NO_LOADERS = { pLoader: undefined, fLoader: undefined };

@@ -1,8 +1,8 @@
 import { writeFileSync } from 'node:fs';
 import { describe, it } from 'vitest';
 
-import type { Segment } from '../src/components/SwarmHlsPlayer/ManifestManagement';
-import { ManifestStateManager } from '../src/components/SwarmHlsPlayer/ManifestManagement';
+import type { Segment } from '../src/features/player/ManifestManagement';
+import { ManifestStateManager } from '../src/features/player/ManifestManagement';
 
 /**
  * The measurement behind `docs/bench/manifest-growth-2026-08-12.md`, kept so the numbers there can

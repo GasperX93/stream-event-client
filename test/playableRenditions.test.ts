@@ -10,8 +10,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { Rendition, STREAM_STATUS_LIVE, STREAM_STATUS_VOD } from '../src/types/stream';
-import { playableRenditions } from '../src/utils/playableRenditions';
+import { Rendition, STREAM_STATUS_LIVE, STREAM_STATUS_VOD } from '../src/features/catalog/stream';
+import { playableRenditions } from '../src/features/player/playableRenditions';
 
 function rung(name: string, recording?: { index: number; duration: number }): Rendition {
   const height = Number.parseInt(name, 10);

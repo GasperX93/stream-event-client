@@ -7,7 +7,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { scheduledStartLabel } from '../src/utils/scheduledStart';
+import { scheduledStartLabel } from '../src/features/catalog/scheduledStart';
 
 describe('the start time an announced broadcast shows', () => {
   it('formats an ISO timestamp for the reader rather than printing it raw', () => {

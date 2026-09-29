@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { attachPlaybackStallReporter } from '../src/components/SwarmHlsPlayer/playbackHealth';
+import { attachPlaybackStallReporter } from '../src/features/player/playbackHealth';
 
 type MediaEventName = 'playing' | 'waiting' | 'ended';
 

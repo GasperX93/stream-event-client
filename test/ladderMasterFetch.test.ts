@@ -1,8 +1,8 @@
 import { Topic } from '@ethersphere/bee-js';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { ManifestFetcher, ManifestStateManager } from '../src/components/SwarmHlsPlayer/ManifestManagement';
-import { RequestJitter } from '../src/utils/requestJitter';
+import { ManifestFetcher, ManifestStateManager } from '../src/features/player/ManifestManagement';
+import { RequestJitter } from '../src/shared/requestJitter';
 
 /**
  * The first browser ever pointed at a published ladder failed with three

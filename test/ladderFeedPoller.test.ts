@@ -1,5 +1,5 @@
 import { FeedIndex, Topic } from '@ethersphere/bee-js';
-import { makeFeedIdentifier } from '@swarm-hls-stream/shared';
+import { makeFeedIdentifier } from '@/shared/feedFollow';
 import assert from 'node:assert/strict';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { beforeEach, describe, it } from 'vitest';
@@ -15,13 +15,13 @@ import {
   RUNG_DEATH_LAG_SEGMENTS,
   UNSERVED_POLLS_PROBE_CEILING,
   UNSERVED_SLOT_STALL_MS,
-} from '../src/components/SwarmHlsPlayer/feedState.js';
-import { LadderFeedPoller } from '../src/components/SwarmHlsPlayer/LadderFeedPoller.js';
-import { ManifestStateManager } from '../src/components/SwarmHlsPlayer/ManifestManagement.js';
-import { parseManifest } from '../src/components/SwarmHlsPlayer/playlist.js';
-import { ManifestFetchError, PROBE_DISTANCES } from '../src/components/SwarmHlsPlayer/refusedSlot.js';
-import { TimedResponse } from '../src/utils/fetchWithTimeout.js';
-import { RequestJitter } from '../src/utils/requestJitter.js';
+} from '../src/features/player/feedState.js';
+import { LadderFeedPoller } from '../src/features/player/LadderFeedPoller.js';
+import { ManifestStateManager } from '../src/features/player/ManifestManagement.js';
+import { parseManifest } from '../src/features/player/playlist.js';
+import { ManifestFetchError, PROBE_DISTANCES } from '../src/features/player/refusedSlot.js';
+import { TimedResponse } from '../src/shared/fetchWithTimeout.js';
+import { RequestJitter } from '../src/shared/requestJitter.js';
 
 import { waitFor } from './helpers/waiting.js';
 

@@ -16,7 +16,7 @@ import {
   TRACKED_TOPIC_LIMIT,
   UNSERVED_POLLS_PROBE_CEILING,
   UNSERVED_SLOT_STALL_MS,
-} from '../src/components/SwarmHlsPlayer/feedState';
+} from '../src/features/player/feedState';
 
 const TOPIC = 'topic-under-test';
 

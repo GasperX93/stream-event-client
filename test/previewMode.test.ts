@@ -9,7 +9,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { previewMode, thumbnailFailed, thumbnailImageUrl } from '../src/components/StreamPreview/previewMode';
+import { previewMode, thumbnailFailed, thumbnailImageUrl } from '../src/features/catalog/StreamPreview/previewMode';
 
 const REF = '6ce8aab7f729e4614ceab32b108336e0d25d53a673bc7c028d01ff386a9aaa70';
 

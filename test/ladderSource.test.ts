@@ -1,5 +1,5 @@
 import { Topic } from '@ethersphere/bee-js';
-import { buildMasterPlaylist, type Rendition } from '@swarm-hls-stream/shared';
+import { buildMasterPlaylist, type Rendition } from '@/shared/masterPlaylist';
 import assert from 'node:assert/strict';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { afterEach, beforeEach, describe, it } from 'vitest';
@@ -9,9 +9,9 @@ import {
   FEED_STATE_LIVE,
   FEED_STATE_RECONNECTING,
   FeedHealthTracker,
-} from '../src/components/SwarmHlsPlayer/feedState';
-import { ManifestFetcher, ManifestStateManager } from '../src/components/SwarmHlsPlayer/ManifestManagement';
-import { RequestJitter } from '../src/utils/requestJitter';
+} from '../src/features/player/feedState';
+import { ManifestFetcher, ManifestStateManager } from '../src/features/player/ManifestManagement';
+import { RequestJitter } from '../src/shared/requestJitter';
 
 import { waitFor } from './helpers/waiting';
 

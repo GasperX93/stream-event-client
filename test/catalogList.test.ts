@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { Stream, STREAM_STATUS_LIVE, STREAM_STATUS_SCHEDULED } from '@/types/stream';
-import { nextStreamList } from '@/utils/catalogList';
+import { Stream, STREAM_STATUS_LIVE, STREAM_STATUS_SCHEDULED } from '@/features/catalog/stream';
+import { nextStreamList } from '@/features/catalog/catalogList';
 
 /**
  * Which catalog the browse page holds after a poll.

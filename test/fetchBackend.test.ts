@@ -6,7 +6,7 @@ import {
   FETCH_BACKEND_WEEB3,
   segmentRefFromUrl,
   selectedFetchBackend,
-} from '../src/components/SwarmHlsPlayer/fetchBackend';
+} from '../src/features/player/fetchBackend';
 
 const REF = '9c4e1f60b8a2d357e0f1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7';
 const ENCRYPTED_REF = REF + REF;

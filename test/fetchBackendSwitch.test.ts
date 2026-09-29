@@ -6,14 +6,14 @@ import {
   FETCH_BACKEND_GATEWAY,
   FETCH_BACKEND_WEEB3,
   selectFetchBackend,
-} from '../src/components/SwarmHlsPlayer/fetchBackend';
+} from '../src/features/player/fetchBackend';
 import {
   exposeFetchBackendForInstrumentation,
   FETCH_BACKEND_HANDLE,
   type FetchBackendSwitch,
-} from '../src/components/SwarmHlsPlayer/fetchBackendTestHandle';
-import type { Weeb3Module, Weeb3Node } from '../src/components/SwarmHlsPlayer/Weeb3FetchBackend';
-import { Weeb3FetchBackend } from '../src/components/SwarmHlsPlayer/Weeb3FetchBackend';
+} from '../src/features/player/fetchBackendTestHandle';
+import type { Weeb3Module, Weeb3Node } from '../src/features/player/Weeb3FetchBackend';
+import { Weeb3FetchBackend } from '../src/features/player/Weeb3FetchBackend';
 
 const holder = globalThis as unknown as Record<string, unknown>;
 

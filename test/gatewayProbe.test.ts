@@ -9,8 +9,8 @@ import {
   isDefaultGateway,
   PROBE_TIMEOUT_MS,
   probeGateway,
-} from '@/components/DomainSelector/gatewayProbe';
-import { FetchTimeoutError, fetchWithTimeout } from '@/utils/fetchWithTimeout';
+} from '@/features/gateway/gatewayProbe';
+import { FetchTimeoutError, fetchWithTimeout } from '@/shared/fetchWithTimeout';
 
 /**
  * That the Bee node picker reads an address before it saves it, and says what it found in words a

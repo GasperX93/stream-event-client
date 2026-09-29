@@ -2,8 +2,8 @@ import type Hls from 'hls.js';
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { attachLivePlaybackRateGuard } from '../src/components/SwarmHlsPlayer/livePlaybackRate';
-import { MAX_LIVE_SYNC_PLAYBACK_RATE } from '../src/components/SwarmHlsPlayer/playerConfig';
+import { attachLivePlaybackRateGuard } from '../src/features/player/livePlaybackRate';
+import { MAX_LIVE_SYNC_PLAYBACK_RATE } from '../src/features/player/playerConfig';
 
 /** What hls.js writes into `config` to mean "leave the playback rate alone". */
 const CATCH_UP_OFF = 1;

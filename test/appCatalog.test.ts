@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { catalogUpdater, toCatalogRead } from '@/providers/catalogState';
-import { Stream } from '@/types/stream';
+import { catalogUpdater, toCatalogRead } from '@/features/catalog/catalogState';
+import { Stream } from '@/features/catalog/stream';
 
 function streamAt(timestamp: number, title: string): Stream {
   return { owner: '0xabc', topic: `topic-${timestamp}`, timestamp, mediatype: 'video', title };

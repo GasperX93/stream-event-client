@@ -2,9 +2,9 @@ import { FeedIndex, Topic } from '@ethersphere/bee-js';
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { FeedReturnWatch, feedReturnWatchWaitMs } from '../src/components/SwarmHlsPlayer/feedReturn';
-import { TimedResponse } from '../src/utils/fetchWithTimeout';
-import { RequestJitter } from '../src/utils/requestJitter';
+import { FeedReturnWatch, feedReturnWatchWaitMs } from '../src/features/player/feedReturn';
+import { TimedResponse } from '../src/shared/fetchWithTimeout';
+import { RequestJitter } from '../src/shared/requestJitter';
 
 import { waitFor } from './helpers/waiting';
 

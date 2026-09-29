@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { beforeEach, describe, it } from 'vitest';
 
-import type { Segment } from '../src/components/SwarmHlsPlayer/ManifestManagement';
-import { ManifestStateManager } from '../src/components/SwarmHlsPlayer/ManifestManagement';
+import type { Segment } from '../src/features/player/ManifestManagement';
+import { ManifestStateManager } from '../src/features/player/ManifestManagement';
 
 const HEADERS = ['#EXTM3U', '#EXT-X-VERSION:3', '#EXT-X-TARGETDURATION:1'];
 const BYTES_URL = 'http://localhost:1633/bzz/';

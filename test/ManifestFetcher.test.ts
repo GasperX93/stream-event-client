@@ -1,5 +1,5 @@
 import { FeedIndex, Topic } from '@ethersphere/bee-js';
-import { makeFeedIdentifier } from '@swarm-hls-stream/shared';
+import { makeFeedIdentifier } from '@/shared/feedFollow';
 import assert from 'node:assert/strict';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { afterEach, beforeEach, describe, it } from 'vitest';
@@ -13,15 +13,15 @@ import {
   type FeedState,
   UNSERVED_POLLS_PROBE_CEILING,
   UNSERVED_SLOT_STALL_MS,
-} from '../src/components/SwarmHlsPlayer/feedState';
+} from '../src/features/player/feedState';
 import {
   ManifestFetcher,
   ManifestStateManager,
   MAX_SLOTS_PER_POLL,
   waitMs,
-} from '../src/components/SwarmHlsPlayer/ManifestManagement';
-import { PROBE_DISTANCES, UNSERVED_POLLS_BEFORE_PROBE } from '../src/components/SwarmHlsPlayer/refusedSlot';
-import { MANIFEST_BACKOFF_JITTER_FRACTION, RequestJitter } from '../src/utils/requestJitter';
+} from '../src/features/player/ManifestManagement';
+import { PROBE_DISTANCES, UNSERVED_POLLS_BEFORE_PROBE } from '../src/features/player/refusedSlot';
+import { MANIFEST_BACKOFF_JITTER_FRACTION, RequestJitter } from '../src/shared/requestJitter';
 
 import { waitFor } from './helpers/waiting';
 

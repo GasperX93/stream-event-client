@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, it, vi } from 'vitest';
 
-import type { Weeb3Module, Weeb3Node } from '../src/components/SwarmHlsPlayer/Weeb3FetchBackend';
-import { WEEB3_BOOT_MIN_PEERS, Weeb3FetchBackend } from '../src/components/SwarmHlsPlayer/Weeb3FetchBackend';
+import type { Weeb3Module, Weeb3Node } from '../src/features/player/Weeb3FetchBackend';
+import { WEEB3_BOOT_MIN_PEERS, Weeb3FetchBackend } from '../src/features/player/Weeb3FetchBackend';
 
 const REF = '9c4e1f60b8a2d357e0f1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7';
 

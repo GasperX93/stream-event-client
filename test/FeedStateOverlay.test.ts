@@ -10,8 +10,8 @@ import {
   FEED_STATE_RECONNECTING,
   FEED_STATE_STALLED,
   type FeedState,
-} from '../src/components/SwarmHlsPlayer/feedState';
-import { FeedStateOverlay } from '../src/components/SwarmHlsPlayer/overlays/feed/FeedStateOverlay';
+} from '../src/features/player/feedState';
+import { FeedStateOverlay } from '../src/features/player/overlays/feed/FeedStateOverlay';
 
 /** The overlay's own output, which a function component returns without needing anything to mount. */
 function render(state: FeedState): ReactElement {

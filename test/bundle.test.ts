@@ -7,9 +7,9 @@ import { build } from 'vite';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { copyWeeb3Runtime, WEEB3_RUNTIME_ENTRIES, weeb3PackageDir } from '../scripts/copy-weeb3-runtime.mjs';
-import { FETCH_BACKEND_HANDLE } from '../src/components/SwarmHlsPlayer/fetchBackendTestHandle';
-import { PLAYER_HANDLE } from '../src/components/SwarmHlsPlayer/playerTestHandle';
-import { GATEWAY_HANDLE } from '../src/providers/gatewayTestHandle';
+import { FETCH_BACKEND_HANDLE } from '../src/features/player/fetchBackendTestHandle';
+import { PLAYER_HANDLE } from '../src/features/player/playerTestHandle';
+import { GATEWAY_HANDLE } from '../src/app/gatewayTestHandle';
 import viteConfig from '../vite.config.js';
 
 const CLIENT_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));

@@ -2,11 +2,11 @@ import { Topic } from '@ethersphere/bee-js';
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { CATALOG_POLL_INTERVAL_MS, watchPageCatalogPollMs } from '../src/providers/catalogPoll';
-import { catalogUpdater, StreamCatalog, toCatalogRead } from '../src/providers/catalogState';
-import { Stream, STREAM_STATUS_LIVE, STREAM_STATUS_SCHEDULED } from '../src/types/stream';
-import { CatalogFeedReader } from '../src/utils/catalogFeed';
-import type { TimedResponse } from '../src/utils/fetchWithTimeout';
+import { CATALOG_POLL_INTERVAL_MS, watchPageCatalogPollMs } from '../src/features/catalog/catalogPoll';
+import { catalogUpdater, StreamCatalog, toCatalogRead } from '../src/features/catalog/catalogState';
+import { Stream, STREAM_STATUS_LIVE, STREAM_STATUS_SCHEDULED } from '../src/features/catalog/stream';
+import { CatalogFeedReader } from '../src/features/catalog/catalogFeed';
+import type { TimedResponse } from '../src/shared/fetchWithTimeout';
 import {
   isWaitingForStart,
   WATCH_VIEW_LOADING,
@@ -15,7 +15,7 @@ import {
   WATCH_VIEW_UNAVAILABLE,
   WatchPageView,
   watchPageView,
-} from '../src/utils/watchPageView';
+} from '../src/features/catalog/watchPageView';
 
 describe('when the watch page reads the catalog again', () => {
   it('keeps reading it while the stream has not started, so the page notices when it does', () => {

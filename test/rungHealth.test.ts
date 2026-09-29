@@ -1,5 +1,5 @@
 import { Topic } from '@ethersphere/bee-js';
-import { buildSwarmUri } from '@swarm-hls-stream/shared';
+import { buildSwarmUri } from '@/shared/masterPlaylist';
 import type Hls from 'hls.js';
 import { Events } from 'hls.js';
 import assert from 'node:assert/strict';
@@ -10,11 +10,11 @@ import {
   FEED_STATE_STALLED,
   FeedHealthTracker,
   RUNG_DEATH_LAG_SEGMENTS,
-} from '../src/components/SwarmHlsPlayer/feedState';
+} from '../src/features/player/feedState';
 
 /** One segment at the longest stage this project runs, so the clock in these cases is a real one. */
 const SEGMENT_MS = 2_000;
-import { attachRungFailover, attachWatchedRungReporter } from '../src/components/SwarmHlsPlayer/rungHealth';
+import { attachRungFailover, attachWatchedRungReporter } from '../src/features/player/rungHealth';
 
 const OWNER = '0x1234567890123456789012345678901234567890';
 const GROUP = 'the-broadcast-a-viewer-linked-to';

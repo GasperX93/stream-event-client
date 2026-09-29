@@ -1,8 +1,8 @@
 import { FeedIndex, Topic } from '@ethersphere/bee-js';
-import { feedSlotPath } from '@swarm-hls-stream/shared';
+import { feedSlotPath } from '@/shared/feedFollow';
 import { describe, expect, it } from 'vitest';
 
-import { previewSegmentUrl, thumbnailManifestUrl } from '@/utils/thumbnailManifest';
+import { previewSegmentUrl, thumbnailManifestUrl } from '@/features/catalog/thumbnailManifest';
 
 /**
  * Which URL a stream card asks for to build its thumbnail.

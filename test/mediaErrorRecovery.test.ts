@@ -13,7 +13,7 @@ import {
   nextMediaErrorAction,
   NO_MEDIA_ERRORS_YET,
   recoverFromMediaError,
-} from '../src/components/SwarmHlsPlayer/mediaErrorRecovery';
+} from '../src/features/player/mediaErrorRecovery';
 
 const T0 = 1_000_000;
 

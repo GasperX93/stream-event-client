@@ -2,7 +2,7 @@ import type Hls from 'hls.js';
 import assert from 'node:assert/strict';
 import { afterEach, beforeEach, describe, it, vi } from 'vitest';
 
-import { exposePlayerForInstrumentation, PLAYER_HANDLE } from '../src/components/SwarmHlsPlayer/playerTestHandle';
+import { exposePlayerForInstrumentation, PLAYER_HANDLE } from '../src/features/player/playerTestHandle';
 
 /** Only identity matters here, so a marker stands in for a player rather than a mock of one. */
 function playerStub(name: string): Hls {

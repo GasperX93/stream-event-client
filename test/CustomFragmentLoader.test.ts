@@ -1,9 +1,4 @@
-import {
-  CLIENT_LOG_UNKNOWN,
-  fragmentAbandonedAnsweredPattern,
-  fragmentRequestedPattern,
-  fragmentSettledPattern,
-} from '@swarm-hls-stream/shared';
+import { CLIENT_LOG_UNKNOWN, fragmentAbandonedAnsweredPattern, fragmentRequestedPattern, fragmentSettledPattern } from '@/shared/clientLog';
 import type { FragmentLoaderContext, HlsConfig, LoaderCallbacks, LoaderConfiguration, LoaderContext } from 'hls.js';
 import assert from 'node:assert/strict';
 import { afterEach, beforeEach, describe, it, vi } from 'vitest';
@@ -12,14 +7,14 @@ import {
   CustomFragmentLoader,
   manifestFetcher,
   requestJitter,
-} from '../src/components/SwarmHlsPlayer/CustomManifestLoader';
-import { FEED_STATE_LIVE, FEED_STATE_RECONNECTING } from '../src/components/SwarmHlsPlayer/feedState';
+} from '../src/features/player/CustomManifestLoader';
+import { FEED_STATE_LIVE, FEED_STATE_RECONNECTING } from '../src/features/player/feedState';
 import {
   FETCH_BACKEND_GATEWAY,
   FETCH_BACKEND_WEEB3,
   selectFetchBackend,
-} from '../src/components/SwarmHlsPlayer/fetchBackend';
-import { weeb3FetchBackend } from '../src/components/SwarmHlsPlayer/Weeb3FetchBackend';
+} from '../src/features/player/fetchBackend';
+import { weeb3FetchBackend } from '../src/features/player/Weeb3FetchBackend';
 
 const TOPIC = 'a-topic-being-watched';
 const FRAGMENT_URL = 'http://127.0.0.1:1633/bytes/0123456789abcdef';

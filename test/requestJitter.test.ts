@@ -6,7 +6,7 @@ import {
   MANIFEST_BACKOFF_JITTER_FRACTION,
   RequestJitter,
   type StaggeredTask,
-} from '../src/utils/requestJitter';
+} from '../src/shared/requestJitter';
 
 /**
  * Records what was scheduled instead of scheduling it, so a stagger is asserted rather than waited
