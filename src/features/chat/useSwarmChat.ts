@@ -31,11 +31,22 @@ export const CHAT_UNREACHABLE = 'unreachable';
 
 export type ChatStatus = typeof CHAT_LOADING | typeof CHAT_READY | typeof CHAT_UNREACHABLE;
 
-function byTimestamp(a: MessageData, b: MessageData): number {
-  return a.timestamp - b.timestamp;
+const PENDING_INDEX = -1;
+
+/**
+ * Published messages by their place in the chat feed, then pending ones by the sender's clock, as library 7.0 orders
+ * them. A timestamp cannot order the two kinds together: a published one is the server's, a pending one the sender's.
+ */
+function inChatOrder(a: MessageData, b: MessageData): number {
+  const aPending = a.index === PENDING_INDEX;
+  const bPending = b.index === PENDING_INDEX;
+  if (aPending !== bPending) {
+    return aPending ? 1 : -1;
+  }
+  return aPending ? a.timestamp - b.timestamp : a.index - b.index;
 }
 
-/** One entry per message id, the latest delivery state laid over what was known, in the order written. */
+/** One entry per message id, the latest delivery state laid over what was known, in chat order. */
 export function mergeMessage(
   messages: VisibleMessage[],
   incoming: MessageData,
@@ -46,7 +57,7 @@ export function mergeMessage(
     index === -1
       ? [...messages, { ...incoming, ...delivery }]
       : messages.map((message, at) => (at === index ? { ...message, ...incoming, ...delivery } : message));
-  return merged.sort(byTimestamp);
+  return merged.sort(inChatOrder);
 }
 
 /**
