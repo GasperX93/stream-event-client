@@ -63,9 +63,9 @@ function message(fields: Partial<MessageData> & Pick<MessageData, 'id'>): Messag
     address: OTHER,
     timestamp: clock,
     signature: 'sig',
-    index: 0,
+    index: clock,
     chatTopic: 'chat-topic',
-    userTopic: 'user-topic',
+    sentAt: clock,
     ...fields,
   };
 }
@@ -150,6 +150,14 @@ describe('the chat on a watch page', () => {
     emit(EVENTS.MESSAGE_RECEIVED, second);
     expect(messageTexts()).toEqual(['text of first', 'text of second', 'text of third']);
     expect(text()).toContain('Bea');
+  });
+
+  it('shows published messages by their place in the chat feed, and one still sending after them', async () => {
+    await open();
+    emit(EVENTS.MESSAGE_REQUEST_INITIATED, message({ id: 'sending', index: -1, timestamp: 1 }));
+    emit(EVENTS.MESSAGE_RECEIVED, message({ id: 'later-in-feed', index: 8, timestamp: 100 }));
+    emit(EVENTS.MESSAGE_RECEIVED, message({ id: 'earlier-in-feed', index: 7, timestamp: 200 }));
+    expect(messageTexts()).toEqual(['text of earlier-in-feed', 'text of later-in-feed', 'text of sending']);
   });
 
   it('shows a message once when it arrives twice', async () => {
