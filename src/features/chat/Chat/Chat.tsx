@@ -7,8 +7,6 @@ import { ScrollableMessageList } from '@/components/Chat/ScrollableMessageList/S
 import { ThreadView } from '@/components/Chat/ThreadView/ThreadView';
 import { useSwarmChat, VisibleMessage } from '@/hooks/useSwarmChat';
 import { useUserContext } from '@/providers/User';
-import { useWakuContext } from '@/providers/Waku';
-import { MessageReceiveMode } from '@/types/messaging';
 import { config } from '@/utils/shared/config';
 
 import './Chat.scss';
@@ -16,7 +14,6 @@ import './Chat.scss';
 interface ChatProps {
   owner: string;
   topic: string;
-  isExternal?: boolean;
 }
 
 const profileColors = [
@@ -45,8 +42,7 @@ function getColorForName(name: string): string {
 
 const privKeyPlaceholder = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
-export const Chat: React.FC<ChatProps> = ({ owner, topic, isExternal = false }) => {
-  const { node, channelManager } = useWakuContext();
+export const Chat: React.FC<ChatProps> = ({ owner, topic }) => {
   const { nickname, keys, setIsLoginModalOpen } = useUserContext();
 
   const [selectedMessage, setSelectedMessage] = useState<VisibleMessage | null>(null);
@@ -54,11 +50,6 @@ export const Chat: React.FC<ChatProps> = ({ owner, topic, isExternal = false }) 
   const [reactionLoadingState, setReactionLoadingState] = useState<Record<string, string>>({});
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [isSendingThreadMessage, setIsSendingThreadMessage] = useState(false);
-
-  const messageReceiveMode = config.messageReceiveMode;
-  const isWakuRequired =
-    messageReceiveMode === MessageReceiveMode.WAKU || messageReceiveMode === MessageReceiveMode.BOTH;
-  const wakuNodeLoading = isWakuRequired && (!node || !channelManager);
 
   const {
     chatLoading,
@@ -96,7 +87,6 @@ export const Chat: React.FC<ChatProps> = ({ owner, topic, isExternal = false }) 
       setIsSendingMessage(true);
       await sendMessage(text, {
         streamId: `${owner}/${topic}`,
-        isExternal,
       });
     } finally {
       setIsSendingMessage(false);
@@ -112,7 +102,6 @@ export const Chat: React.FC<ChatProps> = ({ owner, topic, isExternal = false }) 
       setReactionLoadingState((prev) => ({ ...prev, [loadingKey]: emoji }));
       await sendReaction(messageId, emoji, {
         streamId: `${owner}/${topic}`,
-        isExternal,
       });
     } finally {
       // Clear loading state after a short delay to prevent rapid clicking
@@ -141,8 +130,7 @@ export const Chat: React.FC<ChatProps> = ({ owner, topic, isExternal = false }) 
         setIsSendingThreadMessage(true);
         await sendReply(selectedMessage.id, text, {
           streamId: `${owner}/${topic}`,
-          isExternal,
-        });
+          });
       } finally {
         setIsSendingThreadMessage(false);
       }
@@ -180,12 +168,12 @@ export const Chat: React.FC<ChatProps> = ({ owner, topic, isExternal = false }) 
         />
       ) : (
         <>
-          {(wakuNodeLoading || chatLoading) && (
+          {chatLoading && (
             <div className="chat-loading-overlay">
               <div className="chat-loading">Loading chat...</div>
             </div>
           )}
-          {!wakuNodeLoading && !chatLoading && hasPreviousMessages() && (
+          {!chatLoading && hasPreviousMessages() && (
             <Button onClick={fetchPreviousMessages} className="chat-load-more">
               Load more messages
             </Button>
@@ -224,12 +212,12 @@ export const Chat: React.FC<ChatProps> = ({ owner, topic, isExternal = false }) 
             />
           )}
 
-          {!wakuNodeLoading && !chatLoading && !keys.public && (
+          {!chatLoading && !keys.public && (
             <Button onClick={() => setIsLoginModalOpen(true)} className="chat-login-prompt">
               Log in to join the chat
             </Button>
           )}
-          {!wakuNodeLoading && !chatLoading && keys.public && (
+          {!chatLoading && keys.public && (
             <MessageSender onSend={handleMessageSending} disabled={isAnyOperationLoading} />
           )}
         </>

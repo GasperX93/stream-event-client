@@ -11,18 +11,15 @@ vi.mock('@/components/Button/Button', () => ({
 }));
 
 const loginAsUser = vi.fn();
-const loginAsAdmin = vi.fn();
 const setIsLoginModalOpen = vi.fn();
 
 vi.mock('@/providers/User', () => ({
   useUserContext: () => ({
     nickname: 'TestNick',
     loginAsUser,
-    loginAsAdmin,
     setIsLoginModalOpen,
     keys: { private: '', public: '' },
     isUserLoggedIn: false,
-    isAdmin: false,
     isLoginModalOpen: true,
   }),
 }));
@@ -30,7 +27,6 @@ vi.mock('@/providers/User', () => ({
 describe('LoginModal', () => {
   beforeEach(() => {
     loginAsUser.mockClear();
-    loginAsAdmin.mockClear();
     setIsLoginModalOpen.mockClear();
   });
 
@@ -78,34 +74,6 @@ describe('LoginModal', () => {
     fireEvent.change(input, { target: { value: 'a'.repeat(21) } });
     fireEvent.click(screen.getByText('Join'));
     expect(loginAsUser).not.toHaveBeenCalled();
-  });
-
-  it('can switch to admin mode', () => {
-    render(<LoginModal />);
-    fireEvent.click(screen.getByText('Admin Login'));
-    expect(screen.getByText(/Enter your admin credentials/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Display name')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Password')).toBeInTheDocument();
-  });
-
-  it('can switch back to username mode', () => {
-    render(<LoginModal />);
-    fireEvent.click(screen.getByText('Admin Login'));
-    fireEvent.click(screen.getByText('Back to user login'));
-    expect(screen.getByText(/Choose a display name/i)).toBeInTheDocument();
-  });
-
-  it('shows error when trying to admin login with empty credentials', async () => {
-    render(<LoginModal />);
-    fireEvent.click(screen.getByText('Admin Login'));
-
-    await act(async () => {
-      fireEvent.click(screen.getByText('Log in'));
-      await sleep(0);
-    });
-
-    expect(screen.getByText(/Please enter both username and password/i)).toBeInTheDocument();
-    expect(loginAsAdmin).not.toHaveBeenCalled();
   });
 
   it('shows error when username is invalid', async () => {

@@ -5,14 +5,9 @@ import { useUserContext } from '@/providers/User';
 
 import './LoginModal.scss';
 
-type LoginMode = 'username' | 'admin';
-
 export function LoginModal() {
-  const { nickname, loginAsAdmin, loginAsUser, setIsLoginModalOpen } = useUserContext();
-  const [loginMode, setLoginMode] = useState<LoginMode>('username');
+  const { nickname, loginAsUser, setIsLoginModalOpen } = useUserContext();
   const [localName, setLocalName] = useState(nickname || '');
-  const [adminUsername, setAdminUsername] = useState('');
-  const [adminPassword, setAdminPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,25 +27,6 @@ export function LoginModal() {
       }
     } else {
       setError('Username must be between 1 and 20 characters');
-    }
-  };
-
-  const handleAdminLogin = async () => {
-    if (!adminUsername || !adminPassword) {
-      setError('Please enter both username and password');
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      await loginAsAdmin(adminUsername, adminPassword);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
-    } finally {
-      setIsLoginModalOpen(false);
-      setIsLoading(false);
     }
   };
 
@@ -90,79 +66,12 @@ export function LoginModal() {
           {isLoading ? 'Logging in...' : 'Join'}
         </Button>
       </div>
-      <div className="login-modal-mode-switch">
-        <button className="login-modal-switch-link" onClick={() => setLoginMode('admin')} disabled={isLoading}>
-          Admin Login
-        </button>
-      </div>
-    </>
-  );
-
-  const renderAdminLogin = () => (
-    <>
-      <div className="login-modal-header">Admin Login</div>
-      <div className="login-modal-content">Enter your admin credentials</div>
-
-      {error && <div className="login-modal-error">{error}</div>}
-
-      <div className="login-modal-input-container">
-        <input
-          value={adminUsername}
-          className="login-modal-input"
-          placeholder="Display name"
-          aria-label="Display name"
-          onChange={(e) => setAdminUsername(e.target.value)}
-          disabled={isLoading}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter' && adminPassword) {
-              handleAdminLogin();
-            }
-          }}
-        />
-      </div>
-
-      <div className="login-modal-input-container">
-        <input
-          type="password"
-          value={adminPassword}
-          className="login-modal-input"
-          placeholder="Password"
-          aria-label="Password"
-          onChange={(e) => setAdminPassword(e.target.value)}
-          disabled={isLoading}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter' && adminUsername) {
-              handleAdminLogin();
-            }
-          }}
-        />
-      </div>
-
-      <div className="login-modal-button-container">
-        <Button className="login-modal-button" onClick={() => setIsLoginModalOpen(false)} disabled={isLoading}>
-          Cancel
-        </Button>
-        <Button
-          className="login-modal-button"
-          variant={ButtonVariant.SECONDARY}
-          onClick={handleAdminLogin}
-          disabled={isLoading}
-        >
-          {isLoading ? 'Logging in...' : 'Log in'}
-        </Button>
-      </div>
-
-      <div className="login-modal-mode-switch">
-        <button className="login-modal-switch-link" onClick={() => setLoginMode('username')} disabled={isLoading}>
-          Back to user login
-        </button>
-      </div>
     </>
   );
 
   return (
     <div className="login-modal-container" role="main-layout">
-      <div className="login-modal">{loginMode === 'username' ? renderUsernameLogin() : renderAdminLogin()}</div>
+      <div className="login-modal">{renderUsernameLogin()}</div>
     </div>
   );
 }

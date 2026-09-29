@@ -45,19 +45,10 @@ const mockUserContext = {
   setIsLoginModalOpen,
   nickname: 'TestUser',
   logout,
-  isAdmin: false,
 };
 
 vi.mock('@/providers/User', () => ({
   useUserContext: () => mockUserContext,
-}));
-
-const mockSetTheme = vi.fn();
-vi.mock('@/providers/Theme', () => ({
-  useTheme: () => ({
-    theme: 'solarpunk',
-    setTheme: mockSetTheme,
-  }),
 }));
 
 describe('LoginButton', () => {
@@ -66,7 +57,6 @@ describe('LoginButton', () => {
     logout.mockClear();
     mockNavigate.mockClear();
     mockUserContext.isUserLoggedIn = false;
-    mockUserContext.isAdmin = false;
   });
 
   it('renders "Login" when user is not logged in', () => {
@@ -94,19 +84,8 @@ describe('LoginButton', () => {
     expect(screen.getByText('Browse streams')).toBeInTheDocument();
   });
 
-  it('shows "My Streams" and "My Stamps" options for admin users', () => {
-    mockUserContext.isUserLoggedIn = true;
-    mockUserContext.isAdmin = true;
-    render(<LoginButton />);
-    fireEvent.click(screen.getByText('TestUser'));
-    expect(screen.getByText('My Streams')).toBeInTheDocument();
-    expect(screen.getByText('My Stamps')).toBeInTheDocument();
-    expect(screen.getByText('Log out')).toBeInTheDocument();
-  });
-
   it('does not show "My Streams" and "My Stamps" options for regular users', () => {
     mockUserContext.isUserLoggedIn = true;
-    mockUserContext.isAdmin = false;
     render(<LoginButton />);
     fireEvent.click(screen.getByText('TestUser'));
     expect(screen.queryByText('My Streams')).not.toBeInTheDocument();
@@ -116,7 +95,6 @@ describe('LoginButton', () => {
 
   it('shows confirmation modal when regular user clicks Logout', () => {
     mockUserContext.isUserLoggedIn = true;
-    mockUserContext.isAdmin = false;
     render(<LoginButton />);
     fireEvent.click(screen.getByText('TestUser'));
     fireEvent.click(screen.getByText('Log out'));
@@ -126,20 +104,8 @@ describe('LoginButton', () => {
     expect(logout).not.toHaveBeenCalled(); // Should not be called immediately
   });
 
-  it('calls logout directly when admin user clicks Logout', () => {
-    mockUserContext.isUserLoggedIn = true;
-    mockUserContext.isAdmin = true;
-    render(<LoginButton />);
-    fireEvent.click(screen.getByText('TestUser'));
-    fireEvent.click(screen.getByText('Log out'));
-
-    expect(logout).toHaveBeenCalled();
-    expect(mockNavigate).toHaveBeenCalledWith('/browse');
-  });
-
   it('calls logout when confirmation modal is confirmed', () => {
     mockUserContext.isUserLoggedIn = true;
-    mockUserContext.isAdmin = false;
     render(<LoginButton />);
 
     // Open dropdown and click logout
@@ -155,7 +121,6 @@ describe('LoginButton', () => {
 
   it('does not logout when confirmation modal is cancelled', () => {
     mockUserContext.isUserLoggedIn = true;
-    mockUserContext.isAdmin = false;
     render(<LoginButton />);
 
     // Open dropdown and click logout
@@ -170,15 +135,6 @@ describe('LoginButton', () => {
     expect(screen.queryByTestId('confirmation-modal')).not.toBeInTheDocument();
   });
 
-  it('navigates to stream manager when "My Streams" clicked', () => {
-    mockUserContext.isUserLoggedIn = true;
-    mockUserContext.isAdmin = true;
-    render(<LoginButton />);
-    fireEvent.click(screen.getByText('TestUser'));
-    fireEvent.click(screen.getByText('My Streams'));
-    expect(mockNavigate).toHaveBeenCalledWith('/manage');
-  });
-
   it('navigates to stream browser when "Stream Browser" clicked', () => {
     mockUserContext.isUserLoggedIn = true;
     render(<LoginButton />);
@@ -187,12 +143,4 @@ describe('LoginButton', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/browse');
   });
 
-  it('navigates to stamp dashboard when "My Stamps" clicked', () => {
-    mockUserContext.isUserLoggedIn = true;
-    mockUserContext.isAdmin = true;
-    render(<LoginButton />);
-    fireEvent.click(screen.getByText('TestUser'));
-    fireEvent.click(screen.getByText('My Stamps'));
-    expect(mockNavigate).toHaveBeenCalledWith('/stamps');
-  });
 });

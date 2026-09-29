@@ -1,10 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { ChatSettings, EVENTS, MessageData, MessageType, SwarmChat } from '@solarpunkltd/swarm-chat-js';
 
-import { useWakuContext } from '@/providers/Waku';
-import { MessageReceiveMode } from '@/types/messaging';
-import { config } from '@/utils/shared/config';
-import { WakuTransport } from '@/utils/waku/WakuChatTransport';
 
 import { useSerializedEffect } from './useSerializedEffect';
 
@@ -69,7 +65,6 @@ const processReactions = (
 
 export const useSwarmChat = ({ user, infra }: ChatSettings) => {
   const chatRef = useRef<SwarmChat | null>(null);
-  const { channelManager } = useWakuContext();
 
   const [messages, setMessages] = useState<VisibleMessage[]>([]);
   const [chatLoading, setChatLoading] = useState<boolean>(true);
@@ -120,56 +115,11 @@ export const useSwarmChat = ({ user, infra }: ChatSettings) => {
   useSerializedEffect(
     'swarm-chat',
     async (isMounted) => {
-      const messageReceiveMode = config.messageReceiveMode;
-      const shouldUseWaku =
-        messageReceiveMode === MessageReceiveMode.WAKU || messageReceiveMode === MessageReceiveMode.BOTH;
-      const shouldUsePolling =
-        messageReceiveMode === MessageReceiveMode.SWARM || messageReceiveMode === MessageReceiveMode.BOTH;
-
-      if (shouldUseWaku && !channelManager) {
-        console.log('⏭️  Waku is required but channel manager not available yet');
-
-        if (chatRef.current) {
-          const chatToCleanup = chatRef.current;
-          chatRef.current = null;
-
-          try {
-            await chatToCleanup.stop();
-          } catch (err) {
-            console.error('Error stopping chat:', err);
-          }
-
-          // Reset state
-          if (isMounted()) {
-            setMessages([]);
-            setChatLoading(true);
-            setMessagesLoading(false);
-            setError(null);
-          }
-        }
-
-        return;
-      }
-
       if (chatRef.current) {
         return;
       }
 
-      let transport;
-      if (shouldUseWaku && channelManager) {
-        transport = new WakuTransport({
-          channelManager,
-          chatTopic: infra.chatTopic,
-        });
-      }
-
-      const updatedInfra = {
-        ...infra,
-        pollingInterval: 500,
-        enableFallbackPolling: shouldUsePolling,
-      };
-
-      const chat = new SwarmChat({ user, infra: updatedInfra }, transport);
+      const chat = new SwarmChat({ user, infra });
 
       if (!isMounted()) {
         console.log('⏭️  Unmounted during instantiation');
@@ -262,7 +212,7 @@ export const useSwarmChat = ({ user, infra }: ChatSettings) => {
         }
       }
     },
-    [user.privateKey, channelManager],
+    [user.privateKey],
   );
 
   const sendMessage = useCallback(

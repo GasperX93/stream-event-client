@@ -1,21 +1,17 @@
 import { createContext, ReactChild, ReactElement, useContext, useEffect, useMemo, useState } from 'react';
 
-import { adminlogin, nicknameLogin, Session } from '@/utils/auth/login';
-import { persistUserSession, purgeUserSession, restoreUserSession, StorageMethod } from '@/utils/auth/persistence';
+import { nicknameLogin, Session } from './auth/login';
+import { persistUserSession, purgeUserSession, restoreUserSession } from './auth/persistence';
 
 interface ContextInterface {
   keys: {
     private: string;
     public: string;
   };
-  loginAsAdmin: (username: string, password: string) => Promise<void>;
   loginAsUser: (username: string) => Promise<void>;
   logout: () => void;
   nickname: string;
   isUserLoggedIn: boolean;
-  isAdmin: boolean;
-  isSolarpunkAdmin: boolean;
-  instanceId: string;
   isLoginModalOpen: boolean;
   setIsLoginModalOpen: (isLoginModalOpen: boolean) => void;
   session: Session | null;
@@ -27,14 +23,10 @@ const initialValues: ContextInterface = {
     private: '',
     public: '',
   },
-  loginAsAdmin: async () => {},
   loginAsUser: async () => {},
   logout: () => {},
   nickname: '',
   isUserLoggedIn: false,
-  isAdmin: false,
-  isSolarpunkAdmin: false,
-  instanceId: '',
   isLoginModalOpen: false,
   setIsLoginModalOpen: () => {},
   session: null,
@@ -60,24 +52,12 @@ export function Provider({ children }: Props): ReactElement {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const savedSession = restoreUserSession(StorageMethod.LOCAL_STORAGE);
+    const savedSession = restoreUserSession();
     if (savedSession) {
       setSession(savedSession);
     }
     setIsLoading(false);
   }, []);
-
-  const loginAsAdmin = async (username: string, password: string) => {
-    const res = await adminlogin(username, password);
-
-    if (res.session) {
-      setSession(res.session);
-      persistUserSession(res.session, { method: StorageMethod.LOCAL_STORAGE });
-      setIsLoginModalOpen(false);
-    } else {
-      console.error('Admin login failed:', res.error);
-    }
-  };
 
   const loginAsUser = async (username: string) => {
     const trimmedUsername = username.trim();
@@ -85,7 +65,7 @@ export function Provider({ children }: Props): ReactElement {
 
     if (res.session) {
       setSession(res.session);
-      persistUserSession(res.session, { method: StorageMethod.LOCAL_STORAGE });
+      persistUserSession(res.session);
       setIsLoginModalOpen(false);
     } else {
       console.error('User login failed:', res.error);
@@ -94,18 +74,12 @@ export function Provider({ children }: Props): ReactElement {
 
   const logout = () => {
     setSession(null);
-    purgeUserSession(StorageMethod.LOCAL_STORAGE);
+    purgeUserSession();
   };
 
   const nickname = useMemo(() => session?.username || '', [session]);
 
   const isUserLoggedIn = useMemo(() => !!session, [session]);
-
-  const isAdmin = useMemo(() => !!session?.instanceId, [session]);
-
-  const isSolarpunkAdmin = useMemo(() => isAdmin && session?.instanceId === 'solarpunk', [isAdmin, session]);
-
-  const instanceId = useMemo(() => session?.instanceId || '', [session]);
 
   const keys = useMemo(() => {
     if (!session) {
@@ -122,14 +96,10 @@ export function Provider({ children }: Props): ReactElement {
     <Context.Provider
       value={{
         keys,
-        loginAsAdmin,
         loginAsUser,
         logout,
         nickname,
         isUserLoggedIn,
-        isAdmin,
-        isSolarpunkAdmin,
-        instanceId,
         isLoginModalOpen,
         setIsLoginModalOpen,
         session,
