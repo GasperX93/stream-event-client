@@ -81,6 +81,9 @@ export function useSwarmChat(settings: ChatSettings, streamId: string, ownAddres
       setStatus(CHAT_LOADING);
       setHasOlder(false);
       setIsLoadingOlder(false);
+    } else {
+      // A chat started again, for a new name or on request, has not failed yet.
+      setStatus((previous) => (previous === CHAT_UNREACHABLE ? CHAT_LOADING : previous));
     }
     let stopped = false;
     let chat: SwarmChat | null = null;
@@ -225,10 +228,7 @@ export function useSwarmChat(settings: ChatSettings, streamId: string, ownAddres
     }
   }, []);
 
-  const restart = useCallback(() => {
-    setStatus(CHAT_LOADING);
-    setRestarts((count) => count + 1);
-  }, []);
+  const restart = useCallback(() => setRestarts((count) => count + 1), []);
 
   return {
     status,
