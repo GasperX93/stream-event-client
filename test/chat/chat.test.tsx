@@ -171,6 +171,18 @@ describe('the chat on a watch page', () => {
     expect(FakeSwarmChat.instances[0].stop).toHaveBeenCalled();
   });
 
+  it('shows the chat again by itself once the library, which keeps trying, gets through', async () => {
+    await open();
+    emit(EVENTS.CRITICAL_ERROR, new Error('opening failed three times'));
+    expect(text()).toContain('The chat cannot be reached right now');
+    emit(EVENTS.LOADING_INIT, true);
+    expect(text()).toContain('The chat cannot be reached right now');
+    emit(EVENTS.LOADING_INIT, false);
+    expect(text()).not.toContain('The chat cannot be reached right now');
+    expect(text()).toContain('No messages yet.');
+    expect(FakeSwarmChat.instances).toHaveLength(1);
+  });
+
   it('reads again, and shows the chat once it answers, after a sign-in while it could not be reached', async () => {
     await open(
       createElement(
