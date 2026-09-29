@@ -69,7 +69,7 @@ describe('checking the runtime config', () => {
   });
 
   it('refuses a gateway that is neither a path on this site nor an http address', () => {
-    for (const gatewayUrl of ['', 'bee', 'ftp://gateway.example.com', 'javascript:alert(1)']) {
+    for (const gatewayUrl of ['', 'bee', '//gateway.example.com', 'ftp://gateway.example.com', 'javascript:alert(1)']) {
       expect(problemOf(parseRuntimeConfig({ ...VALID, gatewayUrl }))).toContain('gatewayUrl');
     }
   });

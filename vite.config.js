@@ -9,7 +9,16 @@ const __dirname = path.dirname(__filename);
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, __dirname, '');
-  const beeUrl = env.VITE_READER_BEE_URL || 'http://127.0.0.1:1633';
+  // The Bee node the dev server and `vite preview` forward `/bee` to, so a config naming `/bee` reads a
+  // node on this machine without that node having to allow the page's origin.
+  const beeProxyTarget = env.DEV_BEE_PROXY_TARGET || 'http://127.0.0.1:1633';
+  const proxy = {
+    '/bee': {
+      target: beeProxyTarget,
+      changeOrigin: true,
+      rewrite: (path) => path.replace(/^\/bee/, ''),
+    },
+  };
 
   return {
     base: './',
@@ -28,14 +37,7 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, 'src'),
       },
     },
-    server: {
-      proxy: {
-        '/bee': {
-          target: beeUrl,
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/bee/, ''),
-        },
-      },
-    },
+    server: { proxy },
+    preview: { proxy },
   };
 });

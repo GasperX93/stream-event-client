@@ -5,7 +5,6 @@ import { parseManifest, type Segment } from '@/shared/manifest';
 import Pqueue from 'p-queue';
 
 import { Rendition } from '@/features/catalog/stream';
-import { config } from '@/config/config';
 import { fetchWithTimeout, TimedResponse } from '@/shared/fetchWithTimeout';
 import { RequestJitter } from '@/shared/requestJitter';
 
@@ -445,7 +444,8 @@ export class RungNotReadyError extends Error {
 }
 
 export class ManifestFetcher {
-  private _beeUrl: string = config.beeUrl;
+  /** Set by the app provider to the gateway in use before any player mounts. */
+  private _beeUrl = '';
   private ladders = new Map<string, RegisteredLadder>();
   private poller: LadderFeedPoller;
   private lastLoggedMaster = '';

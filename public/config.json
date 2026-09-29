@@ -1,0 +1,15 @@
+{
+  "gatewayUrl": "/bee",
+  "catalog": {
+    "owner": "<stream list feed owner address>",
+    "topic": "<stream list topic>"
+  },
+  "chat": {
+    "enabled": false,
+    "beeUrl": "<Bee endpoint the chat reads and writes through>",
+    "gsocResourceId": "<the shared key every viewer writes chat messages with>",
+    "gsocTopic": "<GSOC topic>",
+    "feedOwner": "<chat feed owner address>",
+    "pollIntervalMs": 500
+  }
+}

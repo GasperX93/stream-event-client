@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
 
 import { useAppContext } from '@/app/AppProvider';
-import { config } from '@/config/config';
 
 import {
   beeBaseUrlFromTypedAddress,
@@ -28,11 +27,11 @@ const EMPTY_ADDRESS_TEXT = 'Enter the address of your Bee node, for example http
  * Nothing is saved until the address has answered a health check, so a typo, or a node that refuses
  * this site's origin, is reported here in words rather than reaching the viewer later as a catalog
  * with nothing in it. The default gateway is one click away again, because a viewer who tried their
- * own node and gave up has no other route back: a deployed build's default is an environment value
+ * own node and gave up has no other route back: the default is a setting in the site's config that
  * they have never seen.
  */
 export function DomainSelector() {
-  const { gatewayUrl, setGatewayUrl } = useAppContext();
+  const { gatewayUrl, setGatewayUrl, defaultGatewayUrl } = useAppContext();
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [status, setStatus] = useState<PickerStatus>(IDLE);
@@ -40,7 +39,7 @@ export function DomainSelector() {
   // retyped cannot save an address they no longer meant.
   const probeGeneration = useRef(0);
 
-  const isOnDefault = isDefaultGateway(gatewayUrl, config.beeUrl);
+  const isOnDefault = isDefaultGateway(gatewayUrl, defaultGatewayUrl);
 
   const handleOpen = () => {
     setInputValue(isOnDefault ? '' : gatewayUrl);
@@ -81,7 +80,7 @@ export function DomainSelector() {
   };
 
   const handleUseDefault = () => {
-    setGatewayUrl(config.beeUrl);
+    setGatewayUrl(defaultGatewayUrl);
     close();
   };
 
@@ -108,7 +107,7 @@ export function DomainSelector() {
     <>
       <button className="gateway-button" onClick={handleOpen} title="Choose which Bee node streams load through">
         <span className="gateway-button-label">Bee node</span>
-        <span className="gateway-button-current">{gatewayLabel(gatewayUrl, config.beeUrl)}</span>
+        <span className="gateway-button-current">{gatewayLabel(gatewayUrl, defaultGatewayUrl)}</span>
       </button>
 
       {isOpen && (

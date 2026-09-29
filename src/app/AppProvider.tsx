@@ -5,7 +5,7 @@ import { manifestFetcher } from '@/features/player/CustomManifestLoader';
 import { ManifestStateManager } from '@/features/player/ManifestManagement';
 import { Stream } from '@/features/catalog/stream';
 import { CatalogFeedReader } from '@/features/catalog/catalogFeed';
-import { config } from '@/config/config';
+import type { RuntimeConfig } from '@/config/runtimeConfig';
 
 import { CatalogRead, catalogUpdater, StreamCatalog, toCatalogRead } from '@/features/catalog/catalogState';
 
@@ -35,6 +35,8 @@ type AppContextState = {
   fetchAppState: () => Promise<CatalogRead>;
   gatewayUrl: string;
   setGatewayUrl: (url: string) => void;
+  /** The gateway this deployment's config names, which the picker offers as the way back. */
+  defaultGatewayUrl: string;
 };
 
 const AppContext = createContext<AppContextState | undefined>(undefined);
@@ -48,25 +50,26 @@ export const useAppContext = () => {
 };
 
 type Props = {
+  config: RuntimeConfig;
   children: ReactNode;
 };
 
 /** Where a viewer's chosen gateway survives a reload. */
 const GATEWAY_STORAGE_KEY = 'swarm-gateway-url';
 
-function loadGatewayUrl(): string {
+function loadGatewayUrl(defaultGatewayUrl: string): string {
   try {
-    return localStorage.getItem(GATEWAY_STORAGE_KEY) || config.beeUrl;
+    return localStorage.getItem(GATEWAY_STORAGE_KEY) || defaultGatewayUrl;
   } catch {
-    return config.beeUrl;
+    return defaultGatewayUrl;
   }
 }
 
-export const AppContextProvider = ({ children }: Props) => {
+export const AppContextProvider = ({ config, children }: Props) => {
   const [catalog, setCatalog] = useState<StreamCatalog>({ streams: [], gateway: null, slot: null });
   const [isStreamListLoaded, setIsStreamListLoaded] = useState(false);
   const [gatewayUrl, setGatewayUrlState] = useState<string>(() => {
-    const url = loadGatewayUrl();
+    const url = loadGatewayUrl(config.gatewayUrl);
     manifestFetcher.beeUrl = url;
     return url;
   });
@@ -105,7 +108,7 @@ export const AppContextProvider = ({ children }: Props) => {
    * between polls. A reader recreated on each render would resolve the head every time, which is the
    * cost this replaces.
    */
-  const catalogReader = useRef(new CatalogFeedReader(config.appOwner, Topic.fromString(config.rawAppTopic)));
+  const catalogReader = useRef(new CatalogFeedReader(config.catalog.owner, Topic.fromString(config.catalog.topic)));
 
   /**
    * A read that landed, with the feed slot its body came from, and a null body when nothing was newer
@@ -158,6 +161,7 @@ export const AppContextProvider = ({ children }: Props) => {
         fetchAppState,
         gatewayUrl,
         setGatewayUrl,
+        defaultGatewayUrl: config.gatewayUrl,
       }}
     >
       {children}
