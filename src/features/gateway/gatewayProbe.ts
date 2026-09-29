@@ -46,6 +46,53 @@ export function beeBaseUrlFromTypedAddress(input: string): string {
   return `http://${trimmed}`;
 }
 
+/** What the picker offers for a viewer's own node: the Bee API port on this machine, as Swarm Desktop runs it. */
+export const OWN_NODE_DEFAULT_ADDRESS = 'http://localhost:1633';
+
+/**
+ * The hosts a viewer's own node may be on, exactly. The page's content security policy allows these
+ * and nothing wider, and a browser lets an `https` page reach a plain `http` node only on them.
+ */
+const OWN_MACHINE_HOSTS = ['localhost', '127.0.0.1', '[::1]'];
+
+const OWN_MACHINE_HOSTS_TEXT = 'localhost, 127.0.0.1 or [::1]';
+
+type OwnNodeAddressCheck = { ok: true; url: string } | { ok: false; text: string };
+
+/** Whether what a viewer typed names a Bee node on their own machine, and the base URL it means. */
+export function checkOwnNodeAddress(input: string): OwnNodeAddressCheck {
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(input.trim()) && !/^https?:\/\//i.test(input.trim())) {
+    return { ok: false, text: 'The address has to start with http:// or https://.' };
+  }
+
+  const typed = beeBaseUrlFromTypedAddress(input);
+  if (!typed) {
+    return { ok: false, text: `Enter the address of your Bee node, for example ${OWN_NODE_DEFAULT_ADDRESS}.` };
+  }
+
+  let url: URL;
+  try {
+    url = new URL(typed);
+  } catch {
+    return { ok: false, text: `That is not an address. Enter one such as ${OWN_NODE_DEFAULT_ADDRESS}.` };
+  }
+
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    return { ok: false, text: 'The address has to start with http:// or https://.' };
+  }
+  if (!OWN_MACHINE_HOSTS.includes(url.hostname)) {
+    return {
+      ok: false,
+      text: `Only a Bee node on this computer can be used here, at ${OWN_MACHINE_HOSTS_TEXT}.`,
+    };
+  }
+  if (url.username || url.password || url.pathname !== '/' || url.search || url.hash) {
+    return { ok: false, text: `Enter only the scheme, host and port, such as ${OWN_NODE_DEFAULT_ADDRESS}.` };
+  }
+
+  return { ok: true, url: url.origin };
+}
+
 /**
  * Hosts a browser treats as trustworthy whatever the scheme, so a plain `http` node on one of them
  * is not blocked from an `https` page.
@@ -208,7 +255,7 @@ export function isDefaultGateway(gatewayUrl: string, defaultGatewayUrl: string):
  */
 export function gatewayLabel(gatewayUrl: string, defaultGatewayUrl: string): string {
   if (isDefaultGateway(gatewayUrl, defaultGatewayUrl)) {
-    return 'Default gateway';
+    return 'Event gateway';
   }
   try {
     return new URL(gatewayUrl).host;

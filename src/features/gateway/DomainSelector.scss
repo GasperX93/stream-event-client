@@ -166,3 +166,24 @@
     cursor: progress;
   }
 }
+
+.gateway-modal-default:disabled {
+  cursor: default;
+  text-decoration: none;
+}
+
+.gateway-modal-choice {
+  padding: 12px 0;
+
+  & + & {
+    border-top: 1px solid #ffffff20;
+  }
+}
+
+.gateway-modal-choice-title {
+  margin: 0 0 4px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  color: #efefef;
+}
