@@ -130,7 +130,8 @@ so the chat, the player and the picker can each be read, tested and replaced on 
 11. **Size is a number.** Every pull request reports what the first page load downloads, so
     "lightweight" can be checked rather than claimed. It is reported, not a gate.
 12. **Phone first.** Many viewers will watch on a phone, so every screen is laid out for a narrow
-    screen first. There the chat sits under the video and can be folded away.
+    screen first. The watch page keeps a place for the chat, under the video on a phone and beside
+    it on a desktop, from phase 2. The chat itself, and folding it away on a phone, come in phase 3.
 
 ### The configuration
 
@@ -209,14 +210,14 @@ Each phase is one branch and one pull request into `main`, reviewed before it me
 it changes in the same pull request. The target dates assume the decisions below are answered this
 week, and leave the two weeks before the event for rehearsal with the real streams and chat.
 
-| #   | Phase                  | Done when                                                                                                                                                                                                                                                                                                                               | Target     |
-| --- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| 0   | This plan              | The repository exists, this file is on `main`, the decisions are answered                                                                                                                                                                                                                                                               | 2026-09-30 |
-| 1   | The viewer, standalone | The viewer, the shared pieces and the picker are in the new layout, weeb-3 is gone, decision 2 is applied, the runtime config works, every stream is listed, the toolchain is the monorepo's, dependencies are current and checked, the kept tests and CI are green                                                                     | 2026-10-02 |
-| 2   | Swarm design           | Tokens and the Swarm theme are in, every screen uses them on a phone and on a desktop, fonts, logo and favicon are bundled, and no theme machinery is left                                                                                                                                                                              | 2026-10-06 |
-| 3   | Chat                   | The display-name login and the chat panel work on the watch page, reading the chat feed by polling, with the ported and new tests green                                                                                                                                                                                                 | 2026-10-10 |
-| 4   | Ship                   | The Docker image, nginx with the page fallback, caching, `config.json` served uncached, a content security policy that allows the gateway, the viewer's own machine and the chat endpoint, the config mounted at start, and the browser smoke test with its recorded answers in CI. A deploy to a staging host only on the owner's word | 2026-10-15 |
-| 5   | Review and docs        | A review for broken logic, races, loops that never end, unhandled errors and anything that leaves a viewer unsure what is happening, each finding fixed or recorded. Docs and comments read against the code and fixed. A check that no host, address or key is in the tree                                                             | 2026-10-19 |
+| #   | Phase                  | Done when                                                                                                                                                                                                                                                                                                                               | Target                 |
+| --- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| 0   | This plan              | The repository exists, this file is on `main`, the decisions are answered                                                                                                                                                                                                                                                               | 2026-09-30             |
+| 1   | The viewer, standalone | The viewer, the shared pieces and the picker are in the new layout, weeb-3 is gone, decision 2 is applied, the runtime config works, every stream is listed, the toolchain is the monorepo's, dependencies are current and checked, the kept tests and CI are green                                                                     | Done 2026-09-29, PR #1 |
+| 2   | Swarm design           | Tokens and the Swarm theme are in, every screen uses them on a phone and on a desktop, the watch page keeps a place for the chat, fonts, logo and favicon are bundled, no theme machinery is left, and the tokens test is green                                                                                                         | 2026-10-06             |
+| 3   | Chat                   | The display-name login and the chat panel work on the watch page, reading the chat feed by polling, with the ported and new tests green                                                                                                                                                                                                 | 2026-10-10             |
+| 4   | Ship                   | The Docker image, nginx with the page fallback, caching, `config.json` served uncached, a content security policy that allows the gateway, the viewer's own machine and the chat endpoint, the config mounted at start, and the browser smoke test with its recorded answers in CI. A deploy to a staging host only on the owner's word | 2026-10-15             |
+| 5   | Review and docs        | A review for broken logic, races, loops that never end, unhandled errors and anything that leaves a viewer unsure what is happening, each finding fixed or recorded. Docs and comments read against the code and fixed. A check that no host, address or key is in the tree                                                             | 2026-10-19             |
 
 ## Decisions for the owner
 
@@ -283,6 +284,7 @@ week, and leave the two weeks before the event for rehearsal with the real strea
 - **Decision 6, licence** (the owner, 2026-09-29): MIT, added in phase 1.
 - **Decision 7, pace** (the owner, 2026-09-29): A, each phase ends with a summary and the next starts on
   the owner's go.
+- **Stream list order** (the owner, 2026-09-29): live, then upcoming, then finished.
 
 ## Risks and limits
 
