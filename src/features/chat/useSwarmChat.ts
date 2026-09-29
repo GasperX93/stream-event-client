@@ -200,7 +200,7 @@ export function useSwarmChat(settings: ChatSettings, ownAddress: string | null) 
     for (const message of messages) {
       if (message.type === MessageType.TEXT) {
         text.push(message);
-      } else if (message.type === MessageType.REACTION) {
+      } else if (message.type === MessageType.REACTION && !message.error) {
         reactions.push(message);
       } else if (message.type === MessageType.THREAD) {
         replies.push(message);
