@@ -82,6 +82,25 @@ describe('a dialog', () => {
     assert.equal(onClose.mock.calls.length, 1);
   });
 
+  it('closes on Escape after the focused control was disabled and focus fell back to the page', () => {
+    const onClose = renderDialog(true);
+    act(() => (document.activeElement as HTMLElement).blur());
+    assert.equal(document.activeElement, document.body);
+    act(() => {
+      document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    });
+    assert.equal(onClose.mock.calls.length, 1);
+  });
+
+  it('brings Tab back inside after focus fell back to the page', () => {
+    renderDialog(true);
+    act(() => (document.activeElement as HTMLElement).blur());
+    act(() => {
+      document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    });
+    assert.equal(document.activeElement?.getAttribute('aria-label'), 'first');
+  });
+
   it('closes on a click outside it and not on a click inside it', () => {
     const onClose = renderDialog(true);
     const dialog = document.querySelector('[role="dialog"]') as HTMLElement;
