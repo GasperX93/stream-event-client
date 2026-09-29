@@ -273,6 +273,9 @@ week, and leave the two weeks before the event for rehearsal with the real strea
   this repository. Its details come later.
 - **Decision 1, the in-tab node** (the owner, 2026-09-29): left out for now, to be added later, so the
   player keeps the place where another way of fetching plugs in.
+- **Decision 2, test hooks and build stamp** (the owner, 2026-09-29): both dropped.
+- **Decision 3, the stream list format** (the owner, 2026-09-29): A, copied into `src/shared/` with the
+  source commit named and tested against sample entries from the monorepo's tests.
 - **Decision 4, the chat library** (the owner, 2026-09-29): discussed later. Until then chat is built
   on swarm-chat-js 6.2.8 as it is.
 - **Decision 5, visibility** (the owner, 2026-09-29): public once phase 1 has merged and the tree is
