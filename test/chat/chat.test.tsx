@@ -354,6 +354,18 @@ describe('reactions', () => {
     expect(queryButton(/^👍/)).toBeNull();
   });
 
+  it('do not count a reaction whose sending ran out, since nobody else ever saw it', async () => {
+    signIn();
+    await open();
+    emit(EVENTS.MESSAGE_RECEIVED, message({ id: 'm' }));
+    emit(EVENTS.MESSAGE_RECEIVED, reaction('r1', 'm', '👍', OTHER));
+    const own = reaction('mine', 'm', '👍', session!.address, 'Ada');
+    emit(EVENTS.MESSAGE_REQUEST_INITIATED, { ...own, index: -1 });
+    expect(button('👍 2')).toBeTruthy();
+    emit(EVENTS.MESSAGE_REQUEST_ERROR, { ...own, index: -1 });
+    expect(button('👍 1').getAttribute('aria-pressed')).toBe('false');
+  });
+
   it('counts two people who chose the same name as two', async () => {
     await open();
     emit(EVENTS.MESSAGE_RECEIVED, message({ id: 'm' }));
