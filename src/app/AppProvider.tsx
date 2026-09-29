@@ -2,14 +2,12 @@ import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, u
 import { Topic } from '@ethersphere/bee-js';
 
 import { manifestFetcher } from '@/features/player/CustomManifestLoader';
-import { exposeFetchBackendForInstrumentation } from '@/features/player/fetchBackendTestHandle';
 import { ManifestStateManager } from '@/features/player/ManifestManagement';
 import { Stream } from '@/features/catalog/stream';
 import { CatalogFeedReader } from '@/features/catalog/catalogFeed';
 import { config } from '@/config/config';
 
 import { CatalogRead, catalogUpdater, StreamCatalog, toCatalogRead } from '@/features/catalog/catalogState';
-import { exposeGatewayForInstrumentation } from './gatewayTestHandle';
 
 type AppContextState = {
   streamList: Stream[];
@@ -53,14 +51,8 @@ type Props = {
   children: ReactNode;
 };
 
-/**
- * Where a viewer's chosen gateway survives a reload.
- *
- * Exported because the arm harness seeds it before the app runs, which is the only way an arm can be
- * on its own gateway for the join rather than from the first render onwards. `e2e` mirrors the string
- * and `e2e/test/gatewaySweep.test.ts` reads this line to prove the two still agree.
- */
-export const GATEWAY_STORAGE_KEY = 'swarm-gateway-url';
+/** Where a viewer's chosen gateway survives a reload. */
+const GATEWAY_STORAGE_KEY = 'swarm-gateway-url';
 
 function loadGatewayUrl(): string {
   try {
@@ -89,8 +81,7 @@ export const AppContextProvider = ({ children }: Props) => {
    * the browse page stops showing it from this moment without anything being thrown away. Clearing
    * it would reach the watch page too, where a player is mounted on a ladder read out of it and
    * nothing polls the catalog to put one back: the viewer's own node would cost them the ladder, the
-   * playback position, or the whole player. It would also break the instrumentation handle's one
-   * promise, that a switch repoints every fetch without remounting anything.
+   * playback position, or the whole player.
    */
   const setGatewayUrl = useCallback((url: string) => {
     const trimmed = url.replace(/\/+$/, '');
@@ -156,21 +147,6 @@ export const AppContextProvider = ({ children }: Props) => {
     // Catches its own failure and marks the list loaded either way.
     void initAppState();
   }, [initAppState]);
-
-  // Only present in a build made with VITE_EXPOSE_PLAYER, which no shipping build is. `setGatewayUrl`
-  // holds no dependencies, so this publishes once per mount rather than on every render.
-  useEffect(
-    () =>
-      exposeGatewayForInstrumentation({
-        current: () => gatewayRef.current,
-        select: setGatewayUrl,
-      }) ?? undefined,
-    [setGatewayUrl],
-  );
-
-  // The byte-source switch, beside the gateway one and behind the same flag. It holds no React state
-  // of its own, so it publishes once per mount and depends on nothing.
-  useEffect(() => exposeFetchBackendForInstrumentation() ?? undefined, []);
 
   return (
     <AppContext.Provider

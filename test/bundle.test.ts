@@ -7,9 +7,6 @@ import { build } from 'vite';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { copyWeeb3Runtime, WEEB3_RUNTIME_ENTRIES, weeb3PackageDir } from '../scripts/copy-weeb3-runtime.mjs';
-import { FETCH_BACKEND_HANDLE } from '../src/features/player/fetchBackendTestHandle';
-import { PLAYER_HANDLE } from '../src/features/player/playerTestHandle';
-import { GATEWAY_HANDLE } from '../src/app/gatewayTestHandle';
 import viteConfig from '../vite.config.js';
 
 const CLIENT_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -136,47 +133,6 @@ describe('the emitted bundle honours the declared browser target (TEST-22)', () 
     );
 
     expect(withRangeSyntax).toEqual([]);
-  });
-
-  /**
-   * The instrumentation seam must leave no trace in a build that did not ask for it.
-   *
-   * This asserts the shipping direction, and in doing so it proves the mechanism: the handle only
-   * disappears if Vite substituted `import.meta.env.VITE_EXPOSE_PLAYER` with a literal and the
-   * minifier dropped the dead branch. **Written as a static member access for exactly that reason.**
-   * Behind a named constant the substitution does not happen, the branch survives, and the handle
-   * ships. That was measured, not assumed: it was present in a production bundle until the indirection
-   * came out. The other direction is covered by `playerTestHandle.test.ts` and by building with the
-   * flag set, which is not done here because it costs a second full build.
-   */
-  it('leaves no instrumentation handle in a build that did not ask for one', () => {
-    const leaked = emitted.js.filter(({ source }) => source.includes(PLAYER_HANDLE)).map(({ name }) => name);
-
-    expect(leaked).toEqual([]);
-  });
-
-  /**
-   * The gateway switch is a second seam behind the same flag, and it needs its own case rather than
-   * riding on the one above. They are published from different files and either could lose the static
-   * `import.meta.env.VITE_EXPOSE_PLAYER` access independently, which is the exact mistake that shipped
-   * the player handle once already.
-   */
-  it('leaves no gateway switch in a build that did not ask for one', () => {
-    const leaked = emitted.js.filter(({ source }) => source.includes(GATEWAY_HANDLE)).map(({ name }) => name);
-
-    expect(leaked).toEqual([]);
-  });
-
-  /**
-   * The byte-source switch is a third seam behind the same flag, and it needs its own case rather
-   * than riding on the two above. All three are published from different files and any one could lose
-   * its static `import.meta.env.VITE_EXPOSE_PLAYER` access independently, which is the exact mistake
-   * that shipped the player handle once already.
-   */
-  it('leaves no fetch backend switch in a build that did not ask for one', () => {
-    const leaked = emitted.js.filter(({ source }) => source.includes(FETCH_BACKEND_HANDLE)).map(({ name }) => name);
-
-    expect(leaked).toEqual([]);
   });
 
   /**

@@ -15,7 +15,6 @@ import { ManifestStateManager } from './ManifestManagement';
 import { nextMediaErrorAction, NO_MEDIA_ERRORS_YET, recoverFromMediaError } from './mediaErrorRecovery';
 import { attachPlaybackStallReporter } from './playbackHealth';
 import { buildPlayerConfig, HLS_TUNING } from './playerConfig';
-import { exposePlayerForInstrumentation } from './playerTestHandle';
 import { buildSwarmUri } from './playlist';
 import { attachReturningBroadcastRejoin } from './returningBroadcast';
 import { attachRungFailover, attachWatchedRungReporter } from './rungHealth';
@@ -443,7 +442,6 @@ export const SwarmHlsPlayer: React.FC<HlsPlayerProps> = ({
 
     const detachQoe = enableQoeOverlay ? attachQoeTracking(video, hls, setMetrics) : null;
     const detachRateGuard = hls ? attachLivePlaybackRateGuard(video, hls) : null;
-    const detachTestHandle = hls ? exposePlayerForInstrumentation(hls) : null;
 
     // ⛔ Both halves of what a ladder viewer needs when one rung stops being produced, and neither
     // works alone: the failover moves the picture, the reporter is what lets the overlay say so
@@ -529,7 +527,6 @@ export const SwarmHlsPlayer: React.FC<HlsPlayerProps> = ({
       detachRateGuard?.();
       detachStallReporter?.();
       detachReturnRejoin?.();
-      detachTestHandle?.();
       detachRungFailover?.();
       detachWatchedRung?.();
 
