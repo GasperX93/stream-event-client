@@ -1,0 +1,28 @@
+# AGENTS.md
+
+Read by AI coding agents and by people working in this repository. `CLAUDE.md` is the one line
+`@AGENTS.md`, so every tool reads the same text.
+
+## What this is
+
+The Devcon 8 viewer: browse the event's streams, watch them over Swarm, and chat beside the video.
+The plan, its phases and its open decisions are in `docs/PLAN.md`. Read it before starting work,
+and update it when a phase closes or a decision lands.
+
+## Scope
+
+- In: the stream list, the watch page and its player, the Bee node picker, the Swarm design, and a
+  chat per stream with a display-name login.
+- Out, and staying out unless the plan changes: admin sign-in, wallets, postage stamps, uploads,
+  creating or managing streams, other themes and a theme switcher.
+
+## Rules
+
+- Real host names, addresses, domains, keys and stamp ids stay out of the repository. Name a host by
+  its role and use a placeholder for an address.
+- What differs between deployments is a setting in the runtime config, never a literal in the code.
+- A bug gets its own pull request, with a test that fails before the fix.
+- When you change behaviour, change the page that describes it in the same pull request.
+- Browser and end-to-end suites check that things work. Timings are reported, never asserted.
+- Nothing is deployed without the owner's word.
+- A comment carries context the code cannot, never a narration of the line below it.
