@@ -13,14 +13,15 @@ import {
 import { draftProblem } from './draftCheck';
 import { groupReactions, type ReactionsByMessage } from './reactions';
 
-/** Where a message stands on its way from this browser to the chat feed. */
+/** Where a message stands on its way from this browser to the chat feed, as the library's sender reports it. */
 interface DeliveryState {
-  /** The send began. */
+  /** Built and signed, about to be written to the chat's shared address. */
   requested?: boolean;
-  /** Written to the sender's own feed, and on its way to the aggregator. */
+  /** The node took the first write. The library resends it until it reads the message back. */
   uploaded?: boolean;
   /** Read back from the chat feed, so everyone watching can see it. */
   received?: boolean;
+  /** The resends ran out without the message being read back. */
   error?: boolean;
 }
 

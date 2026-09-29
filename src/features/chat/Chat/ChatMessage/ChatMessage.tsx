@@ -26,8 +26,8 @@ interface ChatMessageProps {
 }
 
 /**
- * How long an own message may sit written but unread from the chat feed before it is offered again.
- * Past this the aggregator has most likely missed it rather than being slow.
+ * How long an own message may sit written but unread from the chat feed before the viewer is offered a resend.
+ * The library resends it on its own meanwhile, and a resend by hand sends the same bytes again.
  */
 const UNCONFIRMED_AFTER_MS = 20_000;
 
