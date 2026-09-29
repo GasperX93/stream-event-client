@@ -1,4 +1,13 @@
-import { CLIENT_LOG_UNKNOWN, FRAGMENT_ABORTED, FRAGMENT_ANSWER_REJECTED, FRAGMENT_ANSWER_RESOLVED, FRAGMENT_ERRORED, FRAGMENT_LOADED, FRAGMENT_TIMED_OUT, fragmentAbandonedAnswered, type FragmentAnswer, type FragmentOutcome, fragmentRequested, fragmentSettled } from '@/shared/clientLog';
+import {
+  CLIENT_LOG_UNKNOWN,
+  FRAGMENT_ABORTED,
+  FRAGMENT_ERRORED,
+  FRAGMENT_LOADED,
+  FRAGMENT_TIMED_OUT,
+  type FragmentOutcome,
+  fragmentRequested,
+  fragmentSettled,
+} from '@/shared/clientLog';
 import type {
   Fragment,
   FragmentLoaderContext,
@@ -13,9 +22,7 @@ import Hls from 'hls.js';
 
 import { RequestJitter, StaggeredTask } from '@/shared/requestJitter';
 
-import { activeFetchBackend, FETCH_BACKEND_WEEB3, segmentRefFromUrl } from './fetchBackend';
 import { ManifestFetcher } from './ManifestManagement';
-import { weeb3FetchBackend } from './Weeb3FetchBackend';
 
 export const manifestFetcher = new ManifestFetcher();
 
@@ -71,16 +78,6 @@ export class CustomFragmentLoader extends FragmentLoader {
   private pendingStagger: StaggeredTask | null = null;
 
   /**
-   * Set once hls.js has abandoned this fragment, so a retrieval still in flight answers nobody.
-   *
-   * ⛔ Only the weeb-3 path needs this. The gateway path hands the transfer to hls.js's own loader,
-   * which owns its cancellation, but `retrieveBytes` takes no abort signal and cannot be called off.
-   * The most that can be done is to drop the answer, and dropping it is required: hls.js treats a
-   * success on a fragment it has finished with as belonging to whatever it is loading now.
-   */
-  private abandoned = false;
-
-  /**
    * What this loader's one fragment is and when it was asked for, until the attempt ends.
    *
    * ⭐ Read once at the top of {@link load} rather than at each ending, because the endings do not all
@@ -90,26 +87,6 @@ export class CustomFragmentLoader extends FragmentLoader {
    * be double-counted by anything pairing the two halves.
    */
   private attempt: FragmentAttempt | null = null;
-
-  /**
-   * Whether an in-tab retrieval is still running, which is the one ending {@link abandon} must not stamp
-   * itself.
-   *
-   * ⛔ **Not "has this fragment left yet", which is the question that was asked here twice and answered
-   * wrongly both times.** The first version read {@link pendingStagger} being set as "still held back",
-   * and `RequestJitter.stagger` runs its task synchronously at the shipped bound of zero and returns the
-   * handle afterwards, so that field is non-null for the whole life of every ordinary fragment. The
-   * second read it as "handed to a byte source" and left the gateway path's ending to hls.js's own
-   * loader, which does not always produce one: `XhrLoader.destroy` nulls its callbacks and only then
-   * aborts itself, so a teardown with no `abort()` in front of it never reaches the wrapped `onAbort`
-   * and the attempt settled nowhere at all.
-   *
-   * ⭐ The in-tab path is genuinely the exception, which is why this field survives rather than going
-   * away with that second answer. `retrieveBytes` takes no abort signal, so an abandoned retrieval keeps
-   * costing the node until it answers, and {@link retrieveThroughWeeb3} settles it at the answer so the
-   * elapsed is that work rather than zero.
-   */
-  private retrievalOutstanding = false;
 
   load(context: FragmentLoaderContext, config: LoaderConfiguration, callbacks: LoaderCallbacks<LoaderContext>) {
     // ⛔ One attempt to one settle line, enforced here rather than rested on hls.js. A second `load` on
@@ -121,8 +98,6 @@ export class CustomFragmentLoader extends FragmentLoader {
     this.recordSettle(FRAGMENT_ABORTED);
 
     const url = context.url;
-    this.abandoned = false;
-    this.retrievalOutstanding = false;
     this.attempt = attemptBegun(context);
 
     recordFragmentRequest(this.attempt, context);
@@ -164,58 +139,56 @@ export class CustomFragmentLoader extends FragmentLoader {
     this.pendingStagger = requestJitter.stagger(() => {
       this.pendingStagger = null;
 
-      // ⭐ Inside the stagger rather than in front of it, so the two backends are reached through
-      // exactly the same path and differ in one thing: where the bytes come from. The stagger is
-      // currently a synchronous no-op (`GATEWAY_REQUEST_JITTER_MS` is 0), so this costs nothing
-      // today, and it keeps the arms comparable for an operator who turns it back on.
-      //
-      // ⛔ Read here rather than held from the constructor, so a switch mid-broadcast takes effect on
-      // the next fragment. hls.js builds a loader per fragment, so a constructor read would look like
-      // it worked and lag by one, and a loader already in flight would finish on the old backend
-      // while the harness had moved on. That is the shape of an arm that measures the wrong thing.
-      if (activeFetchBackend() === FETCH_BACKEND_WEEB3) {
-        this.retrieveThroughWeeb3(context, callbacks);
-        return;
-      }
+      this.fetchSegmentBytes(context, config, callbacks);
+    });
+  }
 
-      // ⭐ All four endings are wrapped, so the gateway path settles wherever it stops, and the two byte
-      // sources account for their attempts the same way. hls.js's own fragment loader supplies all four,
-      // `onAbort` included, and each wrapper forwards what it was handed untouched. Three of them are
-      // the attempt's real ending. The fourth is now a duplicate, and says so where it is defined.
-      super.load(context, config, {
-        ...callbacks,
-        // A segment that arrived is proof the gateway is answering, and the manifest side is the only
-        // half that ever holds off on the belief that it is not. Its backoff doubles from the failure
-        // that set it, so an outage of twenty seconds went unnoticed for thirty: the gateway was back
-        // for ten of them and the one thing still talking to it was this. Reported here because the
-        // player fetches segments anyway on hls.js's own retry cadence, so the signal is free.
-        onSuccess: (response, stats, ctx, networkDetails) => {
-          this.recordSettle(FRAGMENT_LOADED);
-          manifestFetcher.feedHealth.recordGatewayReachable();
-          callbacks.onSuccess(response, stats, ctx, networkDetails);
-        },
-        onError: (error, ctx, networkDetails, stats) => {
-          this.recordSettle(FRAGMENT_ERRORED);
-          callbacks.onError(error, ctx, networkDetails, stats);
-        },
-        onTimeout: (stats, ctx, networkDetails) => {
-          this.recordSettle(FRAGMENT_TIMED_OUT);
-          callbacks.onTimeout(stats, ctx, networkDetails);
-        },
-        // ⚠️ Optional-chained where the three above are not, because hls.js declares only this one
-        // optional. Supplying it regardless costs nothing: the transport calls it, this settles, and a
-        // caller that had none is handed nothing.
-        //
-        // ⭐ The settle here is the DUPLICATE, not the primary, and {@link abandon} is what actually
-        // ends an abandoned gateway attempt. It has to be that way round: `XhrLoader.abort` calls this
-        // back but `XhrLoader.destroy` nulls its callbacks before aborting itself, so a loader torn down
-        // without an abort in front of it reaches this never. `recordSettle` drops whichever of the two
-        // arrives second, and this one stays so that the forwarding to hls.js keeps happening.
-        onAbort: (stats, ctx, networkDetails) => {
-          this.recordSettle(FRAGMENT_ABORTED);
-          callbacks.onAbort?.(stats, ctx, networkDetails);
-        },
-      });
+  /**
+   * The one place segment bytes are fetched, today from the gateway through hls.js's own loader.
+   * Another source of segment bytes, such as a Swarm node in the tab, plugs in here.
+   */
+  private fetchSegmentBytes(
+    context: FragmentLoaderContext,
+    config: LoaderConfiguration,
+    callbacks: LoaderCallbacks<LoaderContext>,
+  ): void {
+    // ⭐ All four endings are wrapped, so the gateway path settles wherever it stops, and the two byte
+    // sources account for their attempts the same way. hls.js's own fragment loader supplies all four,
+    // `onAbort` included, and each wrapper forwards what it was handed untouched. Three of them are
+    // the attempt's real ending. The fourth is now a duplicate, and says so where it is defined.
+    super.load(context, config, {
+      ...callbacks,
+      // A segment that arrived is proof the gateway is answering, and the manifest side is the only
+      // half that ever holds off on the belief that it is not. Its backoff doubles from the failure
+      // that set it, so an outage of twenty seconds went unnoticed for thirty: the gateway was back
+      // for ten of them and the one thing still talking to it was this. Reported here because the
+      // player fetches segments anyway on hls.js's own retry cadence, so the signal is free.
+      onSuccess: (response, stats, ctx, networkDetails) => {
+        this.recordSettle(FRAGMENT_LOADED);
+        manifestFetcher.feedHealth.recordGatewayReachable();
+        callbacks.onSuccess(response, stats, ctx, networkDetails);
+      },
+      onError: (error, ctx, networkDetails, stats) => {
+        this.recordSettle(FRAGMENT_ERRORED);
+        callbacks.onError(error, ctx, networkDetails, stats);
+      },
+      onTimeout: (stats, ctx, networkDetails) => {
+        this.recordSettle(FRAGMENT_TIMED_OUT);
+        callbacks.onTimeout(stats, ctx, networkDetails);
+      },
+      // ⚠️ Optional-chained where the three above are not, because hls.js declares only this one
+      // optional. Supplying it regardless costs nothing: the transport calls it, this settles, and a
+      // caller that had none is handed nothing.
+      //
+      // ⭐ The settle here is the DUPLICATE, not the primary, and {@link abandon} is what actually
+      // ends an abandoned gateway attempt. It has to be that way round: `XhrLoader.abort` calls this
+      // back but `XhrLoader.destroy` nulls its callbacks before aborting itself, so a loader torn down
+      // without an abort in front of it reaches this never. `recordSettle` drops whichever of the two
+      // arrives second, and this one stays so that the forwarding to hls.js keeps happening.
+      onAbort: (stats, ctx, networkDetails) => {
+        this.recordSettle(FRAGMENT_ABORTED);
+        callbacks.onAbort?.(stats, ctx, networkDetails);
+      },
     });
   }
 
@@ -230,19 +203,13 @@ export class CustomFragmentLoader extends FragmentLoader {
   }
 
   private abandon(): void {
-    this.abandoned = true;
-    if (!this.retrievalOutstanding) {
-      // ⛔ This is where an abandoned attempt ends, whether or not it ever reached a byte source, and it
-      // used to be only the ones that had not. hls.js's own loader is not a reliable owner of the
-      // ending: `XhrLoader.destroy` nulls its callbacks and then aborts itself, so a gateway attempt
-      // torn down without an `abort()` in front of it produced no `onAbort`, no settle and a request
-      // line with nothing after it. Settling here depends on no base-class internal, and the wrapped
-      // `onAbort` becomes the duplicate that `recordSettle` drops.
-      //
-      // The one attempt this must NOT stamp is an in-tab retrieval, which always answers and is settled
-      // where it answers. {@link retrievalOutstanding} says why.
-      this.recordSettle(FRAGMENT_ABORTED);
-    }
+    // ⛔ This is where an abandoned attempt ends, whether or not it ever reached the transport.
+    // hls.js's own loader is not a reliable owner of the ending: `XhrLoader.destroy` nulls its
+    // callbacks and then aborts itself, so an attempt torn down without an `abort()` in front of it
+    // produced no `onAbort`, no settle and a request line with nothing after it. Settling here depends
+    // on no base-class internal, and the wrapped `onAbort` becomes the duplicate that `recordSettle`
+    // drops.
+    this.recordSettle(FRAGMENT_ABORTED);
     this.pendingStagger?.cancel();
     this.pendingStagger = null;
   }
@@ -260,7 +227,7 @@ export class CustomFragmentLoader extends FragmentLoader {
    *
    * ⭐ That guard is also what lets several endings be wired to one attempt without any of them having to
    * know which will arrive: the first one wins and the rest are silent. The wrapped `onAbort` after
-   * {@link abandon} and a weeb-3 answer that lands after a teardown are both that second caller.
+   * {@link abandon} is that second caller.
    */
   private recordSettle(outcome: FragmentOutcome): void {
     const attempt = this.attempt;
@@ -274,125 +241,6 @@ export class CustomFragmentLoader extends FragmentLoader {
     } catch {
       // Silent by design. A viewer whose console throws still has to get their video.
     }
-  }
-
-  /**
-   * Say which way a retrieval went that answered a player who had already walked away.
-   *
-   * ⛔ **An instrument, and only an instrument**, exactly as {@link recordSettle} is. ⭐ Written IN
-   * ADDITION to the `aborted` settle rather than instead of it, so everything that pairs the two halves
-   * of that instrument is untouched and every artifact already on disk still reads the same.
-   *
-   * ⛔ Called BEFORE the settle, because {@link recordSettle} clears the attempt this reads the level,
-   * the segment number and the elapsed off. Guarded on the same field for the same reason, so the two
-   * lines are written together or not at all.
-   *
-   * ⛔ The in-tab path only. hls.js's own loader owns a gateway transfer and cancels it, so there is no
-   * late answer there to describe.
-   */
-  private recordAbandonedAnswer(answer: FragmentAnswer, byteLength: number | typeof CLIENT_LOG_UNKNOWN): void {
-    const attempt = this.attempt;
-    if (attempt === null) {
-      return;
-    }
-
-    try {
-      console.debug(fragmentAbandonedAnswered(attempt.level, attempt.sn, answer, byteLength, elapsedMsSince(attempt)));
-    } catch {
-      // Silent by design. A viewer whose console throws still has to get their video.
-    }
-  }
-
-  /**
-   * Fetch this segment from the Swarm node in this tab instead of from a gateway.
-   *
-   * ⛔⛔⛔ **The gateway's health is deliberately not reported here**, which is the one place the two
-   * backends must not be symmetrical. A segment that arrived proves the gateway is answering only when
-   * the gateway is what served it. These bytes came from a node in this tab, so calling
-   * `recordGatewayReachable` would end the manifest side's backoff on evidence about something else,
-   * and a viewer whose gateway had genuinely gone would keep asking it at full rate while believing it
-   * was live. The feed and the manifest still travel through the gateway on this path.
-   *
-   * ⚠️ The stats below are the only timing a weeb-3 segment has. There is no network request for the
-   * browser's request log or a performance entry to describe, so a harness comparing the two backends
-   * reads this, and it has to be filled in rather than left at its zeroes.
-   */
-  private retrieveThroughWeeb3(context: FragmentLoaderContext, callbacks: LoaderCallbacks<LoaderContext>): void {
-    const ref = segmentRefFromUrl(context.url);
-    if (!ref) {
-      // ⛔ Before the callback, for the reason written out at the url check in {@link load}: hls.js
-      // destroys this loader from inside its own `onError`, re-entrantly, and that re-entrancy is what
-      // decides whether this refusal reads as `errored` or as `aborted`.
-      this.recordSettle(FRAGMENT_ERRORED);
-      callbacks.onError(
-        { code: 0, text: `fragment url carries no Swarm reference: ${context.url}` },
-        context,
-        null,
-        this.stats,
-      );
-      return;
-    }
-
-    const stats = this.stats;
-    stats.loading.start = performance.now();
-
-    // Both arms below end the attempt, whatever hls.js does in the meantime, so {@link abandon} leaves
-    // this one alone rather than stamping it at the teardown.
-    this.retrievalOutstanding = true;
-
-    weeb3FetchBackend.retrieveBytes(ref).then(
-      (bytes) => {
-        if (this.abandoned) {
-          // ⭐ Settled here rather than at the abort, because this is when the retrieval actually
-          // finished. `retrieveBytes` takes no abort signal, so an abandoned fragment keeps costing the
-          // node until it answers, and an arm that stamped the ending at the abort would report that
-          // work as free.
-          //
-          // ⭐⭐ The extra line says WHICH way it went, which `aborted` alone cannot: bytes that arrived
-          // too late and bytes that never arrived reach the settle line as the same word.
-          this.recordAbandonedAnswer(FRAGMENT_ANSWER_RESOLVED, bytes.byteLength);
-          this.recordSettle(FRAGMENT_ABORTED);
-          return;
-        }
-        // ⛔⛔⛔ **`first` is the start, not the arrival, and that one line is the whole of hls.js's
-        // ABR on this path.** hls.js excludes time-to-first-byte from its bandwidth maths on purpose,
-        // because waiting is not throughput. It samples `parsing.end - loading.start - min(first -
-        // start, estimatedTtfb)` against the byte count (`AbrController.onFragBuffered`, hls.js
-        // 1.6.15) and feeds `first - start` straight into that TTFB estimate from `onFragLoaded`.
-        // Stamping `first` at arrival told it the entire retrieval was latency and the download itself
-        // was the millisecond of demuxing left over, so it divided half a megabyte by about three
-        // milliseconds and believed the viewer had 74 to 109 Mbps. Measured live 2026-08-30, n=3: an
-        // in-tab viewer rode 1080p through a link capped at 2800 kbps while its picture ran at 0.55 of
-        // real time, and never stepped down, because on those numbers 1080p was affordable.
-        //
-        // A weeb-3 retrieval has no observable split between waiting and transferring, since the bytes
-        // appear at once. Charging all of it to transfer is the conservative half of that ignorance:
-        // it can only under-state the connection, and a viewer who under-states their connection
-        // watches a lower rung rather than a frozen one.
-        stats.loading.first = stats.loading.start;
-        stats.loading.end = performance.now();
-        stats.loaded = bytes.byteLength;
-        stats.total = bytes.byteLength;
-        this.recordSettle(FRAGMENT_LOADED);
-        callbacks.onSuccess({ url: context.url, data: asArrayBuffer(bytes), code: 200 }, stats, context, null);
-      },
-      (error: unknown) => {
-        if (this.abandoned) {
-          // ⛔ No byte count rather than a count of zero. Zero is a legal answer, so folding a refusal in
-          // as one would put a segment nobody produced into a total of what late retrievals delivered.
-          this.recordAbandonedAnswer(FRAGMENT_ANSWER_REJECTED, CLIENT_LOG_UNKNOWN);
-          this.recordSettle(FRAGMENT_ABORTED);
-          return;
-        }
-        this.recordSettle(FRAGMENT_ERRORED);
-        callbacks.onError(
-          { code: 0, text: `weeb-3 could not retrieve ${ref}: ${errorText(error)}` },
-          context,
-          null,
-          stats,
-        );
-      },
-    );
   }
 }
 
@@ -483,22 +331,4 @@ function rungOf(context: FragmentLoaderContext): string {
   } catch {
     return CLIENT_LOG_UNKNOWN;
   }
-}
-
-/**
- * hls.js demuxes an `ArrayBuffer`, and wasm hands back a view.
- *
- * Copied only when the view is a window onto something larger, because handing over the whole backing
- * buffer would give hls.js bytes either side of the segment.
- */
-function asArrayBuffer(bytes: Uint8Array): ArrayBuffer {
-  const buffer = bytes.buffer as ArrayBuffer;
-  if (bytes.byteOffset === 0 && bytes.byteLength === buffer.byteLength) {
-    return buffer;
-  }
-  return buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
-}
-
-function errorText(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
 }

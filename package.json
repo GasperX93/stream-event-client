@@ -4,9 +4,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "predev": "node scripts/copy-weeb3-runtime.mjs",
     "dev": "vite",
-    "prebuild": "node scripts/copy-weeb3-runtime.mjs",
     "build": "tsc -b && vite build",
     "lint": "oxlint --type-aware .",
     "preview": "vite preview",
@@ -15,7 +13,6 @@
   },
   "dependencies": {
     "@ethersphere/bee-js": "13.1.0",
-    "@lat-murmeldjur/weeb_3": "0.0.350001",
     "@swarm-hls-stream/shared": "workspace:*",
     "hls.js": "^1.7.3",
     "p-queue": "9.3.3",
