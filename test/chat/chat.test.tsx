@@ -7,6 +7,7 @@ import type { ChatConfig } from '../../src/config/runtimeConfig';
 import { nicknameLogin, type Session } from '../../src/features/chat/auth/login';
 import { persistUserSession } from '../../src/features/chat/auth/persistence';
 import { Chat, READ_ONLY_PRIVATE_KEY } from '../../src/features/chat/Chat/Chat';
+import { LoginButton } from '../../src/features/chat/LoginButton/LoginButton';
 import { ChatUserProvider } from '../../src/features/chat/User';
 import { FakeSwarmChat } from '../helpers/fakeSwarmChat';
 import {
@@ -170,6 +171,26 @@ describe('the chat on a watch page', () => {
     await settle();
     expect(FakeSwarmChat.instances).toHaveLength(2);
     expect(FakeSwarmChat.instances[0].stop).toHaveBeenCalled();
+  });
+
+  it('reads again, and shows the chat once it answers, after a sign-in while it could not be reached', async () => {
+    await open(
+      createElement(
+        ChatUserProvider,
+        null,
+        createElement(LoginButton),
+        createElement(Chat, { chat: CHAT, owner: OWNER, topic: 'stream-one' }),
+      ),
+    );
+    emit(EVENTS.CRITICAL_ERROR, new Error('unreachable'));
+    click(button('Join chat'));
+    type(input('Display name'), 'Ada');
+    click(button('Join'));
+    await settle();
+    expect(FakeSwarmChat.instances).toHaveLength(2);
+    emit(EVENTS.LOADING_INIT, false);
+    expect(text()).not.toContain('cannot be reached');
+    expect(input('Message')).toBeTruthy();
   });
 });
 
