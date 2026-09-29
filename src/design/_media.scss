@@ -15,3 +15,12 @@ $desktop: 1024px;
     @content;
   }
 }
+
+// Wide enough for two cards side by side, which a large phone held sideways already is.
+$wide-phone: 560px;
+
+@mixin wide-phone-up {
+  @media (min-width: $wide-phone) {
+    @content;
+  }
+}

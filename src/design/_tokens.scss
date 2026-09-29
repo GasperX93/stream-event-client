@@ -15,6 +15,8 @@ $color: (
   'border': #333333,
   'border-strong': #4c4c4c,
   'overlay': rgba(0, 0, 0, 0.75),
+  // Behind a letterboxed picture, where anything but black reads as part of the video.
+  'video': #000000,
   'primary': #f47a20,
   'primary-hover': #f79c5a,
   // Light text on the orange measures 2.6:1, so anything written on it is the darkest neutral.
@@ -32,7 +34,6 @@ $color: (
   'on-live': #fafafa,
   'error-text': #ff8a8a,
   'warning': #f28b0a,
-  'success': #5fd08a,
   'spinner-track': rgba(250, 250, 250, 0.15),
 );
 
