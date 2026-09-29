@@ -271,6 +271,15 @@ week, and leave the two weeks before the event for rehearsal with the real strea
 - **Chat delivery** (the owner, 2026-09-29): no Waku. Viewers read the chat by polling.
 - **The chat service** (the owner, 2026-09-29): a new aggregator is set up for this app, apart from
   this repository. Its details come later.
+- **Decision 1, the in-tab node** (the owner, 2026-09-29): left out for now, to be added later, so the
+  player keeps the place where another way of fetching plugs in.
+- **Decision 4, the chat library** (the owner, 2026-09-29): discussed later. Until then chat is built
+  on swarm-chat-js 6.2.8 as it is.
+- **Decision 5, visibility** (the owner, 2026-09-29): public once phase 1 has merged and the tree is
+  checked for hosts, addresses and keys.
+- **Decision 6, licence** (the owner, 2026-09-29): MIT, added in phase 1.
+- **Decision 7, pace** (the owner, 2026-09-29): A, each phase ends with a summary and the next starts on
+  the owner's go.
 
 ## Risks and limits
 
