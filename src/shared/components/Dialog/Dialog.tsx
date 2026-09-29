@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useId, useRef } from 'react';
+import { ReactNode, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import './Dialog.scss';
@@ -36,9 +36,11 @@ export function Dialog({ title, onClose, children }: DialogProps) {
   // which would hand focus back and take it again on every keystroke.
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
+  // Taken on the first render, before anything inside with `autoFocus` has moved focus in, which
+  // happens before any effect runs.
+  const [previouslyFocused] = useState(() => document.activeElement as HTMLElement | null);
 
   useEffect(() => {
-    const previouslyFocused = document.activeElement as HTMLElement | null;
     const panel = panelRef.current;
     if (panel && !panel.contains(document.activeElement)) {
       firstFocusable(panel).focus();
@@ -63,7 +65,7 @@ export function Dialog({ title, onClose, children }: DialogProps) {
       document.removeEventListener('keydown', onKeyDown);
       previouslyFocused?.focus?.();
     };
-  }, []);
+  }, [previouslyFocused]);
 
   return createPortal(
     <div className="dialog-backdrop" onClick={() => onCloseRef.current()}>
