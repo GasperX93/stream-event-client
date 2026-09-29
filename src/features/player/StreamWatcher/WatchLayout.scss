@@ -1,0 +1,44 @@
+@use '@/design/media';
+
+// A phone stacks everything in reading order: back, stage, info, then the side panel. A desktop puts
+// the side panel in a column of its own, beside the stage and the info.
+.watch-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'back'
+    'stage'
+    'info'
+    'side';
+  gap: var(--spacing-base);
+
+  @include media.desktop-up {
+    &.with-side {
+      grid-template-columns: minmax(0, 1fr) 360px;
+      grid-template-areas:
+        'back back'
+        'stage side'
+        'info side';
+      grid-template-rows: auto auto 1fr;
+      column-gap: var(--spacing-lg);
+    }
+  }
+}
+
+.watch-layout-back {
+  grid-area: back;
+}
+
+.watch-layout-stage {
+  grid-area: stage;
+  min-width: 0;
+}
+
+.watch-layout-info {
+  grid-area: info;
+}
+
+.watch-layout-side {
+  grid-area: side;
+  min-width: 0;
+}

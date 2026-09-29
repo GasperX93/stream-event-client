@@ -1,24 +1,26 @@
 .swarm-hls-feed-state {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 2;
+  top: var(--spacing-sm);
+  left: var(--spacing-sm);
+  z-index: var(--z-index-player-overlay);
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.7);
-  color: #fff;
-  font-size: 13px;
-  line-height: 1;
+  gap: var(--spacing-sm);
+  max-width: calc(100% - 2 * var(--spacing-sm));
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  background: var(--color-overlay);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-tight);
   pointer-events: none;
 
   &__dot {
+    flex-shrink: 0;
     width: 8px;
     height: 8px;
-    border-radius: 50%;
-    background: #f5a623;
+    border-radius: var(--radius-full);
+    background: var(--color-warning);
     animation: swarm-hls-feed-state-pulse 1.4s ease-in-out infinite;
   }
 }

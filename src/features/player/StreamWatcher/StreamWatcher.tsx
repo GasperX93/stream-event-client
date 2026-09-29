@@ -1,18 +1,24 @@
-import { useNavigate, useParams, useSearchParams } from 'react-router';
+import { Link, useParams, useSearchParams } from 'react-router';
 
-import { Button, ButtonVariant } from '@/shared/components/Button/Button';
 import { SwarmHlsPlayer } from '@/features/player/SwarmHlsPlayer';
 import { useAppContext } from '@/app/AppProvider';
 import { watchPageCatalogPollMs } from '@/features/catalog/catalogPoll';
 import { useCatalogPoll } from '@/features/catalog/useCatalogPoll';
 import { ROUTES } from '@/app/routes';
-import { MEDIA_TYPE_AUDIO, MEDIA_TYPE_VIDEO, MediaType } from '@/features/catalog/stream';
+import {
+  MEDIA_TYPE_AUDIO,
+  MEDIA_TYPE_VIDEO,
+  MediaType,
+  STREAM_STATUS_LIVE,
+  STREAM_STATUS_SCHEDULED,
+} from '@/features/catalog/stream';
 import { playableRenditions } from '@/features/player/playableRenditions';
 import { scheduledStartLabel } from '@/features/catalog/scheduledStart';
 import { WATCH_VIEW_PLAYER, watchPageView } from '@/features/catalog/watchPageView';
 
 import { useIsWaitingForStart } from './useIsWaitingForStart';
-import { WatchPlaceholder } from './WatchPlaceholder';
+import { WatchLayout } from './WatchLayout';
+import { WatchNotice, WatchPlaceholder } from './WatchPlaceholder';
 
 import './StreamWatcher.scss';
 
@@ -29,7 +35,6 @@ export function StreamWatcher() {
     topic: string;
   }>();
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const { streamList, isStreamListLoaded } = useAppContext();
 
   // The ladder lives in the catalog, keyed by the primary feed the browser links to. Current
@@ -43,12 +48,23 @@ export function StreamWatcher() {
   const view = watchPageView(isStreamListLoaded, stream, isWaiting);
   useCatalogPoll(watchPageCatalogPollMs(view));
 
-  const handleBackButtonClick = () => {
-    navigate(ROUTES.STREAM_BROWSER);
-  };
+  const back = (
+    <Link className="watch-back" to={ROUTES.STREAM_BROWSER}>
+      <span aria-hidden="true">←</span> All streams
+    </Link>
+  );
 
   if (!mediatype || !owner || !topic || !isMediaType(mediatype)) {
-    return <div>Invalid stream</div>;
+    return (
+      <WatchLayout
+        back={back}
+        stage={
+          <WatchNotice>
+            <p className="watch-notice-title">This link does not name a stream.</p>
+          </WatchNotice>
+        }
+      />
+    );
   }
 
   const enableQoeOverlay = searchParams.get('qoe') === '1';
@@ -61,21 +77,31 @@ export function StreamWatcher() {
   const startsAt = scheduledStartLabel(stream?.scheduledStartTime);
 
   return (
-    <div className="stream-item-page">
-      <WatchPlaceholder view={view} startsAt={startsAt} />
-      {view === WATCH_VIEW_PLAYER && (
-        <SwarmHlsPlayer
-          owner={owner}
-          topicString={topic}
-          mediaType={mediatype}
-          enableQoeOverlay={enableQoeOverlay}
-          renditions={playableRenditions(stream)}
-          level={level}
-        />
-      )}
-      <Button variant={ButtonVariant.SECONDARY} onClick={() => handleBackButtonClick()}>
-        Back
-      </Button>
-    </div>
+    <WatchLayout
+      back={back}
+      stage={
+        view === WATCH_VIEW_PLAYER ? (
+          <SwarmHlsPlayer
+            owner={owner}
+            topicString={topic}
+            mediaType={mediatype}
+            enableQoeOverlay={enableQoeOverlay}
+            renditions={playableRenditions(stream)}
+            level={level}
+          />
+        ) : (
+          <WatchPlaceholder view={view} startsAt={startsAt} />
+        )
+      }
+      info={
+        stream && (
+          <div className="watch-info">
+            {stream.state === STREAM_STATUS_LIVE && <span className="watch-info-state live">Live</span>}
+            {stream.state === STREAM_STATUS_SCHEDULED && <span className="watch-info-state upcoming">Upcoming</span>}
+            <h1 className="watch-info-title">{stream.title}</h1>
+          </div>
+        )
+      }
+    />
   );
 }

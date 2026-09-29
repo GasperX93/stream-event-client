@@ -1,24 +1,22 @@
 .swarm-hls-player-wrapper {
   position: relative;
+  overflow: hidden;
   width: 100%;
-
-  video,
-  audio {
-    width: 100%;
-  }
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-video);
 
   video {
-    max-height: 60vh;
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    // Keeps the whole picture and the controls on screen on a phone held sideways.
+    max-height: 80vh;
     object-fit: contain;
   }
 }
 
 .swarm-hls-player-audio {
+  display: block;
   width: 100%;
-}
-
-.swarm-hls-video {
-  width: 100%;
-  max-height: 60vh;
-  object-fit: contain;
 }
