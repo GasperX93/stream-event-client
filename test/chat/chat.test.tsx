@@ -9,7 +9,20 @@ import { persistUserSession } from '../../src/features/chat/auth/persistence';
 import { Chat, READ_ONLY_PRIVATE_KEY } from '../../src/features/chat/Chat/Chat';
 import { ChatUserProvider } from '../../src/features/chat/User';
 import { FakeSwarmChat } from '../helpers/fakeSwarmChat';
-import { button, click, dialog, input, mount, press, queryButton, settle, text, type, type Mounted } from '../helpers/dom';
+import {
+  button,
+  click,
+  dialog,
+  input,
+  mount,
+  press,
+  queryButton,
+  settle,
+  text,
+  type,
+  type Mounted,
+  waitFor,
+} from '../helpers/dom';
 
 vi.mock('@solarpunkltd/swarm-chat-js', async (importActual) => {
   const actual = await importActual<typeof import('@solarpunkltd/swarm-chat-js')>();
@@ -215,10 +228,9 @@ describe('sending', () => {
     await open();
     type(input('Message'), 'party ');
     click(button('Add an emoji'));
-    await settle();
-    await settle();
-    click(button('pick 🎉'));
+    click(await waitFor(() => queryButton('pick 🎉')));
     expect(input('Message').value).toBe('party 🎉');
+    expect(dialog()).toBeNull();
   });
 
   it('says a message did not send and sends it again on retry', async () => {

@@ -1,137 +1,83 @@
-import { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import clsx from 'clsx';
-import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
+import { useId, useState } from 'react';
 
-import { useClickOutside } from '@/hooks/useClickOutside';
-import {
-  calculatePickerPosition,
-  EMOJI_PICKER_CONFIG,
-  getResponsivePickerDimensions,
-  PickerDimensions,
-  PickerPosition,
-} from '@/utils/ui/emojiPicker';
+import { EmojiPickerDialog } from '../../EmojiPicker/EmojiPickerDialog';
 
 import './MessageActions.scss';
 
+/** Offered first, so a common reaction needs no picker and no download. */
+export const QUICK_REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+
 interface MessageActionsProps {
-  onEmojiClick?: (emoji: string) => void;
-  onThreadClick?: () => void;
-  visible: boolean;
-  ownMessage?: boolean;
-  isReactionLoading?: boolean;
+  onReact: (emoji: string) => void;
+  onOpenThread?: () => void;
   disabled?: boolean;
 }
 
-export function MessageActions({
-  onEmojiClick,
-  onThreadClick,
-  visible,
-  ownMessage = false,
-  isReactionLoading = false,
-  disabled = false,
-}: MessageActionsProps) {
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [pickerPosition, setPickerPosition] = useState<PickerPosition>({ top: 0, left: 0 });
-  const [pickerDimensions, setPickerDimensions] = useState<PickerDimensions>({ width: 300, height: 350 });
-  const emojiButtonRef = useRef<HTMLButtonElement>(null);
-  const pickerRef = useRef<HTMLDivElement>(null);
+/** What can be done with a message, folded behind one button so a phone screen is not all buttons. */
+export function MessageActions({ onReact, onOpenThread, disabled = false }: MessageActionsProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const actionsId = useId();
 
-  useEffect(() => {
-    if (!visible) {
-      setShowEmojiPicker(false);
-    }
-  }, [visible]);
-
-  useClickOutside([emojiButtonRef, pickerRef], () => setShowEmojiPicker(false), showEmojiPicker);
-
-  const handleEmojiButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-
-    if (isReactionLoading || disabled) return;
-
-    if (!showEmojiPicker && emojiButtonRef.current) {
-      const buttonRect = emojiButtonRef.current.getBoundingClientRect();
-      const dimensions = getResponsivePickerDimensions();
-      const position = calculatePickerPosition(buttonRect, dimensions, ownMessage);
-
-      setPickerDimensions(dimensions);
-      setPickerPosition(position);
-    }
-
-    setShowEmojiPicker(!showEmojiPicker);
+  const react = (emoji: string) => {
+    onReact(emoji);
+    setIsOpen(false);
   };
-
-  const handleEmojiClick = (emojiData: EmojiClickData) => {
-    if (isReactionLoading || disabled) return;
-
-    onEmojiClick?.(emojiData.emoji);
-    setShowEmojiPicker(false);
-  };
-
-  const isDisabled = isReactionLoading || disabled;
 
   return (
-    <div
-      className={clsx('message-actions', {
-        visible,
-        'own-message': ownMessage,
-      })}
-    >
-      <div className="action-buttons">
-        <button
-          ref={emojiButtonRef}
-          className="action-button emoji-button"
-          onClick={handleEmojiButtonClick}
-          disabled={isDisabled}
-          title={
-            disabled ? 'Reactions disabled while loading' : isReactionLoading ? 'Sending reaction...' : 'Add reaction'
-          }
-        >
-          {isReactionLoading ? '⏳' : '😊'}
-        </button>
+    <div className="message-actions">
+      <button
+        type="button"
+        className="message-actions-toggle"
+        aria-label="Message actions"
+        aria-expanded={isOpen}
+        aria-controls={actionsId}
+        onClick={() => setIsOpen((open) => !open)}
+      >
+        <span aria-hidden="true">⋯</span>
+      </button>
 
-        {!!onThreadClick && (
+      {isOpen && (
+        <div id={actionsId} className="message-actions-row">
+          {QUICK_REACTIONS.map((emoji) => (
+            <button
+              key={emoji}
+              type="button"
+              className="message-action"
+              aria-label={`React with ${emoji}`}
+              disabled={disabled}
+              onClick={() => react(emoji)}
+            >
+              {emoji}
+            </button>
+          ))}
           <button
-            className="action-button thread-button"
-            onClick={(event) => {
-              event.stopPropagation();
-              if (!disabled) {
-                onThreadClick();
-              }
-            }}
+            type="button"
+            className="message-action"
+            aria-label="More reactions"
             disabled={disabled}
-            title={disabled ? 'Replies disabled while loading' : 'Reply in thread'}
+            onClick={() => setIsPickerOpen(true)}
           >
-            💬
+            <span aria-hidden="true">＋</span>
           </button>
-        )}
-      </div>
+          {onOpenThread && (
+            <button
+              type="button"
+              className="message-action message-action-text"
+              onClick={() => {
+                setIsOpen(false);
+                onOpenThread();
+              }}
+            >
+              Reply in a thread
+            </button>
+          )}
+        </div>
+      )}
 
-      {showEmojiPicker &&
-        createPortal(
-          <div
-            ref={pickerRef}
-            className="emoji-picker-fixed"
-            style={{
-              position: 'fixed',
-              top: pickerPosition.top,
-              left: pickerPosition.left,
-              zIndex: 99999,
-              isolation: 'isolate',
-              transform: 'translateZ(0)',
-            }}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <EmojiPicker
-              {...EMOJI_PICKER_CONFIG}
-              onEmojiClick={handleEmojiClick}
-              width={pickerDimensions.width}
-              height={pickerDimensions.height}
-            />
-          </div>,
-          document.body,
-        )}
+      {isPickerOpen && (
+        <EmojiPickerDialog title="React with an emoji" onPick={react} onClose={() => setIsPickerOpen(false)} />
+      )}
     </div>
   );
 }

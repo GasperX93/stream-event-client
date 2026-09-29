@@ -1,105 +1,46 @@
-@use '@/styles/themes/base' as theme;
-
 .thread-view {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  height: 100%;
-
-  .button {
-    background-color: transparent;
-    box-shadow: none;
-    backdrop-filter: none;
-    padding: 4px 8px;
-
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-  }
+  min-height: 0;
 }
 
-.thread-title-container {
+.thread-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 0 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.02);
-  flex-shrink: 0;
-
-  @include theme.mobile-only {
-    gap: 8px;
-    padding: 0 8px;
-  }
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
 }
 
-.back-button {
-  padding: 8px 12px;
-  font-size: 14px;
-  min-width: auto;
-
-  @include theme.mobile-only {
-    padding: 6px 10px;
-    font-size: 12px;
-  }
+.thread-back-button {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  font-size: var(--font-size-lg);
+  cursor: pointer;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--color-button-secondary-hover);
   }
 }
 
 .thread-title {
+  font-size: var(--font-size-md);
+}
+
+.thread-original {
   margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-
-  @include theme.mobile-only {
-    font-size: 16px;
-  }
+  padding: 0 0 var(--spacing-xs);
+  border-bottom: 1px solid var(--color-border);
+  list-style: none;
 }
 
-.original-message-container {
-  padding: 4px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.02);
-  flex-shrink: 0;
-
-  @include theme.mobile-only {
-    display: none;
-  }
-}
-
-.thread-messages-container {
+.thread-empty {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 4px 0;
-  min-height: 0;
-}
-
-.no-thread-messages {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--color-text-primary);
-  font-style: italic;
+  padding: var(--spacing-lg) var(--spacing-base);
+  font-size: var(--font-size-sm);
   text-align: center;
-  padding: 40px 20px;
-}
-
-.thread-view .message-sender {
-  flex-shrink: 0;
-}
-
-.chat-login-prompt {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px !important;
-  font-size: 14px;
   color: var(--color-text-secondary);
-  background-color: var(--color-background-glass) !important;
-  border-radius: 8px;
-  margin-top: auto;
 }

@@ -1,176 +1,120 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import clsx from 'clsx';
+import { useEffect, useState } from 'react';
 
-import { ReactionData } from '@/hooks/useSwarmChat';
+import type { ReactionSummary } from '../../reactions';
+import type { VisibleMessage } from '../../useSwarmChat';
+import { nameColor } from '../nameColor';
 
 import { MessageActions } from './MessageActions/MessageActions';
 import { MessageReactionsWrapper } from './MessageReactionsWrapper/MessageReactionsWrapper';
 import { MessageThreadWrapper } from './MessageThreadWrapper/MessageThreadWrapper';
-import { ProfilePicture } from './ProfilePicture/ProfilePicture';
+import { ProfilePicture, shortAddress } from './ProfilePicture/ProfilePicture';
 
 import './ChatMessage.scss';
 
 interface ChatMessageProps {
-  message: string;
-  name: string;
-  profileColor: string;
-  ownMessage?: boolean;
-  messageOwnerAddress: string;
-  received: boolean;
-  error: boolean;
-  uploaded?: boolean;
-  requested?: boolean;
-  reactions?: ReactionData[];
-  threadCount?: number;
-  onEmojiReaction: (emoji: string) => void;
-  onRetry?: () => void;
-  onThreadReply?: () => void;
-  onHeightChange?: () => void;
-  isReactionLoading?: boolean;
-  loadingReactionEmoji?: string;
-  disabled?: boolean;
-  isLoggedIn?: boolean;
-}
-
-interface MessageStatus {
-  received: boolean;
-  error: boolean;
-  uploaded: boolean;
+  message: VisibleMessage;
   ownMessage: boolean;
-  isNewMessage: boolean;
+  reactions: ReactionSummary[];
+  /** The emoji of this message's reaction still being sent, if any. */
+  pendingReaction?: string | null;
+  replyCount?: number;
+  onReact: (emoji: string) => void;
+  /** Left out where the message is itself the thread being read. */
+  onOpenThread?: () => void;
+  onRetry: () => void;
+  onHeightChange?: () => void;
 }
 
-const MESSAGE_TIMEOUT = 20000;
+/**
+ * How long an own message may sit written but unread from the chat feed before it is offered again.
+ * Past this the aggregator has most likely missed it rather than being slow.
+ */
+const UNCONFIRMED_AFTER_MS = 20_000;
 
-const useMessageTimeout = (status: MessageStatus, onHeightChange?: () => void) => {
-  const [isStuck, setIsStuck] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const clearCurrentTimeout = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-  }, []);
-
-  const resetStuckState = useCallback(() => {
-    setIsStuck(false);
-    clearCurrentTimeout();
-  }, [clearCurrentTimeout]);
+/** True once an own message has waited too long to be read back from the chat feed. */
+function useIsUnconfirmed(waiting: boolean, onHeightChange?: () => void): boolean {
+  const [isUnconfirmed, setIsUnconfirmed] = useState(false);
 
   useEffect(() => {
-    const { uploaded, received, error, ownMessage, isNewMessage } = status;
-
-    // Only start timeout for own messages that are newly sent
-    if (ownMessage && isNewMessage && uploaded && !received && !error) {
-      timeoutRef.current = setTimeout(() => {
-        setIsStuck(true);
-        // Notify parent component about height change when stuck button appears
-        onHeightChange?.();
-      }, MESSAGE_TIMEOUT);
+    if (!waiting) {
+      setIsUnconfirmed(false);
+      return;
     }
+    const timer = setTimeout(() => {
+      setIsUnconfirmed(true);
+      onHeightChange?.();
+    }, UNCONFIRMED_AFTER_MS);
+    return () => clearTimeout(timer);
+  }, [waiting, onHeightChange]);
 
-    if (received || error) {
-      resetStuckState();
-    }
-
-    return clearCurrentTimeout;
-  }, [status, clearCurrentTimeout, resetStuckState, onHeightChange]);
-
-  return { isStuck, resetStuckState };
-};
+  return isUnconfirmed;
+}
 
 export function ChatMessage({
   message,
-  name,
-  profileColor,
-  ownMessage = false,
-  messageOwnerAddress,
-  received,
-  error,
-  uploaded = false,
-  requested: _requested = false,
-  reactions = [],
-  threadCount = 0,
+  ownMessage,
+  reactions,
+  pendingReaction = null,
+  replyCount = 0,
+  onReact,
+  onOpenThread,
   onRetry,
-  onEmojiReaction,
-  onThreadReply,
   onHeightChange,
-  isReactionLoading = false,
-  loadingReactionEmoji = '',
-  disabled = false,
-  isLoggedIn = false,
 }: ChatMessageProps) {
-  const isNewMessage = uploaded && !received;
+  const { error = false, received = false, uploaded = false, requested = false } = message;
+  const isSending = !received && !error && (requested || uploaded);
+  const isUnconfirmed = useIsUnconfirmed(ownMessage && uploaded && !received && !error, onHeightChange);
+  const color = nameColor(message.username);
 
-  const messageStatus: MessageStatus = {
-    received,
-    error,
-    uploaded,
-    ownMessage,
-    isNewMessage,
-  };
-  const { isStuck, resetStuckState } = useMessageTimeout(messageStatus, onHeightChange);
-  const [haveActionsOpened, setHaveActionsOpened] = useState(false);
-
-  const handleRetry = useCallback(() => {
-    if (!onRetry) return;
-
-    resetStuckState();
-    onRetry();
-  }, [onRetry, resetStuckState]);
-
-  const onMessageClick = () => {
-    if (!isLoggedIn) return;
-    setHaveActionsOpened((prev) => !prev);
-  };
+  const classes = [
+    'chat-message',
+    ownMessage && 'own-message',
+    error && 'chat-message-error',
+    isSending && 'not-received',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
-    <div className={clsx('chat-message', { 'own-message': ownMessage })} onClick={onMessageClick}>
-      <ProfilePicture name={name} address={messageOwnerAddress} color={profileColor} ownMessage={ownMessage} />
+    <li className={classes}>
+      <ProfilePicture name={message.username} address={message.address} color={color} />
 
-      <div
-        className={clsx('chat-message-text', {
-          'chat-message-error': error,
-          'chat-message-stuck': isStuck,
-          'not-received': !received,
-        })}
-      >
-        <span className="message">{message}</span>
+      <div className="chat-message-body">
+        <p className="chat-message-author">
+          <span className="chat-message-name">{message.username}</span>{' '}
+          <span className="chat-message-id">{shortAddress(message.address)}</span>
+        </p>
 
-        {error && onRetry && (
-          <button className="retry-button" onClick={handleRetry}>
-            Retry
-          </button>
+        <div className="chat-message-text">
+          <span className="message">{message.message}</span>
+        </div>
+
+        {error && (
+          <p className="chat-message-status error">
+            Not sent.{' '}
+            <button type="button" className="chat-message-retry" onClick={onRetry}>
+              Retry
+            </button>
+          </p>
+        )}
+        {isSending && !isUnconfirmed && <p className="chat-message-status">Sending…</p>}
+        {isSending && isUnconfirmed && (
+          <p className="chat-message-status">
+            Not confirmed yet.{' '}
+            <button type="button" className="chat-message-retry" onClick={onRetry}>
+              Resend
+            </button>
+          </p>
         )}
 
-        {isStuck && onRetry && (
-          <button className="retry-button stuck" onClick={handleRetry}>
-            Resend
-          </button>
-        )}
+        <MessageReactionsWrapper reactions={reactions} pendingReaction={pendingReaction} onReact={onReact} />
 
-        <MessageReactionsWrapper
-          reactions={reactions}
-          onEmojiClick={onEmojiReaction}
-          ownMessage={ownMessage}
-          isLoading={isReactionLoading}
-          loadingEmoji={loadingReactionEmoji}
-          disabled={disabled}
-          isLoggedIn={isLoggedIn}
-        />
-
-        <MessageThreadWrapper threadCount={threadCount} onThreadClick={onThreadReply} disabled={disabled} />
+        {onOpenThread && <MessageThreadWrapper replyCount={replyCount} onOpenThread={onOpenThread} />}
       </div>
 
-      <MessageActions
-        visible={haveActionsOpened && received && !error}
-        onEmojiClick={onEmojiReaction}
-        onThreadClick={onThreadReply}
-        ownMessage={ownMessage}
-        isReactionLoading={isReactionLoading}
-        disabled={disabled}
-      />
-    </div>
+      {received && !error && (
+        <MessageActions onReact={onReact} onOpenThread={onOpenThread} disabled={pendingReaction !== null} />
+      )}
+    </li>
   );
 }

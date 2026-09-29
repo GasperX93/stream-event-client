@@ -1,138 +1,51 @@
-@use '@/styles/themes/base' as theme;
-@use '@/styles/mixins' as mixins;
-
-.login-modal-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100vh;
-  width: 100vw;
-  padding: var(--spacing-base);
-  background-color: var(--color-background-overlay);
-  backdrop-filter: blur(var(--blur-base));
-  z-index: 1000;
-  box-sizing: border-box;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding-top: 10vh;
-
-  @include theme.mobile-up {
-    padding-top: 10vh;
-  }
-}
-
-.login-modal {
-  position: relative;
-  width: 100%;
-  padding: var(--spacing-lg);
-  box-sizing: border-box;
-  background: var(--modal-background, var(--gradient-primary));
-  color: var(--color-text-primary);
-  font-family: var(--font-family-base);
-  border-radius: var(--border-radius-md);
-  border: var(--modal-border, none);
-  box-shadow: var(--modal-glow, var(--shadow-2xl));
-
-  @include theme.mobile-up {
-    max-width: 500px;
-  }
-}
-
-.login-modal-header {
-  font-size: var(--modal-header-font-size, var(--font-size-3xl));
-  margin-bottom: var(--spacing-lg);
-  font-weight: var(--font-weight-bold);
-
-  @include theme.mobile-only {
-    font-size: var(--modal-header-font-size-mobile, var(--modal-header-font-size, var(--font-size-2xl)));
-  }
-}
+@use '@/design/media';
 
 .login-modal-content {
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-base);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
 }
 
 .login-modal-input {
-  display: flex;
-  align-items: center;
-  border: none;
-  outline: none;
-  background-color: transparent;
-  color: var(--color-text-primary);
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  box-sizing: border-box;
   width: 100%;
+  min-height: 44px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-base);
+  background: var(--color-input);
+  transition: border-color var(--duration-base) ease;
+
+  &:focus {
+    border-color: var(--color-primary);
+  }
 
   &::placeholder {
-    color: var(--color-text-placeholder);
-    font-weight: var(--font-weight-normal);
-  }
-}
-
-.login-modal-input-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: var(--color-background-input);
-  border-radius: var(--border-radius-md);
-  padding: var(--spacing-sm);
-  height: 40px;
-  box-sizing: border-box;
-  margin: var(--spacing-sm) 0;
-}
-
-.login-modal-button-container {
-  display: flex;
-  justify-content: end;
-  gap: var(--spacing-base);
-  margin-top: var(--spacing-lg);
-}
-
-.login-modal-button {
-  display: flex;
-  align-items: center;
-  height: var(--modal-button-height, 40px);
-  box-sizing: border-box;
-  padding: 0 var(--modal-button-padding-x, var(--spacing-lg)) !important;
-  font-size: var(--modal-button-font-size, var(--font-size-xl)) !important;
-  width: auto !important;
-
-  @include theme.mobile-only {
-    height: var(--modal-button-height-mobile, var(--modal-button-height, 36px));
-    padding: 0 var(--modal-button-padding-x-mobile, var(--modal-button-padding-x, var(--spacing-md))) !important;
-    font-size: var(--modal-button-font-size-mobile, var(--modal-button-font-size, var(--font-size-lg))) !important;
+    color: var(--color-text-tertiary);
   }
 
-  &.primary {
-    background-color: var(--modal-cancel-background, var(--color-primary)) !important;
-    color: var(--modal-cancel-color, var(--color-text-inverse)) !important;
-
-    &:hover {
-      background-color: var(--modal-cancel-hover, var(--color-primary-hover)) !important;
-    }
-  }
-
-  &.secondary {
-    background: var(--gradient-modal-confirm) !important;
-    box-shadow: var(--shadow-action-button);
-
-    &:hover {
-      background: var(--gradient-modal-confirm-hover) !important;
-      box-shadow: var(--shadow-action-button-hover);
-    }
+  &[aria-invalid='true'] {
+    border-color: var(--color-error-text);
   }
 }
 
 .login-modal-error {
-  background-color: rgba(239, 68, 68, 0.2);
-  border: 1px solid var(--color-error);
-  border-radius: var(--border-radius-base);
-  padding: var(--spacing-sm) var(--spacing-md);
-  margin-bottom: var(--spacing-base);
-  color: var(--color-error);
+  min-height: 1.5em;
+  margin: var(--spacing-xs) 0 var(--spacing-sm);
   font-size: var(--font-size-sm);
-  text-align: center;
+  color: var(--color-error-text);
+}
+
+.login-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+
+  // On a phone both buttons share the row, so each is an easy target.
+  > .button {
+    flex: 1;
+
+    @include media.tablet-up {
+      flex: none;
+    }
+  }
 }

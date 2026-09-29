@@ -1,77 +1,66 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
-import { Button, ButtonVariant } from '@/components/Button/Button';
-import { useUserContext } from '@/providers/User';
+import { Button, ButtonVariant } from '@/shared/components/Button/Button';
+import { Dialog } from '@/shared/components/Dialog/Dialog';
+
+import { DISPLAY_NAME_MAX_LENGTH } from '../auth/login';
+import { useChatUser } from '../User';
 
 import './LoginModal.scss';
 
+const KEY_ENTER = 'Enter';
+
+/** Asks for the display name a viewer chats under. There is no password and no account. */
 export function LoginModal() {
-  const { nickname, loginAsUser, setIsLoginModalOpen } = useUserContext();
-  const [localName, setLocalName] = useState(nickname || '');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { loginAsUser, setIsLoginModalOpen } = useChatUser();
+  const [name, setName] = useState('');
+  const [problem, setProblem] = useState<string | null>(null);
+  const descriptionId = useId();
+  const problemId = useId();
 
-  const handleUsernameLogin = async () => {
-    const trimmedName = localName.trim();
-    if (trimmedName && trimmedName.length > 0 && trimmedName.length <= 20) {
-      setIsLoading(true);
-      setError(null);
+  const close = () => setIsLoginModalOpen(false);
 
-      try {
-        await loginAsUser(trimmedName);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Login failed');
-      } finally {
-        setIsLoginModalOpen(false);
-        setIsLoading(false);
-      }
-    } else {
-      setError('Username must be between 1 and 20 characters');
+  const join = () => {
+    const result = loginAsUser(name);
+    setProblem(result.ok ? null : result.problem);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === KEY_ENTER && !event.nativeEvent.isComposing) {
+      event.preventDefault();
+      join();
     }
   };
 
-  const renderUsernameLogin = () => (
-    <>
-      <div className="login-modal-header">Log in</div>
-      <div className="login-modal-content">Choose a display name to join the chat</div>
-
-      {error && <div className="login-modal-error">{error}</div>}
-
-      <div className="login-modal-input-container">
-        <input
-          value={localName || ''}
-          className="login-modal-input"
-          placeholder="Display name"
-          aria-label="Display name"
-          onChange={(e) => setLocalName(e.target.value)}
-          disabled={isLoading}
-          maxLength={20}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              handleUsernameLogin();
-            }
-          }}
-        />
-      </div>
-      <div className="login-modal-button-container">
-        <Button className="login-modal-button" onClick={() => setIsLoginModalOpen(false)} disabled={isLoading}>
+  return (
+    <Dialog title="Join the chat" onClose={close}>
+      <p id={descriptionId} className="login-modal-content">
+        Choose a display name of up to {DISPLAY_NAME_MAX_LENGTH} characters. It is shown beside your messages, and this
+        browser remembers it.
+      </p>
+      <input
+        value={name}
+        className="login-modal-input"
+        placeholder="Display name"
+        aria-label="Display name"
+        aria-describedby={`${descriptionId} ${problemId}`}
+        aria-invalid={problem !== null}
+        autoComplete="nickname"
+        onChange={(event) => {
+          setName(event.target.value);
+          setProblem(null);
+        }}
+        onKeyDown={handleKeyDown}
+      />
+      <p id={problemId} className="login-modal-error" role="alert">
+        {problem}
+      </p>
+      <div className="login-modal-actions">
+        <Button variant={ButtonVariant.SECONDARY} onClick={close}>
           Cancel
         </Button>
-        <Button
-          className="login-modal-button"
-          variant={ButtonVariant.SECONDARY}
-          onClick={handleUsernameLogin}
-          disabled={isLoading}
-        >
-          {isLoading ? 'Logging in...' : 'Join'}
-        </Button>
+        <Button onClick={join}>Join</Button>
       </div>
-    </>
-  );
-
-  return (
-    <div className="login-modal-container" role="main-layout">
-      <div className="login-modal">{renderUsernameLogin()}</div>
-    </div>
+    </Dialog>
   );
 }

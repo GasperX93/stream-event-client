@@ -1,112 +1,60 @@
-import { createContext, ReactChild, ReactElement, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 
-import { nicknameLogin, Session } from './auth/login';
+import { checkDisplayName, type DisplayNameCheck, nicknameLogin, type Session } from './auth/login';
 import { persistUserSession, purgeUserSession, restoreUserSession } from './auth/persistence';
+import { LoginModal } from './LoginModal/LoginModal';
 
-interface ContextInterface {
-  keys: {
-    private: string;
-    public: string;
-  };
-  loginAsUser: (username: string) => Promise<void>;
-  logout: () => void;
-  nickname: string;
-  isUserLoggedIn: boolean;
-  isLoginModalOpen: boolean;
-  setIsLoginModalOpen: (isLoginModalOpen: boolean) => void;
+interface ChatUserContextValue {
+  /** Null for a viewer who has not chosen a name, who can read the chat and not write to it. */
   session: Session | null;
-  isLoading: boolean;
+  /** Signs in and closes the dialog, or hands back why the name was refused. */
+  loginAsUser: (name: string) => DisplayNameCheck;
+  logout: () => void;
+  isLoginModalOpen: boolean;
+  setIsLoginModalOpen: (open: boolean) => void;
 }
 
-const initialValues: ContextInterface = {
-  keys: {
-    private: '',
-    public: '',
-  },
-  loginAsUser: async () => {},
-  logout: () => {},
-  nickname: '',
-  isUserLoggedIn: false,
-  isLoginModalOpen: false,
-  setIsLoginModalOpen: () => {},
-  session: null,
-  isLoading: true,
-};
+const ChatUserContext = createContext<ChatUserContextValue | undefined>(undefined);
 
-export const Context = createContext<ContextInterface>(initialValues);
-export const Consumer = Context.Consumer;
-
-export const useUserContext = () => {
-  const context = useContext(Context);
-  if (!context) throw new Error('useAppContext must be used within AppContextProvider');
+export function useChatUser(): ChatUserContextValue {
+  const context = useContext(ChatUserContext);
+  if (!context) {
+    throw new Error('useChatUser must be used within ChatUserProvider');
+  }
   return context;
-};
-
-interface Props {
-  children: ReactChild;
 }
 
-export function Provider({ children }: Props): ReactElement {
-  const [session, setSession] = useState<Session | null>(null);
+/** Who the viewer is in the chat, remembered by this browser, and the dialog that asks for a name. */
+export function ChatUserProvider({ children }: { children: ReactNode }) {
+  const [session, setSession] = useState<Session | null>(restoreUserSession);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const savedSession = restoreUserSession();
-    if (savedSession) {
-      setSession(savedSession);
+  const loginAsUser = useCallback((name: string): DisplayNameCheck => {
+    const checked = checkDisplayName(name);
+    if (!checked.ok) {
+      return checked;
     }
-    setIsLoading(false);
+    const next = nicknameLogin(checked.name);
+    persistUserSession(next);
+    setSession(next);
+    setIsLoginModalOpen(false);
+    return checked;
   }, []);
 
-  const loginAsUser = async (username: string) => {
-    const trimmedUsername = username.trim();
-    const res = await nicknameLogin(trimmedUsername);
-
-    if (res.session) {
-      setSession(res.session);
-      persistUserSession(res.session);
-      setIsLoginModalOpen(false);
-    } else {
-      console.error('User login failed:', res.error);
-    }
-  };
-
-  const logout = () => {
-    setSession(null);
+  const logout = useCallback(() => {
     purgeUserSession();
-  };
+    setSession(null);
+  }, []);
 
-  const nickname = useMemo(() => session?.username || '', [session]);
-
-  const isUserLoggedIn = useMemo(() => !!session, [session]);
-
-  const keys = useMemo(() => {
-    if (!session) {
-      return { private: '', public: '' };
-    }
-
-    return {
-      private: session.userSecret.toLocaleLowerCase(),
-      public: session.userId.toLocaleLowerCase(),
-    };
-  }, [session]);
+  const value = useMemo(
+    () => ({ session, loginAsUser, logout, isLoginModalOpen, setIsLoginModalOpen }),
+    [session, loginAsUser, logout, isLoginModalOpen],
+  );
 
   return (
-    <Context.Provider
-      value={{
-        keys,
-        loginAsUser,
-        logout,
-        nickname,
-        isUserLoggedIn,
-        isLoginModalOpen,
-        setIsLoginModalOpen,
-        session,
-        isLoading,
-      }}
-    >
+    <ChatUserContext.Provider value={value}>
       {children}
-    </Context.Provider>
+      {isLoginModalOpen && <LoginModal />}
+    </ChatUserContext.Provider>
   );
 }

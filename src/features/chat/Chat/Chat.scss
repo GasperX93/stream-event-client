@@ -1,69 +1,104 @@
-@use '@/styles/themes/base' as theme;
-@use '@/styles/mixins' as mixins;
+@use '@/design/media';
 
+// Under the video on a phone and a foldable, beside it on a desktop, where the layout gives the panel
+// a column of its own.
 .chat-container {
-  position: relative;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
-  background-color: var(--color-background-glass);
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--accent-glow, var(--shadow-md));
-  border: var(--accent-border, none);
-  box-sizing: border-box;
-}
+  height: var(--size-chat-height);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  overflow: hidden;
 
-.chat-loading-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  padding: var(--spacing-md) 0;
-  z-index: 2;
-  background: var(--gradient-overlay-light);
-  text-align: center;
-  border-radius: var(--border-radius-md);
-}
+  &.folded {
+    height: auto;
+  }
 
-.chat-load-more {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  padding: var(--spacing-xs) var(--spacing-base);
-  border-radius: var(--border-radius-sm);
-  border: none;
-  outline: none;
-  box-shadow: none;
-  cursor: pointer;
-  transition: background-color var(--duration-fast) var(--easing-ease-out);
-  background-color: transparent !important;
-
-  &:hover {
-    background-color: var(--color-background-hover) !important;
+  @include media.desktop-up {
+    height: var(--size-chat-height-desktop);
   }
 }
 
-.chat-login-prompt {
-  @include mixins.flex-center;
-  padding: var(--spacing-md);
-  font-size: var(--font-size-sm) !important;
-  color: var(--color-text-secondary);
-  background-color: var(--color-background-glass) !important;
-  border-radius: var(--border-radius-base);
-  margin-top: auto;
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-base);
+  border-bottom: 1px solid var(--color-border);
+
+  .folded & {
+    border-bottom: none;
+  }
 }
 
-.chat-loading,
-.chat-error {
-  font-family: var(--font-family-base);
+.chat-title {
+  font-size: var(--font-size-lg);
+}
+
+// Folding is for a phone, where the chat pushes the stream's title down the page.
+.chat-fold-button {
+  min-height: 44px;
+  padding: 0 var(--spacing-sm);
+  border: none;
+  background: none;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--color-text);
+  }
+
+  @include media.desktop-up {
+    display: none;
+  }
+}
+
+.chat-body {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.chat-state {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
   text-align: center;
-  padding: var(--spacing-md);
+}
+
+.chat-state-title {
+  font-weight: var(--font-weight-semibold);
+}
+
+.chat-state-detail,
+.chat-empty {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
 }
 
-.chat-error {
-  background-color: var(--color-error-background);
-  border: 1px solid var(--color-error-border);
-  border-radius: var(--border-radius-base);
+.chat-empty {
+  flex: 1;
+  padding: var(--spacing-lg) var(--spacing-base);
+  text-align: center;
+}
+
+.chat-load-more {
+  margin: var(--spacing-sm) var(--spacing-base) 0;
+}
+
+.chat-login-prompt {
+  margin: var(--spacing-sm) var(--spacing-base) var(--spacing-base);
 }

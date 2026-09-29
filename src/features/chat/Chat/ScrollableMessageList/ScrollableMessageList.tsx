@@ -1,55 +1,59 @@
-import React, { useEffect, useRef } from 'react';
+import { ReactNode, useCallback, useEffect, useRef } from 'react';
 
-import { VisibleMessage } from '@/hooks/useSwarmChat';
+import type { VisibleMessage } from '../../useSwarmChat';
 
 import './ScrollableMessageList.scss';
 
 interface ScrollableMessageListProps {
   items: VisibleMessage[];
-  renderItem: (item: VisibleMessage, onHeightChange: () => void) => React.ReactNode;
+  label: string;
+  renderItem: (item: VisibleMessage, onHeightChange: () => void) => ReactNode;
 }
 
-export function ScrollableMessageList({ items, renderItem }: ScrollableMessageListProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const previousItemsLengthRef = useRef<number>(0);
+/** How near the bottom, in pixels, still counts as reading the newest messages. */
+const NEAR_BOTTOM_PX = 50;
+
+/**
+ * Follows new messages while the viewer is at the bottom, and leaves them where they are when they have
+ * scrolled up to read.
+ */
+export function ScrollableMessageList({ items, label, renderItem }: ScrollableMessageListProps) {
+  const containerRef = useRef<HTMLOListElement>(null);
+  const previousCountRef = useRef(0);
 
   const scrollToBottom = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    const container = containerRef.current;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
     }
   };
 
   const isNearBottom = () => {
-    if (!containerRef.current) return true;
-
-    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-    const threshold = 50; // pixels from bottom
-    return scrollTop + clientHeight >= scrollHeight - threshold;
-  };
-
-  const handleHeightChange = () => {
-    if (isNearBottom()) {
-      requestAnimationFrame(() => {
-        scrollToBottom();
-      });
+    const container = containerRef.current;
+    if (!container) {
+      return true;
     }
+    return container.scrollTop + container.clientHeight >= container.scrollHeight - NEAR_BOTTOM_PX;
   };
+
+  const handleHeightChange = useCallback(() => {
+    if (isNearBottom()) {
+      requestAnimationFrame(scrollToBottom);
+    }
+  }, []);
 
   useEffect(() => {
     const count = items.length;
-
-    if (count > previousItemsLengthRef.current || isNearBottom()) {
-      previousItemsLengthRef.current = count;
-
-      requestAnimationFrame(() => {
-        scrollToBottom();
-      });
+    const isFirstFill = previousCountRef.current === 0 && count > 0;
+    if (isFirstFill || (count > previousCountRef.current && isNearBottom())) {
+      requestAnimationFrame(scrollToBottom);
     }
+    previousCountRef.current = count;
   }, [items]);
 
   return (
-    <div className="chat-messages-container" ref={containerRef}>
+    <ol className="chat-messages-container" ref={containerRef} aria-label={label}>
       {items.map((item) => renderItem(item, handleHeightChange))}
-    </div>
+    </ol>
   );
 }

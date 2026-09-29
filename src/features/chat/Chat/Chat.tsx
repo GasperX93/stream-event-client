@@ -1,227 +1,200 @@
-import { useState } from 'react';
+import { useCallback, useId, useMemo, useState } from 'react';
 
-import { Button } from '@/components/Button/Button';
-import { ChatMessage } from '@/components/Chat/ChatMessage/ChatMessage';
-import { MessageSender } from '@/components/Chat/MessageSender/MessageSender';
-import { ScrollableMessageList } from '@/components/Chat/ScrollableMessageList/ScrollableMessageList';
-import { ThreadView } from '@/components/Chat/ThreadView/ThreadView';
-import { useSwarmChat, VisibleMessage } from '@/hooks/useSwarmChat';
-import { useUserContext } from '@/providers/User';
-import { config } from '@/utils/shared/config';
+import type { ChatConfig } from '@/config/runtimeConfig';
+import { Button, ButtonVariant } from '@/shared/components/Button/Button';
+import { Spinner } from '@/shared/components/Spinner/Spinner';
+
+import { chatSettings } from '../chatSettings';
+import { useChatUser } from '../User';
+import { CHAT_LOADING, CHAT_UNREACHABLE, useSwarmChat, type VisibleMessage } from '../useSwarmChat';
+
+import { ChatMessage } from './ChatMessage/ChatMessage';
+import { MessageSender } from './MessageSender/MessageSender';
+import { ScrollableMessageList } from './ScrollableMessageList/ScrollableMessageList';
+import { ThreadView } from './ThreadView/ThreadView';
 
 import './Chat.scss';
 
+export { READ_ONLY_PRIVATE_KEY } from '../chatSettings';
+
 interface ChatProps {
+  chat: ChatConfig;
+  /** The stream's feed owner and topic, which name the stream's chat. */
   owner: string;
   topic: string;
 }
 
-const profileColors = [
-  '#DC2626', // Dark Red
-  '#D97706', // Dark Amber
-  '#059669', // Dark Emerald
-  '#2563EB', // Dark Blue
-  '#EA580C', // Dark Orange
-  '#9333EA', // Dark Purple
-  '#BE123C', // Dark Rose
-  '#0D9488', // Dark Teal
-  '#7C3AED', // Dark Violet
-  '#0284C7', // Dark Cyan
-  '#C026D3', // Dark Magenta
-  '#CA8A04', // Dark Yellow
-  '#0891B2', // Dark Sky
-  '#DB2777', // Dark Pink
-  '#15803D', // Dark Green
-  '#4F46E5', // Dark Indigo
-];
+/** The reaction being sent, one per message, keyed by message id. */
+type PendingReactions = Record<string, string>;
 
-function getColorForName(name: string): string {
-  const hash = [...name].reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return profileColors[hash % profileColors.length];
-}
-
-const privKeyPlaceholder = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
-
-export const Chat: React.FC<ChatProps> = ({ owner, topic }) => {
-  const { nickname, keys, setIsLoginModalOpen } = useUserContext();
-
-  const [selectedMessage, setSelectedMessage] = useState<VisibleMessage | null>(null);
-  const [isThreadView, setIsThreadView] = useState(false);
-  const [reactionLoadingState, setReactionLoadingState] = useState<Record<string, string>>({});
-  const [isSendingMessage, setIsSendingMessage] = useState(false);
-  const [isSendingThreadMessage, setIsSendingThreadMessage] = useState(false);
-
+/** The chat beside a stream: read by anyone, written to by a viewer who has chosen a name. */
+export function Chat({ chat, owner, topic }: ChatProps) {
+  const { session, setIsLoginModalOpen } = useChatUser();
+  const settings = useMemo(() => chatSettings(chat, topic, session), [chat, topic, session]);
+  const ownAddress = session?.address ?? null;
   const {
-    chatLoading,
-    messagesLoading,
-    groupedReactions,
-    simpleMessages,
-    getThreadMessages,
+    status,
+    isLoadingOlder,
+    hasOlder,
+    messages,
+    reactionsByMessage,
+    repliesTo,
     sendMessage,
     sendReaction,
     sendReply,
-    fetchPreviousMessages,
-    hasPreviousMessages,
+    fetchOlderMessages,
     retrySendMessage,
-    error,
-  } = useSwarmChat({
-    user: {
-      nickname: nickname || '',
-      privateKey: keys.private || privKeyPlaceholder,
-    },
-    infra: {
-      beeUrl: config.writerBeeUrl,
-      gsocResourceId: config.chatGsocResourceId,
-      gsocTopic: config.chatGsocTopic,
-      chatAddress: config.streamStateOwner,
-      chatTopic: `chat-${topic}`,
-      enveloped: false,
-      feedReadTimeout: 12500,
-      gsocWriteTimeout: 5000,
-      socReadTimeout: 5000,
-    },
-  });
+    restart,
+  } = useSwarmChat(settings, `${owner}/${topic}`, ownAddress);
 
-  const handleMessageSending = async (text: string) => {
-    try {
-      setIsSendingMessage(true);
-      await sendMessage(text, {
-        streamId: `${owner}/${topic}`,
-      });
-    } finally {
-      setIsSendingMessage(false);
-    }
-  };
+  const [threadId, setThreadId] = useState<string | null>(null);
+  const [pendingReactions, setPendingReactions] = useState<PendingReactions>({});
+  const [isFolded, setIsFolded] = useState(false);
+  const bodyId = useId();
 
-  const handleEmojiReaction = async (messageId: string, emoji: string) => {
-    // Prevent multiple reactions on the same message-emoji combination
-    const loadingKey = `${messageId}-${emoji}`;
-    if (reactionLoadingState[loadingKey]) return;
+  const askForName = useCallback(() => setIsLoginModalOpen(true), [setIsLoginModalOpen]);
 
-    try {
-      setReactionLoadingState((prev) => ({ ...prev, [loadingKey]: emoji }));
-      await sendReaction(messageId, emoji, {
-        streamId: `${owner}/${topic}`,
-      });
-    } finally {
-      // Clear loading state after a short delay to prevent rapid clicking
-      setTimeout(() => {
-        setReactionLoadingState((prev) => {
-          const { [loadingKey]: _, ...rest } = prev;
-          return rest;
-        });
-      }, 500);
-    }
-  };
-
-  const handleThreadReply = (message: VisibleMessage) => {
-    setSelectedMessage(message);
-    setIsThreadView(true);
-  };
-
-  const handleBackToMain = () => {
-    setIsThreadView(false);
-    setSelectedMessage(null);
-  };
-
-  const handleThreadMessageSending = async (text: string) => {
-    if (selectedMessage) {
-      try {
-        setIsSendingThreadMessage(true);
-        await sendReply(selectedMessage.id, text, {
-          streamId: `${owner}/${topic}`,
-          });
-      } finally {
-        setIsSendingThreadMessage(false);
+  const react = useCallback(
+    async (messageId: string, emoji: string) => {
+      if (!session) {
+        askForName();
+        return;
       }
+      if (pendingReactions[messageId]) {
+        return;
+      }
+      setPendingReactions((pending) => ({ ...pending, [messageId]: emoji }));
+      try {
+        await sendReaction(messageId, emoji);
+      } catch {
+        // A reaction that fails leaves the count as it was, which is what the viewer sees.
+      } finally {
+        setPendingReactions(({ [messageId]: _, ...rest }) => rest);
+      }
+    },
+    [session, askForName, pendingReactions, sendReaction],
+  );
+
+  const renderMessage = (message: VisibleMessage, onHeightChange?: () => void, inThread = false) => (
+    <ChatMessage
+      key={message.id}
+      message={message}
+      ownMessage={message.address === ownAddress}
+      reactions={reactionsByMessage[message.id] ?? []}
+      pendingReaction={pendingReactions[message.id] ?? null}
+      replyCount={inThread ? 0 : repliesTo(message.id).length}
+      onReact={(emoji) => void react(message.id, emoji)}
+      onOpenThread={inThread ? undefined : () => setThreadId(message.id)}
+      onRetry={() => retrySendMessage(message)}
+      onHeightChange={onHeightChange}
+    />
+  );
+
+  const joinButton = (label: string) => (
+    <Button className="chat-login-prompt" onClick={askForName}>
+      {label}
+    </Button>
+  );
+
+  const threadParent = threadId ? messages.find((message) => message.id === threadId) : undefined;
+
+  const body = () => {
+    if (status === CHAT_UNREACHABLE) {
+      return (
+        <div className="chat-state" role="status">
+          <p className="chat-state-title">The chat cannot be reached right now.</p>
+          <p className="chat-state-detail">
+            The video is not affected. Messages show here again once the chat answers.
+          </p>
+          <Button variant={ButtonVariant.SECONDARY} onClick={restart}>
+            Try again
+          </Button>
+        </div>
+      );
     }
-  };
 
-  const isAnyOperationLoading =
-    Object.keys(reactionLoadingState).length > 0 || isSendingMessage || isSendingThreadMessage;
+    if (status === CHAT_LOADING) {
+      return (
+        <div className="chat-state" role="status">
+          <Spinner />
+          <p className="chat-state-detail">Loading the chat…</p>
+        </div>
+      );
+    }
 
-  if (error) {
+    if (threadParent) {
+      return (
+        <ThreadView
+          original={renderMessage(threadParent, undefined, true)}
+          replies={repliesTo(threadParent.id)}
+          renderReply={(reply, onHeightChange) => renderMessage(reply, onHeightChange, true)}
+          onBack={() => setThreadId(null)}
+          composer={
+            session ? (
+              <MessageSender
+                label="Reply"
+                placeholder="Reply in the thread"
+                onSend={(text) => sendReply(threadParent.id, text)}
+              />
+            ) : (
+              joinButton('Join the chat to reply')
+            )
+          }
+        />
+      );
+    }
+
     return (
-      <div className="chat-container">
-        <div className="chat-error">Critical error: {error.message}. Please check node availability status.</div>
-      </div>
+      <>
+        {hasOlder && (
+          <Button
+            variant={ButtonVariant.SECONDARY}
+            className="chat-load-more"
+            disabled={isLoadingOlder}
+            onClick={() => void fetchOlderMessages()}
+          >
+            {isLoadingOlder ? 'Loading older messages…' : 'Load older messages'}
+          </Button>
+        )}
+        {messages.length > 0 ? (
+          <ScrollableMessageList
+            items={messages}
+            label="Messages"
+            renderItem={(message, onHeightChange) => renderMessage(message, onHeightChange)}
+          />
+        ) : (
+          <p className="chat-empty">No messages yet.</p>
+        )}
+        {session ? (
+          <MessageSender label="Message" placeholder="Type a message" onSend={sendMessage} />
+        ) : (
+          joinButton('Join the chat to send messages')
+        )}
+      </>
     );
-  }
+  };
 
   return (
-    <div className="chat-container">
-      {isThreadView && selectedMessage ? (
-        <ThreadView
-          originalMessage={selectedMessage}
-          originalMessageReactions={groupedReactions[selectedMessage.id] || []}
-          threadMessages={getThreadMessages(selectedMessage.id).messages}
-          groupedReactions={groupedReactions}
-          onBack={handleBackToMain}
-          onSendMessage={handleThreadMessageSending}
-          onEmojiReaction={handleEmojiReaction}
-          onRetry={retrySendMessage}
-          getColorForName={getColorForName}
-          currentUserAddress={keys.public || ''}
-          reactionLoadingState={reactionLoadingState}
-          disabled={isAnyOperationLoading}
-          onLoginPrompt={() => setIsLoginModalOpen(true)}
-        />
-      ) : (
-        <>
-          {chatLoading && (
-            <div className="chat-loading-overlay">
-              <div className="chat-loading">Loading chat...</div>
-            </div>
-          )}
-          {!chatLoading && hasPreviousMessages() && (
-            <Button onClick={fetchPreviousMessages} className="chat-load-more">
-              Load more messages
-            </Button>
-          )}
-
-          {messagesLoading && <div className="chat-loading">Loading messages...</div>}
-          {!messagesLoading && simpleMessages.length > 0 && (
-            <ScrollableMessageList
-              items={simpleMessages}
-              renderItem={(item, onHeightChange) => (
-                <ChatMessage
-                  key={item.id}
-                  message={item.message}
-                  received={Boolean(item.received)}
-                  error={Boolean(item.error)}
-                  uploaded={Boolean(item.uploaded)}
-                  requested={Boolean(item.requested)}
-                  name={item.username}
-                  profileColor={getColorForName(item.username)}
-                  messageOwnerAddress={item.address}
-                  ownMessage={item.address === keys.public!}
-                  reactions={groupedReactions[item.id] || []}
-                  threadCount={getThreadMessages(item.id).count}
-                  onRetry={() => retrySendMessage(item)}
-                  onEmojiReaction={(emoji) => handleEmojiReaction(item.id, emoji)}
-                  onThreadReply={() => handleThreadReply(item)}
-                  onHeightChange={onHeightChange}
-                  isReactionLoading={Object.keys(reactionLoadingState).some((key) => key.startsWith(item.id))}
-                  loadingReactionEmoji={
-                    Object.entries(reactionLoadingState).find(([key]) => key.startsWith(item.id))?.[1] || ''
-                  }
-                  disabled={isAnyOperationLoading}
-                  isLoggedIn={Boolean(keys.public)}
-                />
-              )}
-            />
-          )}
-
-          {!chatLoading && !keys.public && (
-            <Button onClick={() => setIsLoginModalOpen(true)} className="chat-login-prompt">
-              Log in to join the chat
-            </Button>
-          )}
-          {!chatLoading && keys.public && (
-            <MessageSender onSend={handleMessageSending} disabled={isAnyOperationLoading} />
-          )}
-        </>
-      )}
-    </div>
+    <section className={isFolded ? 'chat-container folded' : 'chat-container'} aria-labelledby={`${bodyId}-title`}>
+      <header className="chat-header">
+        <h2 id={`${bodyId}-title`} className="chat-title">
+          Chat
+        </h2>
+        <button
+          type="button"
+          className="chat-fold-button"
+          aria-expanded={!isFolded}
+          aria-controls={bodyId}
+          onClick={() => setIsFolded((folded) => !folded)}
+        >
+          {isFolded ? 'Show chat' : 'Hide chat'}
+        </button>
+      </header>
+      <div id={bodyId} className="chat-body" hidden={isFolded}>
+        {body()}
+      </div>
+    </section>
   );
-};
+}
+
+export default Chat;

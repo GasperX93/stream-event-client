@@ -1,90 +1,102 @@
-import { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useId, useRef, useState } from 'react';
 
-import { Button } from '@/components/Button/Button';
-import { useClickOutside } from '@/hooks/useClickOutside';
-import { useUserContext } from '@/providers/User';
-import { ROUTES } from '@/routes';
+import { Button, ButtonVariant } from '@/shared/components/Button/Button';
+import { Dialog } from '@/shared/components/Dialog/Dialog';
 
-import { ConfirmationModal } from '../ConfirmationModal/ConfirmationModal';
+import { useChatUser } from '../User';
 
+import '../LoginModal/LoginModal.scss';
 import './LoginButton.scss';
 
-export const LoginButton = () => {
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
+const KEY_ESCAPE = 'Escape';
 
-  const { isUserLoggedIn, setIsLoginModalOpen, nickname, logout } = useUserContext();
+/** The chat name in the header: an offer to join when there is none, the name and a menu when there is. */
+export function LoginButton() {
+  const { session, setIsLoginModalOpen, logout } = useChatUser();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isConfirmingLogout, setIsConfirmingLogout] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const menuId = useId();
 
-  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  useClickOutside([dropdownRef], () => setIsDropdownOpen(false), isDropdownOpen);
-
-  const handleButtonClick = () => {
-    if (isUserLoggedIn) {
-      setIsDropdownOpen(!isDropdownOpen);
-    } else {
-      setIsLoginModalOpen(true);
+  useEffect(() => {
+    if (!isMenuOpen) {
+      return;
     }
-  };
+    const closeOnOutside = (event: MouseEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === KEY_ESCAPE) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', closeOnOutside);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('mousedown', closeOnOutside);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [isMenuOpen]);
 
-  const handleLogout = () => {
-    setLogoutModalOpen(true);
-    setIsDropdownOpen(false);
-  };
-
-  const handleLogoutModalConfirm = () => {
-    logout();
-    setIsDropdownOpen(false);
-    setLogoutModalOpen(false);
-    navigate(ROUTES.STREAM_BROWSER);
-  };
-
-  const handleLogoutModalCancel = () => {
-    setLogoutModalOpen(false);
-  };
-
-  const handleBrowser = () => {
-    navigate(ROUTES.STREAM_BROWSER);
-    setIsDropdownOpen(false);
-  };
-
-  if (isUserLoggedIn) {
+  if (!session) {
     return (
-      <div className="login-button-container" ref={dropdownRef}>
-        <ConfirmationModal
-          isOpen={logoutModalOpen}
-          title="Are you sure?"
-          message="If you log out, your display name won't be saved. You'll need to choose one again next time."
-          confirmText="Log out"
-          cancelText="Cancel"
-          onConfirm={handleLogoutModalConfirm}
-          onCancel={handleLogoutModalCancel}
-        />
-
-        <Button className="login-button" onClick={handleButtonClick}>
-          {nickname}
-        </Button>
-
-        {isDropdownOpen && (
-          <div className="login-dropdown">
-            <button className="login-dropdown-item" onClick={handleBrowser}>
-              Browse streams
-            </button>
-            <div className="login-dropdown-divider" />
-            <button className="login-dropdown-item" onClick={handleLogout}>
-              Log out
-            </button>
-          </div>
-        )}
-      </div>
+      <Button variant={ButtonVariant.SECONDARY} className="login-button" onClick={() => setIsLoginModalOpen(true)}>
+        Join chat
+      </Button>
     );
   }
 
+  const confirmLogout = () => {
+    logout();
+    setIsConfirmingLogout(false);
+  };
+
   return (
-    <Button className="login-button" onClick={handleButtonClick}>
-      Log in
-    </Button>
+    <div className="login-button-container" ref={containerRef}>
+      <Button
+        variant={ButtonVariant.SECONDARY}
+        className="login-button"
+        aria-haspopup="true"
+        aria-expanded={isMenuOpen}
+        aria-controls={menuId}
+        onClick={() => setIsMenuOpen((open) => !open)}
+      >
+        <span className="login-button-name">{session.username}</span>
+        <span className="login-button-chevron" aria-hidden="true">
+          ▾
+        </span>
+      </Button>
+
+      {isMenuOpen && (
+        <div id={menuId} className="login-dropdown">
+          <button
+            type="button"
+            className="login-dropdown-item"
+            onClick={() => {
+              setIsMenuOpen(false);
+              setIsConfirmingLogout(true);
+            }}
+          >
+            Log out
+          </button>
+        </div>
+      )}
+
+      {isConfirmingLogout && (
+        <Dialog title="Log out of the chat?" onClose={() => setIsConfirmingLogout(false)}>
+          <p className="login-modal-content">
+            If you log out, your display name won&apos;t be saved. You&apos;ll need to choose one again next time.
+          </p>
+          <div className="login-modal-actions">
+            <Button variant={ButtonVariant.SECONDARY} onClick={() => setIsConfirmingLogout(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmLogout}>Log out</Button>
+          </div>
+        </Dialog>
+      )}
+    </div>
   );
-};
+}

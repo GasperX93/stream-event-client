@@ -21,7 +21,9 @@ export const DISPLAY_NAME_PROBLEM = `A display name is 1 to ${DISPLAY_NAME_MAX_L
 export function checkDisplayName(raw: string): DisplayNameCheck {
   const name = raw.trim();
   const length = [...name].length;
-  return length >= 1 && length <= DISPLAY_NAME_MAX_LENGTH ? { ok: true, name } : { ok: false, problem: DISPLAY_NAME_PROBLEM };
+  return length >= 1 && length <= DISPLAY_NAME_MAX_LENGTH
+    ? { ok: true, name }
+    : { ok: false, problem: DISPLAY_NAME_PROBLEM };
 }
 
 export type RandomBytes = (length: number) => Uint8Array;

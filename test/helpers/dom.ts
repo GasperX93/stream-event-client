@@ -87,3 +87,17 @@ export function text(): string {
 export function dialog(): HTMLElement | null {
   return document.querySelector('[role="dialog"]');
 }
+
+/** Settles until the check finds something, for what arrives through a dynamic import. */
+export async function waitFor<T>(check: () => T | null | undefined, attempts = 50): Promise<T> {
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    const found = check();
+    if (found) {
+      return found;
+    }
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    });
+  }
+  throw new Error('what was waited for never arrived');
+}
