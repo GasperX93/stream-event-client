@@ -14,33 +14,53 @@ const filledIn = z.string().refine((value) => !PLACEHOLDER.test(value.trim()), {
   message: 'still holds the example placeholder',
 });
 
-const gatewayUrlSchema = filledIn.refine(
-  (value) => (value.startsWith('/') && !value.startsWith('//')) || /^https?:\/\/[^/]/i.test(value),
-  {
-    message: 'must be a path on this site, such as /bee, or an http or https address',
-  },
-);
+const PRIVATE_KEY = /^(0x)?[0-9a-fA-F]{64}$/;
+
+const isRootedPathOrHttpUrl = (value: string) =>
+  (value.startsWith('/') && !value.startsWith('//')) || /^https?:\/\/[^/]/i.test(value);
+
+const gatewayUrlSchema = filledIn.refine(isRootedPathOrHttpUrl, {
+  message: 'must be a path on this site, such as /bee, or an http or https address',
+});
+
+const ethAddress = filledIn.refine((value) => ETH_ADDRESS.test(value), { message: 'must be an Ethereum address' });
+
+const notEmpty = filledIn.refine((value) => value.trim().length > 0, { message: 'must not be empty' });
 
 const catalogSchema = z.object({
-  owner: filledIn.refine((value) => ETH_ADDRESS.test(value), { message: 'must be an Ethereum address' }),
-  topic: filledIn.refine((value) => value.length > 0, { message: 'must not be empty' }),
+  owner: ethAddress,
+  topic: notEmpty,
 });
 
-/** Checked for shape only until the chat is built on it. */
-const chatSchema = z.object({
-  enabled: z.boolean(),
-  beeUrl: z.string(),
-  gsocResourceId: z.string(),
-  gsocTopic: z.string(),
-  feedOwner: z.string(),
+const enabledChatSchema = z.object({
+  enabled: z.literal(true),
+  beeUrl: filledIn.refine(isRootedPathOrHttpUrl, {
+    message: 'must be a path on this site or an http or https address',
+  }),
+  /**
+   * A private key every viewer receives, so it is configuration and not a secret: the GSOC address it
+   * signs for is where the chat aggregator listens, and every viewer writes there with the same key.
+   */
+  gsocResourceId: filledIn.refine((value) => PRIVATE_KEY.test(value), {
+    message: 'must be 32 bytes written as 64 hex digits',
+  }),
+  gsocTopic: notEmpty,
+  feedOwner: ethAddress,
   pollIntervalMs: z.number().int().positive(),
 });
+
+/** Chat switched off is not read any further, so its example placeholders can stay. */
+const disabledChatSchema = z.looseObject({ enabled: z.literal(false) });
+
+const chatSchema = z.discriminatedUnion('enabled', [enabledChatSchema, disabledChatSchema]);
 
 const runtimeConfigSchema = z.object({
   gatewayUrl: gatewayUrlSchema,
   catalog: catalogSchema,
   chat: chatSchema.optional(),
 });
+
+export type ChatConfig = z.infer<typeof enabledChatSchema>;
 
 export type RuntimeConfig = z.infer<typeof runtimeConfigSchema>;
 
@@ -50,6 +70,11 @@ function describeIssues(error: z.ZodError): string {
   return error.issues
     .map((issue) => `${issue.path.length > 0 ? issue.path.join('.') : 'the config'}: ${issue.message}`)
     .join('; ');
+}
+
+/** The chat's settings when chat is on, and null when it is off or not configured. */
+export function enabledChat(config: RuntimeConfig): ChatConfig | null {
+  return config.chat?.enabled ? config.chat : null;
 }
 
 export function parseRuntimeConfig(raw: unknown): RuntimeConfigResult {
