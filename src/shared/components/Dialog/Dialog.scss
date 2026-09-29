@@ -1,0 +1,45 @@
+@use '@/design/media';
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-dialog);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: var(--color-overlay);
+
+  @include media.tablet-up {
+    align-items: center;
+    padding: var(--spacing-base);
+  }
+}
+
+// On a phone the dialog is a sheet along the bottom edge, where a thumb reaches its buttons.
+.dialog {
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: var(--spacing-lg) var(--spacing-base) var(--spacing-xl);
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-modal);
+
+  @include media.tablet-up {
+    max-width: 460px;
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.dialog-title {
+  margin-bottom: var(--spacing-base);
+  font-size: var(--font-size-2xl);
+}
