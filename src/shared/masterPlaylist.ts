@@ -1,3 +1,6 @@
+// Copied from Solar-Punk-Ltd/streaming-monorepo at c1696c26, apps/hls-stream/packages/shared/src/masterPlaylist.ts.
+// Refresh it from there when the stream list format changes.
+
 import { HLS_INDEPENDENT_SEGMENTS, HLS_M3U, HLS_STREAM_INF, HLS_VERSION } from './hlsTags.js';
 
 /**

@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict';
-import { describe, it } from 'node:test';
+import { describe, it } from 'vitest';
 
-import { CATALOG_STATE_LIVE, CATALOG_STATE_SCHEDULED, CATALOG_STATE_VOD, CATALOG_STATES } from '../../src/shared/contracts/catalogState.js';
+import {
+  CATALOG_STATE_LIVE,
+  CATALOG_STATE_SCHEDULED,
+  CATALOG_STATE_VOD,
+  CATALOG_STATES,
+} from '../../src/shared/contracts/catalogState.js';
 
 describe('the state a catalog entry is written with', () => {
   it('is live, a recording or scheduled', () => {

@@ -1,3 +1,6 @@
+// Copied from Solar-Punk-Ltd/streaming-monorepo at c1696c26, apps/hls-stream/packages/shared/src/abrTuning.ts.
+// Refresh it from there when the stream list format changes.
+
 /**
  * The two hls.js rules that decide which rung a player may take, and the numbers this client runs
  * them with.

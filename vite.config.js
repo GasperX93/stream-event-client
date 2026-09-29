@@ -8,13 +8,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig(({ mode }) => {
-  // Load env from monorepo root
-  const env = loadEnv(mode, path.resolve(__dirname, '../..'), '');
+  const env = loadEnv(mode, __dirname, '');
   const beeUrl = env.VITE_READER_BEE_URL || 'http://127.0.0.1:1633';
 
   return {
     base: './',
-    envDir: path.resolve(__dirname, '../..'),
     plugins: [nodePolyfills(), react()],
     build: {
       // Stated rather than inherited, because the bundler default is not stable

@@ -1,5 +1,9 @@
 import { parseManifest as sharedParseManifest } from '@/shared/manifest';
-import { buildMasterPlaylist as sharedBuildMasterPlaylist, buildSwarmUri as sharedBuildSwarmUri, parseSwarmUri as sharedParseSwarmUri } from '@/shared/masterPlaylist';
+import {
+  buildMasterPlaylist as sharedBuildMasterPlaylist,
+  buildSwarmUri as sharedBuildSwarmUri,
+  parseSwarmUri as sharedParseSwarmUri,
+} from '@/shared/masterPlaylist';
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 

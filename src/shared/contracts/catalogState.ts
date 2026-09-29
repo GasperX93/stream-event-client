@@ -1,3 +1,6 @@
+// Copied from Solar-Punk-Ltd/streaming-monorepo at c1696c26, packages/contracts/src/catalogState.ts.
+// Refresh it from there when the stream list format changes.
+
 export const CATALOG_STATE_LIVE = 'live' as const;
 export const CATALOG_STATE_VOD = 'vod' as const;
 /**

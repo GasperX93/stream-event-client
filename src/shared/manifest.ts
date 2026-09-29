@@ -1,3 +1,6 @@
+// Copied from Solar-Punk-Ltd/streaming-monorepo at c1696c26, apps/hls-stream/packages/shared/src/manifest.ts.
+// Refresh it from there when the stream list format changes.
+
 import { HLS_DISCONTINUITY, HLS_ENDLIST, HLS_EXTINF, HLS_GAP, HLS_PROGRAM_DATE_TIME } from './hlsTags.js';
 
 /**

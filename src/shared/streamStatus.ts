@@ -1,3 +1,6 @@
+// Copied from Solar-Punk-Ltd/streaming-monorepo at c1696c26, apps/hls-stream/packages/shared/src/streamStatus.ts.
+// Refresh it from there when the stream list format changes.
+
 /**
  * The states a catalog entry is written with, under the names the stack has always used for them. The contract
  * holds them because every writer and reader of the catalog shares them.

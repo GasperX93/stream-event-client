@@ -1,3 +1,6 @@
+// Copied from Solar-Punk-Ltd/streaming-monorepo at c1696c26, apps/hls-stream/packages/shared/src/hlsTags.ts.
+// Refresh it from there when the stream list format changes.
+
 /**
  * HLS playlist tags (RFC 8216), as bare tag names without a trailing colon.
  *

@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
-import { describe, it } from 'node:test';
+import { describe, it } from 'vitest';
 
 import {
-  adminFeedRungSchema,
   viewerCatalogEntrySchema,
   viewerCatalogRungSchema,
   viewerCatalogSchema,
@@ -102,21 +101,5 @@ describe('the catalog, as the viewer reads it', () => {
     assert.equal(accepts(viewerCatalogSchema, []), true);
     assert.equal(accepts(viewerCatalogSchema, [ENTRY, { ...ENTRY, title: null }]), false);
     assert.equal(accepts(viewerCatalogSchema, { entries: [ENTRY] }), false);
-  });
-});
-
-describe('a rung, as the admin reads it back off the catalog', () => {
-  it('takes any number and any text, and an index or a duration alone', () => {
-    assert.equal(accepts(adminFeedRungSchema, { ...RUNG, width: Infinity, name: '' }), true);
-    assert.equal(accepts(adminFeedRungSchema, { ...RUNG, index: Number.NaN }), true);
-    assert.equal(accepts(adminFeedRungSchema, { ...RUNG, duration: 1 }), true);
-  });
-
-  it('refuses a missing field and a field of the wrong kind', () => {
-    for (const change of [{ width: '1280' }, { topic: 1 }, { index: '1' }, { duration: null }]) {
-      assert.equal(accepts(adminFeedRungSchema, { ...RUNG, ...change }), false, JSON.stringify(change));
-    }
-    const { avgBandwidth: _left, ...missing } = RUNG;
-    assert.equal(accepts(adminFeedRungSchema, missing), false);
   });
 });

@@ -22,11 +22,11 @@ changed by people who were not here when it was built.
 
 ## Sources
 
-| What | Taken from | At |
-|---|---|---|
-| Stream list, watch page, HLS player, Bee node picker | [streaming-monorepo](https://github.com/Solar-Punk-Ltd/streaming-monorepo) `apps/hls-stream/packages/client` | `main` at `c1696c26` (2026-09-28) |
-| The stream list format and feed helpers the viewer imports | the same repository, `apps/hls-stream/packages/shared` and `packages/contracts` | the same commit |
-| Design tokens, the Swarm theme, the chat, the display-name login | [msrs-client](https://github.com/Solar-Punk-Ltd/msrs-client) | `master` at `a2f50151` (2026-09-24), which holds the Swarm theme (#20) and Brand v3.0 (#22) |
+| What                                                             | Taken from                                                                                                   | At                                                                                          |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| Stream list, watch page, HLS player, Bee node picker             | [streaming-monorepo](https://github.com/Solar-Punk-Ltd/streaming-monorepo) `apps/hls-stream/packages/client` | `main` at `c1696c26` (2026-09-28)                                                           |
+| The stream list format and feed helpers the viewer imports       | the same repository, `apps/hls-stream/packages/shared` and `packages/contracts`                              | the same commit                                                                             |
+| Design tokens, the Swarm theme, the chat, the display-name login | [msrs-client](https://github.com/Solar-Punk-Ltd/msrs-client)                                                 | `master` at `a2f50151` (2026-09-24), which holds the Swarm theme (#20) and Brand v3.0 (#22) |
 
 The code arrives as a copy, without the history of either repository. The first commit of phase 1
 copies the source files unchanged and names the commits above, and the moves and edits follow in
@@ -57,15 +57,15 @@ commits of their own, so every change can be read against where the code came fr
 
 ## What stays out
 
-| Left out | Where it was | Why |
-|---|---|---|
-| Admin sign-in, wallet connection (MetaMask, wagmi) | msrs-client | Not part of the event client |
-| Creating, editing, pinning and managing streams, the uploader, the stamp dashboard and top-ups | msrs-client | The same |
-| The other three themes and the theme switcher | msrs-client | Swarm theme only |
-| The Swarm theme's background video | msrs-client | Brand v3.0 had already removed it |
-| Waku push delivery for the chat, with its libraries and its node | msrs-client | The owner's call, 2026-09-29: the chat is read by polling |
-| The in-tab Bee node (weeb-3) | monorepo viewer | Decision 1 |
-| The hooks the monorepo's test harness drives, and its build stamp file | monorepo viewer | Decision 2 |
+| Left out                                                                                       | Where it was    | Why                                                       |
+| ---------------------------------------------------------------------------------------------- | --------------- | --------------------------------------------------------- |
+| Admin sign-in, wallet connection (MetaMask, wagmi)                                             | msrs-client     | Not part of the event client                              |
+| Creating, editing, pinning and managing streams, the uploader, the stamp dashboard and top-ups | msrs-client     | The same                                                  |
+| The other three themes and the theme switcher                                                  | msrs-client     | Swarm theme only                                          |
+| The Swarm theme's background video                                                             | msrs-client     | Brand v3.0 had already removed it                         |
+| Waku push delivery for the chat, with its libraries and its node                               | msrs-client     | The owner's call, 2026-09-29: the chat is read by polling |
+| The in-tab Bee node (weeb-3)                                                                   | monorepo viewer | Decision 1                                                |
+| The hooks the monorepo's test harness drives, and its build stamp file                         | monorepo viewer | Decision 2                                                |
 
 ## How it is built
 
@@ -209,14 +209,14 @@ Each phase is one branch and one pull request into `main`, reviewed before it me
 it changes in the same pull request. The target dates assume the decisions below are answered this
 week, and leave the two weeks before the event for rehearsal with the real streams and chat.
 
-| # | Phase | Done when | Target |
-|---|---|---|---|
-| 0 | This plan | The repository exists, this file is on `main`, the decisions are answered | 2026-09-30 |
-| 1 | The viewer, standalone | The viewer, the shared pieces and the picker are in the new layout, weeb-3 is gone, decision 2 is applied, the runtime config works, every stream is listed, the toolchain is the monorepo's, dependencies are current and checked, the kept tests and CI are green | 2026-10-02 |
-| 2 | Swarm design | Tokens and the Swarm theme are in, every screen uses them on a phone and on a desktop, fonts, logo and favicon are bundled, and no theme machinery is left | 2026-10-06 |
-| 3 | Chat | The display-name login and the chat panel work on the watch page, reading the chat feed by polling, with the ported and new tests green | 2026-10-10 |
-| 4 | Ship | The Docker image, nginx with the page fallback, caching, `config.json` served uncached, a content security policy that allows the gateway, the viewer's own machine and the chat endpoint, the config mounted at start, and the browser smoke test with its recorded answers in CI. A deploy to a staging host only on the owner's word | 2026-10-15 |
-| 5 | Review and docs | A review for broken logic, races, loops that never end, unhandled errors and anything that leaves a viewer unsure what is happening, each finding fixed or recorded. Docs and comments read against the code and fixed. A check that no host, address or key is in the tree | 2026-10-19 |
+| #   | Phase                  | Done when                                                                                                                                                                                                                                                                                                                               | Target     |
+| --- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| 0   | This plan              | The repository exists, this file is on `main`, the decisions are answered                                                                                                                                                                                                                                                               | 2026-09-30 |
+| 1   | The viewer, standalone | The viewer, the shared pieces and the picker are in the new layout, weeb-3 is gone, decision 2 is applied, the runtime config works, every stream is listed, the toolchain is the monorepo's, dependencies are current and checked, the kept tests and CI are green                                                                     | 2026-10-02 |
+| 2   | Swarm design           | Tokens and the Swarm theme are in, every screen uses them on a phone and on a desktop, fonts, logo and favicon are bundled, and no theme machinery is left                                                                                                                                                                              | 2026-10-06 |
+| 3   | Chat                   | The display-name login and the chat panel work on the watch page, reading the chat feed by polling, with the ported and new tests green                                                                                                                                                                                                 | 2026-10-10 |
+| 4   | Ship                   | The Docker image, nginx with the page fallback, caching, `config.json` served uncached, a content security policy that allows the gateway, the viewer's own machine and the chat endpoint, the config mounted at start, and the browser smoke test with its recorded answers in CI. A deploy to a staging host only on the owner's word | 2026-10-15 |
+| 5   | Review and docs        | A review for broken logic, races, loops that never end, unhandled errors and anything that leaves a viewer unsure what is happening, each finding fixed or recorded. Docs and comments read against the code and fixed. A check that no host, address or key is in the tree                                                             | 2026-10-19 |
 
 ## Decisions for the owner
 

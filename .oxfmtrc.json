@@ -14,13 +14,5 @@
       }
     }
   ],
-  "ignorePatterns": [
-    "**/dist/**",
-    "**/coverage/**",
-    "**/reports/**",
-    "**/.stryker-tmp/**",
-    "pnpm-lock.yaml",
-    "infra/**",
-    "apps/hls-stream/docs/bench/**"
-  ]
+  "ignorePatterns": ["**/dist/**", "**/coverage/**", "pnpm-lock.yaml"]
 }

@@ -1,3 +1,6 @@
+// Copied from Solar-Punk-Ltd/streaming-monorepo at c1696c26, apps/hls-stream/packages/shared/src/feedFollow.ts.
+// Refresh it from there when the stream list format changes.
+
 /**
  * Which request follows a sequential Swarm feed, so that everything reading one asks the same way.
  *

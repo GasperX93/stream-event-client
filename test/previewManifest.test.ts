@@ -1,7 +1,11 @@
 import { buildMasterPlaylist, type Rendition } from '@/shared/masterPlaylist';
 import { describe, expect, it } from 'vitest';
 
-import { fetchPreviewManifest, type PreviewEntry, rungSlotsKey } from '@/features/catalog/StreamPreview/previewManifest';
+import {
+  fetchPreviewManifest,
+  type PreviewEntry,
+  rungSlotsKey,
+} from '@/features/catalog/StreamPreview/previewManifest';
 import { STREAM_STATUS_LIVE, STREAM_STATUS_VOD } from '@/features/catalog/stream';
 import { thumbnailManifestUrl } from '@/features/catalog/thumbnailManifest';
 

@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict';
-import { describe, it } from 'node:test';
+import { describe, it } from 'vitest';
 
-import { MEDIA_TYPE_AUDIO, MEDIA_TYPE_VIDEO, MEDIA_TYPES, mediaTypeSchema } from '../../src/shared/contracts/mediaType.js';
+import {
+  MEDIA_TYPE_AUDIO,
+  MEDIA_TYPE_VIDEO,
+  MEDIA_TYPES,
+  mediaTypeSchema,
+} from '../../src/shared/contracts/mediaType.js';
 
 describe('the media type', () => {
   it('is video or audio, video first', () => {

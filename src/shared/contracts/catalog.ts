@@ -1,3 +1,6 @@
+// Copied from Solar-Punk-Ltd/streaming-monorepo at c1696c26, packages/contracts/src/catalog.ts.
+// Refresh it from there when the stream list format changes. The admin's rung schema is left out.
+
 import { z } from 'zod';
 
 import { mediaTypeSchema } from './mediaType.js';
@@ -40,20 +43,3 @@ export const viewerCatalogEntrySchema = z.looseObject({
 
 /** The whole catalog as the viewer reads it, refused whole when any one entry is refused. */
 export const viewerCatalogSchema = z.array(viewerCatalogEntrySchema);
-
-const anyNumber = z.custom<number>((value) => typeof value === 'number');
-
-/**
- * A rung as the admin reads it back off the catalog before it rewrites an entry: the six fields every rung carries,
- * each only of its kind, and an index or a duration of any number when present.
- */
-export const adminFeedRungSchema = z.looseObject({
-  name: z.string(),
-  topic: z.string(),
-  width: anyNumber,
-  height: anyNumber,
-  bandwidth: anyNumber,
-  avgBandwidth: anyNumber,
-  index: anyNumber.optional(),
-  duration: anyNumber.optional(),
-});

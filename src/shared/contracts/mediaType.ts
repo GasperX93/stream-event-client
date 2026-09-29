@@ -1,3 +1,6 @@
+// Copied from Solar-Punk-Ltd/streaming-monorepo at c1696c26, packages/contracts/src/mediaType.ts.
+// Refresh it from there when the stream list format changes.
+
 import { z } from 'zod';
 
 export const MEDIA_TYPE_VIDEO = 'video' as const;

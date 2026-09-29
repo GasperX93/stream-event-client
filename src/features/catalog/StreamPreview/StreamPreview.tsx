@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { HLS_ENDLIST, HLS_M3U, HLS_MEDIA_SEQUENCE_ZERO, HLS_PLAYLIST_TYPE_VOD, HLS_TARGET_DURATION, HLS_VERSION } from '@/shared/hlsTags';
+import {
+  HLS_ENDLIST,
+  HLS_M3U,
+  HLS_MEDIA_SEQUENCE_ZERO,
+  HLS_PLAYLIST_TYPE_VOD,
+  HLS_TARGET_DURATION,
+  HLS_VERSION,
+} from '@/shared/hlsTags';
 import Hls, { Events } from 'hls.js';
 import Pqueue from 'p-queue';
 
@@ -11,7 +18,13 @@ import { previewMode, thumbnailFailed, thumbnailImageUrl } from '@/features/cata
 import { previewSourceFrom } from '@/features/catalog/StreamPreview/previewSource';
 import { CustomFragmentLoader } from '@/features/player/CustomManifestLoader';
 import { useAppContext } from '@/app/AppProvider';
-import { MediaType, Rendition, STREAM_STATUS_LIVE, STREAM_STATUS_SCHEDULED, StreamState } from '@/features/catalog/stream';
+import {
+  MediaType,
+  Rendition,
+  STREAM_STATUS_LIVE,
+  STREAM_STATUS_SCHEDULED,
+  StreamState,
+} from '@/features/catalog/stream';
 import { formatDuration } from '@/features/catalog/format';
 import { scheduledStartLabel } from '@/features/catalog/scheduledStart';
 import { previewSegmentUrl } from '@/features/catalog/thumbnailManifest';
