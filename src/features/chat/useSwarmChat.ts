@@ -120,13 +120,10 @@ export function useSwarmChat(settings: ChatSettings, ownAddress: string | null) 
         if (!loading) {
           setHasOlder(started.hasPreviousMessages());
         }
-        // Once a chat has shown, a restart for a new name reads it again behind what is on screen.
+        // The library keeps trying after a critical error, so the end of a load shows the chat whatever came
+        // before. Once a chat has shown, a restart for a new name reads it again behind what is on screen.
         setStatus((previous) =>
-          previous === CHAT_UNREACHABLE || (loading && previous === CHAT_READY)
-            ? previous
-            : loading
-              ? CHAT_LOADING
-              : CHAT_READY,
+          !loading ? CHAT_READY : previous === CHAT_UNREACHABLE || previous === CHAT_READY ? previous : CHAT_LOADING,
         );
       });
       listen(EVENTS.LOADING_PREVIOUS_MESSAGES, (loading: boolean) => {
@@ -146,8 +143,8 @@ export function useSwarmChat(settings: ChatSettings, ownAddress: string | null) 
 
       started.start().then(
         () => {
-          // The library starts its polling at the end of start() whether or not stop() was called
-          // while start() was still reading, so a chat stopped that early is stopped once more.
+          // Library 6.x began polling at the end of start() even after a stop, and a second stop costs
+          // nothing, so a chat whose start finished after its stop is stopped once more.
           if (stopped) {
             void started.stop();
           }
