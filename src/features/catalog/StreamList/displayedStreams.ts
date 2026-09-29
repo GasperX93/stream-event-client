@@ -1,7 +1,5 @@
 import { Stream, STREAM_STATUS_LIVE } from '@/features/catalog/stream';
 
-const MAX_DISPLAYED_STREAMS = 10;
-
 /**
  * Live first, then newest first, and that is all this ever tests for.
  *
@@ -30,7 +28,7 @@ function compareStreams(a: { state?: string; timestamp?: number; index?: number 
   return (b.index ?? 0) - (a.index ?? 0);
 }
 
-/** The streams the browse page shows, in the order it shows them. */
+/** Every stream on the catalog, in the order the browse page shows them. */
 export function displayedStreams(streamList: readonly Stream[]): Stream[] {
-  return streamList.slice(-MAX_DISPLAYED_STREAMS).sort(compareStreams);
+  return [...streamList].sort(compareStreams);
 }
