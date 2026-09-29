@@ -65,8 +65,9 @@ build on every pull request, and reports what the first page load downloads.
 
 ## What the viewer does
 
-- **The stream list.** Read from a Swarm feed and read again every 5 seconds. Every entry is shown,
-  live streams first, then the rest newest first. A read from a newer feed slot replaces the list
+- **The stream list.** Read from a Swarm feed and read again every 5 seconds. Every entry is shown in
+  three groups: live streams, then upcoming ones with the soonest start first, then finished ones
+  newest first. A read from a newer feed slot replaces the list
   whatever changed in it, so an entry edited, unpublished or gone live in place shows on an open page
   without a reload.
 - **Previews.** The entry's uploaded thumbnail when it has one, otherwise a frame decoded from the
