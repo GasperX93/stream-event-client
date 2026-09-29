@@ -1,5 +1,7 @@
 import { useCallback, useId, useMemo, useState } from 'react';
 
+import { FeedStatus } from '@solarpunkltd/swarm-chat-js';
+
 import type { ChatConfig } from '@/config/runtimeConfig';
 import { Button, ButtonVariant } from '@/shared/components/Button/Button';
 import { Spinner } from '@/shared/components/Spinner/Spinner';
@@ -56,6 +58,8 @@ export function Chat({ chat, topic }: ChatProps) {
   const bodyId = useId();
 
   const askForName = useCallback(() => setIsLoginModalOpen(true), [setIsLoginModalOpen]);
+  /** Before the library has reported a state nothing has gone wrong, so that counts as live. */
+  const isFeedLive = feedStatus === null || feedStatus === FeedStatus.LIVE;
 
   const react = useCallback(
     async (messageId: string, emoji: string) => {
@@ -90,6 +94,7 @@ export function Chat({ chat, topic }: ChatProps) {
       onOpenThread={inThread ? undefined : () => setThreadId(message.id)}
       onRetry={() => retrySendMessage(message)}
       onHeightChange={onHeightChange}
+      canOfferResend={isFeedLive}
     />
   );
 
