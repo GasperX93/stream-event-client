@@ -355,7 +355,7 @@ describe('sending', () => {
       emit(EVENTS.MESSAGE_REQUEST_INITIATED, own);
       emit(EVENTS.MESSAGE_REQUEST_UPLOADED, own);
       emit(EVENTS.STATUS, 'reconnecting');
-      act(() => vi.advanceTimersByTime(20_000));
+      void act(() => vi.advanceTimersByTime(20_000));
       expect(text()).toContain('Sending');
       expect(text()).not.toContain('Not confirmed yet');
 
