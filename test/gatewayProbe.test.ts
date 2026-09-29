@@ -226,7 +226,7 @@ describe('the way back to the default gateway', () => {
   });
 
   it('names the default rather than showing a path a viewer has never seen', () => {
-    expect(gatewayLabel('/bee', '/bee')).toBe('Default gateway');
+    expect(gatewayLabel('/bee', '/bee')).toBe('Event gateway');
   });
 
   it('shows a viewer their own node as its host, which is what they typed', () => {
