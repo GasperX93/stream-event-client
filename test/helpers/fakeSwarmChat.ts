@@ -26,6 +26,10 @@ class FakeEmitter {
   cleanAll = () => {
     this.listeners.clear();
   };
+
+  listenerCount(): number {
+    return [...this.listeners.values()].reduce((sum, listeners) => sum + listeners.length, 0);
+  }
 }
 
 /**
@@ -55,9 +59,8 @@ export class FakeSwarmChat {
   previousMessages = false;
 
   start = vi.fn(async () => {});
-  stop = vi.fn(async () => {
-    this.emitter.cleanAll();
-  });
+  /** Library 7.0 keeps the listeners through a stop, so a later start reports to them again. */
+  stop = vi.fn(async () => {});
   sendMessage = vi.fn(async () => {});
   retrySendMessage = vi.fn(async () => {});
   fetchPreviousMessages = vi.fn(async () => {});

@@ -395,6 +395,19 @@ describe('the chat lifecycle', () => {
     expect(chat.stop).toHaveBeenCalledTimes(1);
   });
 
+  it('takes its own listeners off the chat it stops, since the library keeps them through a stop', async () => {
+    await open(panel('stream-one'));
+    const first = FakeSwarmChat.latest();
+    expect(first.emitter.listenerCount()).toBeGreaterThan(0);
+    mounted?.render(panel('stream-two'));
+    await settle();
+    expect(first.emitter.listenerCount()).toBe(0);
+    const second = FakeSwarmChat.latest();
+    mounted?.unmount();
+    mounted = null;
+    expect(second.emitter.listenerCount()).toBe(0);
+  });
+
   it('stops the old chat and starts the new stream chat when the stream changes, dropping the old messages', async () => {
     await open(panel('stream-one'));
     const first = FakeSwarmChat.latest();
