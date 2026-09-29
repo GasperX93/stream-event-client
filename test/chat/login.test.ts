@@ -1,0 +1,70 @@
+import { PrivateKey } from '@ethersphere/bee-js';
+import { describe, expect, it, vi } from 'vitest';
+
+import { checkDisplayName, DISPLAY_NAME_MAX_LENGTH, nicknameLogin } from '../../src/features/chat/auth/login';
+
+const HEX_KEY = /^[0-9a-f]{64}$/;
+const HEX_ADDRESS = /^[0-9a-f]{40}$/;
+
+describe('the display name rule', () => {
+  it('accepts 1 to 20 characters once the ends are trimmed, and hands back the trimmed name', () => {
+    expect(checkDisplayName('  Ada  ')).toEqual({ ok: true, name: 'Ada' });
+    expect(checkDisplayName('a')).toEqual({ ok: true, name: 'a' });
+    expect(checkDisplayName('b'.repeat(DISPLAY_NAME_MAX_LENGTH))).toEqual({ ok: true, name: 'b'.repeat(20) });
+  });
+
+  it('refuses an empty name, or one of spaces only, and says what is wanted', () => {
+    for (const raw of ['', '   ', '\t\n']) {
+      const result = checkDisplayName(raw);
+      expect(result.ok).toBe(false);
+      expect(!result.ok && result.problem).toMatch(/1 to 20 characters/);
+    }
+  });
+
+  it('refuses a name longer than 20 characters', () => {
+    expect(checkDisplayName('c'.repeat(21)).ok).toBe(false);
+  });
+
+  it('counts an emoji as one character, not as the two code units it takes', () => {
+    expect(checkDisplayName('🙂'.repeat(20)).ok).toBe(true);
+    expect(checkDisplayName('🙂'.repeat(21)).ok).toBe(false);
+  });
+});
+
+describe('logging in with a display name', () => {
+  it('makes the key from 32 random bytes of the browser crypto', () => {
+    const spy = vi.spyOn(globalThis.crypto, 'getRandomValues');
+    nicknameLogin('Ada');
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect((spy.mock.calls[0][0] as Uint8Array).length).toBe(32);
+    spy.mockRestore();
+  });
+
+  it('gives a 64 digit hex key and the 40 digit address that key signs as', () => {
+    const session = nicknameLogin('Ada');
+    expect(session.privateKey).toMatch(HEX_KEY);
+    expect(session.address).toMatch(HEX_ADDRESS);
+    expect(session.address).toBe(new PrivateKey(session.privateKey).publicKey().address().toHex());
+  });
+
+  it('uses the random bytes as the key, unchanged', () => {
+    const bytes = Uint8Array.from({ length: 32 }, (_, i) => i + 1);
+    const session = nicknameLogin('Ada', () => bytes);
+    expect(session.privateKey).toBe(Buffer.from(bytes).toString('hex'));
+  });
+
+  it('gives every login its own key', () => {
+    const keys = new Set(Array.from({ length: 20 }, () => nicknameLogin('Ada').privateKey));
+    expect(keys.size).toBe(20);
+  });
+
+  it('keeps the trimmed name', () => {
+    expect(nicknameLogin('  Ada ').username).toBe('Ada');
+  });
+
+  it('refuses a name the rule refuses, without making a key', () => {
+    const randomBytes = vi.fn(() => new Uint8Array(32).fill(1));
+    expect(() => nicknameLogin('   ', randomBytes)).toThrow(/1 to 20 characters/);
+    expect(randomBytes).not.toHaveBeenCalled();
+  });
+});
