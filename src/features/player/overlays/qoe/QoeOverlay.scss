@@ -2,7 +2,7 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  z-index: 100;
+  z-index: var(--z-index-qoe-overlay);
   width: 32px;
   height: 32px;
   pointer-events: none;
@@ -34,7 +34,7 @@
   }
 
   &:focus-visible {
-    outline: 2px solid rgba(120, 170, 255, 0.8);
+    outline: var(--size-focus-ring) solid var(--color-primary);
     outline-offset: 2px;
   }
 
@@ -126,9 +126,9 @@
   max-height: 70vh;
   overflow-y: auto;
   backdrop-filter: blur(4px);
-  color: #e8e8e8;
-  font-family: monospace;
-  font-size: 11px;
+  color: var(--color-text);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
   line-height: 1.4;
 }
 

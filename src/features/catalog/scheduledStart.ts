@@ -20,9 +20,15 @@
  * thing to check and no card ever renders the words "Invalid Date".
  */
 export function scheduledStartLabel(value: string | number | null | undefined): string | null {
+  const when = scheduledStartMs(value);
+  return when === null ? null : new Date(when).toLocaleString();
+}
+
+/** The announced start in epoch milliseconds, null on the same values the label refuses. */
+export function scheduledStartMs(value: string | number | null | undefined): number | null {
   if (value === null || value === undefined || value === '') {
     return null;
   }
-  const when = new Date(value);
-  return Number.isNaN(when.getTime()) ? null : when.toLocaleString();
+  const when = new Date(value).getTime();
+  return Number.isNaN(when) ? null : when;
 }

@@ -1,21 +1,48 @@
+@use '@/design/media';
+
 .config-problem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
   max-width: 640px;
-  margin: 80px auto 0;
-  padding: 24px;
-  border-radius: 8px;
-  background-color: rgba(0, 0, 0, 0.6);
-  color: #ffffff;
-  font-family: sans-serif;
+  margin: 0 auto;
+  padding: var(--spacing-lg) var(--spacing-base);
+
+  @include media.tablet-up {
+    padding-top: var(--spacing-3xl);
+  }
+}
+
+.config-problem-logo {
+  align-self: flex-start;
+  height: var(--size-logo-height-desktop);
+}
+
+.config-problem-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
   overflow-wrap: anywhere;
 }
 
 .config-problem-title {
-  margin: 0 0 16px;
-  font-size: 24px;
+  font-size: var(--font-size-2xl);
+
+  @include media.tablet-up {
+    font-size: var(--font-size-3xl);
+  }
 }
 
-.config-problem-detail,
+.config-problem-detail {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+}
+
 .config-problem-hint {
-  margin: 0 0 12px;
-  line-height: 1.5;
+  color: var(--color-text-secondary);
 }

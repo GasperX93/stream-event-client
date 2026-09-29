@@ -175,6 +175,15 @@ importers:
       '@ethersphere/bee-js':
         specifier: 13.1.0
         version: 13.1.0
+      '@fontsource/geist':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource/jetbrains-mono':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource/vend-sans':
+        specifier: 5.3.0
+        version: 5.3.0
       cafe-utility:
         specifier: 36.3.0
         version: 36.3.0
@@ -307,6 +316,15 @@ packages:
     peerDependenciesMeta:
       '@noble/hashes':
         optional: true
+
+  '@fontsource/geist@5.3.0':
+    resolution: {integrity: sha512-u03ftlfVwb05uijq2jGDJ03/HKGqMKaNFk7KOhkpBUex8+BhrAOfMs/XciJ2UUNUX9fEsZbZQld/RWMA2oFU7g==}
+
+  '@fontsource/jetbrains-mono@5.3.0':
+    resolution: {integrity: sha512-fqDfB5I9f1p1TV486aUgB9t8zP84P0O1FtQR5Ol9vjwPy+S+EIGlVYm1cvj2W5shcZMTg2nZFdVMoH5wFu8a1A==}
+
+  '@fontsource/vend-sans@5.3.0':
+    resolution: {integrity: sha512-ZYwJYU7ZM+wIFZnZBIe/5e3W9+hOG2VSek9zDIoEM2CLMz08XVYlF+Jdqi6xR121oaV3xol50wx3l9kTCH3FSQ==}
 
   '@jridgewell/resolve-uri@3.1.2':
     resolution: {integrity: sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==}
@@ -1637,6 +1655,12 @@ snapshots:
   '@exodus/bytes@1.15.2(@noble/hashes@1.8.0)':
     optionalDependencies:
       '@noble/hashes': 1.8.0
+
+  '@fontsource/geist@5.3.0': {}
+
+  '@fontsource/jetbrains-mono@5.3.0': {}
+
+  '@fontsource/vend-sans@5.3.0': {}
 
   '@jridgewell/resolve-uri@3.1.2': {}
 

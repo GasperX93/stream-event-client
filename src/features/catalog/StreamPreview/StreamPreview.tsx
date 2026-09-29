@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Link } from 'react-router';
 import {
   HLS_ENDLIST,
   HLS_M3U,
@@ -11,8 +11,6 @@ import {
 import Hls, { Events } from 'hls.js';
 import Pqueue from 'p-queue';
 
-import playIcon from '@/app/assets/icons/playIcon.png';
-import DefaultPreviewImage from '@/app/assets/images/defaultPreviewImage.png';
 import { fetchPreviewManifest, rungSlotsKey } from '@/features/catalog/StreamPreview/previewManifest';
 import { previewMode, thumbnailFailed, thumbnailImageUrl } from '@/features/catalog/StreamPreview/previewMode';
 import { previewSourceFrom } from '@/features/catalog/StreamPreview/previewSource';
@@ -28,6 +26,10 @@ import {
 import { formatDuration } from '@/features/catalog/format';
 import { scheduledStartLabel } from '@/features/catalog/scheduledStart';
 import { previewSegmentUrl } from '@/features/catalog/thumbnailManifest';
+import { PlayIcon } from '@/shared/components/Icons/PlayIcon';
+import { Spinner } from '@/shared/components/Spinner/Spinner';
+
+import { PreviewPlaceholder } from './PreviewPlaceholder';
 
 import './StreamPreview.scss';
 
@@ -65,7 +67,6 @@ export const StreamPreview = ({
   thumbnail,
   scheduledStartTime,
 }: StreamPreviewProps) => {
-  const navigate = useNavigate();
   const { gatewayUrl } = useAppContext();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -215,62 +216,70 @@ export const StreamPreview = ({
     };
   }, [owner, topic, gatewayUrl, index, state, slotsKey, mode]);
 
+  const showsPlaceholder = mode === 'placeholder' || (mode === 'probe' && !isLoading && !isDataAvailable);
+
   return (
-    <div className="stream-preview" onClick={() => navigate(`/watch/${mediatype}/${owner}/${topic}`)}>
-      {isLoading && (
-        <div className="stream-preview-overlay">
-          <div className="spinner"></div>
-        </div>
-      )}
-      {/*
-        The picture, from exactly one of the three sources `previewMode` names. The video element is
-        mounted only for a probe: `videoRef` is what the effect attaches hls.js to, so rendering it
-        beside an image would hand the card a second, black layer for no reason.
-      */}
-      {mode === 'image' && thumbnail && (
-        <img
-          // Keyed by the reference so a replaced thumbnail mounts a new element rather than having its
-          // `src` swapped underneath. React updates attributes in place, so without this an error for
-          // the picture just replaced could arrive after the prop changed and be recorded against the
-          // new reference — demoting a card for a failure that was never its own.
-          key={thumbnail}
-          className="stream-preview-image"
-          src={thumbnailImageUrl(gatewayUrl, thumbnail)}
-          alt=""
-          onError={() => setFailedThumbnail(thumbnail)}
-        />
-      )}
-      {mode === 'probe' && <video ref={videoRef} className="stream-preview-video" controls={false} muted playsInline />}
-      {(mode === 'placeholder' || (mode === 'probe' && !isLoading && !isDataAvailable)) && (
-        <div className="stream-preview-error">
-          <img src={DefaultPreviewImage} alt="" />
-        </div>
-      )}
+    <Link className="stream-card" to={`/watch/${mediatype}/${owner}/${topic}`}>
+      <div className="stream-card-media">
+        {/*
+          The picture, from exactly one of the three sources `previewMode` names. The video element is
+          mounted only for a probe: `videoRef` is what the effect attaches hls.js to, so rendering it
+          beside an image would hand the card a second, black layer for no reason.
+        */}
+        {mode === 'image' && thumbnail && (
+          <img
+            // Keyed by the reference so a replaced thumbnail mounts a new element rather than having its
+            // `src` swapped underneath. React updates attributes in place, so without this an error for
+            // the picture just replaced could arrive after the prop changed and be recorded against the
+            // new reference — demoting a card for a failure that was never its own.
+            key={thumbnail}
+            className="stream-card-picture"
+            src={thumbnailImageUrl(gatewayUrl, thumbnail)}
+            // Empty because the title below already names the stream, and the link reads it out.
+            alt=""
+            onError={() => setFailedThumbnail(thumbnail)}
+          />
+        )}
+        {mode === 'probe' && (
+          <video
+            ref={videoRef}
+            className="stream-card-picture"
+            controls={false}
+            muted
+            playsInline
+            aria-hidden="true"
+            tabIndex={-1}
+          />
+        )}
+        {showsPlaceholder && <PreviewPlaceholder />}
+        {isLoading && (
+          <div className="stream-card-loading">
+            <Spinner />
+          </div>
+        )}
+
+        {state === STREAM_STATUS_LIVE && <span className="stream-card-badge live">Live</span>}
+        {isScheduled && <span className="stream-card-badge upcoming">Upcoming</span>}
+        {duration && (
+          <span className="stream-card-duration">{formatDuration(Number.parseFloat(String(duration)))}</span>
+        )}
+        {/* Nothing to play yet on an announced broadcast, so the card does not promise one. */}
+        {!isScheduled && !isLoading && (
+          <span className="stream-card-play" aria-hidden="true">
+            <PlayIcon />
+          </span>
+        )}
+      </div>
 
       {/*
         The caption belongs to the card, not to the frame. It used to render only when a frame had
         been captured, so a stream whose preview failed — and every scheduled stream, which has no
         frame to capture — showed an untitled picture nobody could identify.
       */}
-      {!isLoading && (
-        <div className="stream-preview-button-wrapper">
-          {/* Nothing to play yet on an announced broadcast, so the card does not promise one. */}
-          {!isScheduled && <img src={playIcon} alt="play-icon" />}
-          <div className="stream-preview-button">
-            <span className="stream-preview-button-title">{title}</span>
-            {state === STREAM_STATUS_LIVE && <span className="stream-preview-button-state">{state}</span>}
-            {isScheduled && (
-              <span className="stream-preview-button-state stream-preview-button-state-scheduled">Upcoming</span>
-            )}
-            {isScheduled && startsAt && <span className="stream-preview-button-schedule">{startsAt}</span>}
-            {duration && (
-              <span className="stream-preview-button-duration">
-                {formatDuration(Number.parseFloat(String(duration)))}
-              </span>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
+      <div className="stream-card-body">
+        <h3 className="stream-card-title">{title}</h3>
+        {isScheduled && startsAt && <p className="stream-card-meta">Starts {startsAt}</p>}
+      </div>
+    </Link>
   );
 };

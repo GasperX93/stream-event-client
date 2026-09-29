@@ -1,6 +1,8 @@
-import { useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 
 import { useAppContext } from '@/app/AppProvider';
+import { Button, ButtonVariant } from '@/shared/components/Button/Button';
+import { Dialog } from '@/shared/components/Dialog/Dialog';
 
 import {
   checkOwnNodeAddress,
@@ -14,7 +16,6 @@ import {
 import './DomainSelector.scss';
 
 const KEY_ENTER = 'Enter';
-const KEY_ESCAPE = 'Escape';
 
 type PickerStatus = { kind: 'idle' } | { kind: 'checking' } | { kind: 'error'; text: string };
 
@@ -37,6 +38,9 @@ export function DomainSelector() {
   // Bumped on every confirm and on close, so a probe that comes back after the viewer cancelled or
   // retyped cannot save an address they no longer meant.
   const probeGeneration = useRef(0);
+  const inputId = useId();
+  const descriptionId = useId();
+  const statusId = useId();
 
   const isOnEventGateway = isDefaultGateway(gatewayUrl, defaultGatewayUrl);
 
@@ -87,9 +91,6 @@ export function DomainSelector() {
     if (e.key === KEY_ENTER) {
       void handleUseOwnNode();
     }
-    if (e.key === KEY_ESCAPE) {
-      close();
-    }
   };
 
   const handleTyping = (value: string) => {
@@ -104,59 +105,65 @@ export function DomainSelector() {
 
   return (
     <>
-      <button className="gateway-button" onClick={handleOpen} title="Choose where the video loads from">
+      <button
+        type="button"
+        className="gateway-button"
+        onClick={handleOpen}
+        aria-haspopup="dialog"
+        aria-expanded={isOpen}
+        title="Choose where the video loads from"
+      >
         <span className="gateway-button-label">Bee node</span>
         <span className="gateway-button-current">{gatewayLabel(gatewayUrl, defaultGatewayUrl)}</span>
       </button>
 
       {isOpen && (
-        <div className="gateway-modal-backdrop" onClick={close}>
-          <div className="gateway-modal" onClick={(e) => e.stopPropagation()}>
-            <h3 className="gateway-modal-title">Where the video loads from</h3>
+        <Dialog title="Where the video loads from" onClose={close}>
+          <section className="gateway-choice">
+            <h3 className="gateway-choice-title">Event gateway</h3>
+            <p className="gateway-choice-description">The Bee node the event runs for every viewer.</p>
+            <Button variant={ButtonVariant.SECONDARY} onClick={handleUseEventGateway} disabled={isOnEventGateway}>
+              {isOnEventGateway ? 'In use' : 'Use the event gateway'}
+            </Button>
+          </section>
 
-            <section className="gateway-modal-choice">
-              <h4 className="gateway-modal-choice-title">Event gateway</h4>
-              <p className="gateway-modal-description">The Bee node the event runs for every viewer.</p>
-              <button className="gateway-modal-default" onClick={handleUseEventGateway} disabled={isOnEventGateway}>
-                {isOnEventGateway ? 'In use' : 'Use the event gateway'}
-              </button>
-            </section>
-
-            <section className="gateway-modal-choice">
-              <h4 className="gateway-modal-choice-title">My own Bee node</h4>
-              <p className="gateway-modal-description">
-                A Bee node on this computer, for example Swarm Desktop. Change the port if yours is not 1633.
-              </p>
-              <input
-                className="gateway-modal-input"
-                type="text"
-                autoFocus
-                value={inputValue}
-                onChange={(e) => handleTyping(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={OWN_NODE_DEFAULT_ADDRESS}
-                aria-label="Address of your own Bee node"
-              />
-              <p className={`gateway-modal-status ${status.kind}`} role="status">
-                {status.kind === 'checking' && 'Checking the node...'}
-                {status.kind === 'error' && status.text}
-              </p>
-              <div className="gateway-modal-actions">
-                <span className="gateway-modal-actions-spacer" />
-                <button className="gateway-modal-cancel" onClick={close}>
-                  Cancel
-                </button>
-                <button
-                  className="gateway-modal-confirm"
-                  onClick={() => void handleUseOwnNode()}
-                  disabled={status.kind === 'checking'}
-                >
-                  {status.kind === 'checking' ? 'Checking...' : 'Check and use'}
-                </button>
-              </div>
-            </section>
-          </div>
-        </div>
+          <section className="gateway-choice">
+            <h3 className="gateway-choice-title">My own Bee node</h3>
+            <p className="gateway-choice-description" id={descriptionId}>
+              A Bee node on this computer, for example Swarm Desktop. Change the port if yours is not 1633.
+            </p>
+            <label className="gateway-input-label" htmlFor={inputId}>
+              Address of your own Bee node
+            </label>
+            <input
+              id={inputId}
+              className="gateway-input"
+              type="text"
+              inputMode="url"
+              autoComplete="off"
+              spellCheck={false}
+              autoFocus
+              value={inputValue}
+              onChange={(e) => handleTyping(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={OWN_NODE_DEFAULT_ADDRESS}
+              aria-describedby={`${descriptionId} ${statusId}`}
+              aria-invalid={status.kind === 'error'}
+            />
+            <p id={statusId} className={`gateway-status ${status.kind}`} role="status">
+              {status.kind === 'checking' && 'Checking the node...'}
+              {status.kind === 'error' && status.text}
+            </p>
+            <div className="gateway-actions">
+              <Button variant={ButtonVariant.SECONDARY} onClick={close}>
+                Cancel
+              </Button>
+              <Button onClick={() => void handleUseOwnNode()} disabled={status.kind === 'checking'}>
+                {status.kind === 'checking' ? 'Checking...' : 'Check and use'}
+              </Button>
+            </div>
+          </section>
+        </Dialog>
       )}
     </>
   );

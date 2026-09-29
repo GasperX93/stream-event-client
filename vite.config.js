@@ -30,6 +30,9 @@ export default defineConfig(({ mode }) => {
       // taking the rule with it and reporting nothing. Raising this floor is a
       // product decision, so it belongs in a commit that says so.
       target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
+      // A font file inlined into the stylesheet is downloaded by every page, including the subsets it
+      // never shows, because inlining throws away the unicode-range that lets the browser skip them.
+      assetsInlineLimit: (file) => (/\.woff2?$/.test(file) ? false : undefined),
     },
     resolve: {
       alias: {

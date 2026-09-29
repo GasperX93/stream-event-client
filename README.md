@@ -4,8 +4,8 @@ A lightweight web app for watching the Devcon 8 streams over [Swarm](https://www
 browse the event's streams, watch one, choose where the video loads from (the event gateway or your
 own Bee node), and chat with the other people watching.
 
-**Status: phase 1 of the plan, the viewer on its own.** The stream list, the watch page, the player
-and the Bee node picker work. The Swarm design comes in phase 2 and the chat in phase 3. The plan,
+**Status: phase 2 of the plan, the Swarm design.** The stream list, the watch page, the player and
+the Bee node picker work, in the Swarm Brand v3.0 look. The chat comes in phase 3. The plan,
 its phases and its decisions are in [docs/PLAN.md](docs/PLAN.md).
 
 It is built from the viewer of
@@ -65,8 +65,9 @@ build on every pull request, and reports what the first page load downloads.
 
 ## What the viewer does
 
-- **The stream list.** Read from a Swarm feed and read again every 5 seconds. Every entry is shown,
-  live streams first, then the rest newest first. A read from a newer feed slot replaces the list
+- **The stream list.** Read from a Swarm feed and read again every 5 seconds. Every entry is shown in
+  three groups: live streams, then upcoming ones with the soonest start first, then finished ones
+  newest first. A read from a newer feed slot replaces the list
   whatever changed in it, so an entry edited, unpublished or gone live in place shows on an open page
   without a reload.
 - **Previews.** The entry's uploaded thumbnail when it has one, otherwise a frame decoded from the
@@ -106,18 +107,41 @@ so the player brings its own loaders:
 Feed URIs use a `swarm://<owner>/<topic>` scheme, because hls.js resolves every playlist URI against
 the playlist's own URL and a URI with a scheme is the one case it leaves untouched.
 
+## The design
+
+One look, Swarm Brand v3.0: near-black surfaces, the Swarm orange `#f47a20` as a sparing accent,
+Vend Sans for headings, Geist for text and JetBrains Mono for small labels. There is no theme
+switcher and no second theme.
+
+- **The tokens** live in `src/design/_tokens.scss`, one Sass map per group (colour, font, spacing,
+  radius and so on). `src/design/theme.scss` emits every entry once on `:root` as a CSS custom
+  property named `--<group>-<name>`, for example `--color-primary` or `--spacing-base`, and sets the
+  page's base styles.
+- **Components read only the variables**, `var(--color-primary)`, never a Sass token or a literal
+  colour. The breakpoints are the one exception, because a media query cannot read a custom
+  property: they are the mixins in `src/design/_media.scss`, and every layout is written for a phone
+  first and widened by them.
+- **To add a token**, add it to its map in `_tokens.scss` and read it where it is needed. The tokens
+  test (`test/designTokens.test.ts`) fails when a stylesheet reads a variable the design does not
+  define, when the design defines one nothing reads, and when a text colour falls below 4.5:1
+  against its background, so a new colour pairing goes into its list too.
+- **The fonts** are bundled from `@fontsource`, only the weights used: Geist 400 and 600, Vend Sans
+  600 and JetBrains Mono 500, imported in `src/design/fonts.ts`. The page makes no font request to a
+  third party. Another weight needs its file imported there, or the browser fakes it.
+
 ## Layout
 
 ```
 src/
-  app/          the entry, routes, the app provider, the page layout, styles and assets
+  app/          the entry, routes, the app provider, the page layout and header
   config/       the runtime configuration, read and checked at start
+  design/       the design tokens, the Swarm theme, the fonts and the logo
   features/
     catalog/    the stream list: feed reader, schema, polling, previews
     player/     the Swarm HLS player, its loaders and overlays, the watch page
     gateway/    the Bee node picker and its health check
-  shared/       the stream list format and feed helpers copied from streaming-monorepo, and the
-                fetch helpers every feature uses
+  shared/       the stream list format and feed helpers copied from streaming-monorepo, the fetch
+                helpers every feature uses, and the components more than one feature uses
 test/           the unit tests, test/shared for the copied modules
 ```
 

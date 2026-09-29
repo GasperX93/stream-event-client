@@ -1,0 +1,85 @@
+@use 'sass:list';
+@use 'sass:meta';
+@use 'tokens';
+
+:root {
+  @each $group, $values in tokens.$groups {
+    @each $name, $value in $values {
+      @if meta.type-of($value) == 'list' and list.separator($value) == 'comma' {
+        --#{$group}-#{$name}: #{meta.inspect($value)};
+      } @else {
+        --#{$group}-#{$name}: #{$value};
+      }
+    }
+  }
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--font-family-heading);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+p {
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: var(--size-focus-ring) solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+// A text field under 16px makes iOS Safari zoom the page when it is focused.
+input {
+  font-size: max(16px, 1em);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -8,7 +8,7 @@ import { AppContextProvider as AppProvider } from './AppProvider';
 import { ConfigProblem } from './ConfigProblem';
 import BaseRouter from './routes';
 
-import '@/app/styles/globals.scss';
+import '@/design';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 

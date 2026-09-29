@@ -1,4 +1,6 @@
-import Logo from '@/app/assets/images/sp-logo.png';
+import { Link } from 'react-router';
+
+import { swarmLogoUrl } from '@/design';
 import { DomainSelector } from '@/features/gateway/DomainSelector';
 
 import './MainLayout.scss';
@@ -9,13 +11,14 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   return (
-    <div className="main-layout" role="main-layout">
-      <div className="upper-side"></div>
-      <div className="main-layout-header">
-        <img src={Logo} alt="logo" className="logo" />
+    <div className="main-layout">
+      <header className="main-layout-header">
+        <Link to="/" className="main-layout-logo-link" aria-label="All streams">
+          <img src={swarmLogoUrl} alt="Swarm" className="main-layout-logo" />
+        </Link>
         <DomainSelector />
-      </div>
-      <div className="content">{children}</div>
+      </header>
+      <main className="main-layout-content">{children}</main>
     </div>
   );
 }

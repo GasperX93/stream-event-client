@@ -4,6 +4,7 @@ import {
   WATCH_VIEW_UNAVAILABLE,
   type WatchPageView,
 } from '@/features/catalog/watchPageView';
+import { Spinner } from '@/shared/components/Spinner/Spinner';
 
 interface WatchPlaceholderProps {
   view: WatchPageView;
@@ -18,25 +19,38 @@ interface WatchPlaceholderProps {
 export function WatchPlaceholder({ view, startsAt }: WatchPlaceholderProps) {
   if (view === WATCH_VIEW_LOADING) {
     return (
-      <div className="stream-placeholder">
+      <WatchNotice>
+        <Spinner />
         <p>Loading this stream…</p>
-      </div>
+      </WatchNotice>
     );
   }
   if (view === WATCH_VIEW_NOT_STARTED) {
     return (
-      <div className="stream-placeholder">
-        <p>This stream has not started yet.</p>
-        {startsAt && <p className="stream-placeholder-detail">Scheduled for {startsAt}</p>}
-      </div>
+      <WatchNotice>
+        <p className="watch-notice-title">This stream has not started yet.</p>
+        {startsAt && <p className="watch-notice-detail">Scheduled for {startsAt}</p>}
+      </WatchNotice>
     );
   }
   if (view === WATCH_VIEW_UNAVAILABLE) {
     return (
-      <div className="stream-placeholder">
-        <p>This stream is no longer available.</p>
-      </div>
+      <WatchNotice>
+        <p className="watch-notice-title">This stream is no longer available.</p>
+      </WatchNotice>
     );
   }
   return null;
+}
+
+/**
+ * Stands where the player would, in the player's shape, so a viewer who followed a link to an
+ * announced broadcast, or to one unpublished while they waited, lands on the page they expected.
+ */
+export function WatchNotice({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="watch-notice" role="status">
+      {children}
+    </div>
+  );
 }
