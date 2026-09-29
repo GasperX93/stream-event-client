@@ -1,0 +1,60 @@
+@use '@/styles/themes/base' as theme;
+@use '@/styles/mixins' as mixins;
+
+.login-button-container {
+  position: relative;
+  display: inline-block;
+}
+
+.login-button {
+  padding: 0 !important;
+  font-size: var(--login-button-font-size, var(--font-size-base)) !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.login-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 150px;
+  background: var(--login-dropdown-background, var(--gradient-primary));
+  border: var(--login-dropdown-border, none);
+  border-radius: var(--border-radius-base);
+  box-shadow: var(--login-dropdown-glow, var(--shadow-lg));
+  z-index: 1000;
+  overflow: hidden;
+  margin-top: var(--spacing-xs);
+}
+
+.login-dropdown-item {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-base);
+  border: none;
+  background: transparent;
+  color: var(--login-dropdown-text, var(--color-text-primary));
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-ease-out),
+    color var(--duration-fast) var(--easing-ease-out);
+
+  &:hover {
+    background-color: var(--color-background-glass-light);
+    color: var(--color-text-primary);
+  }
+
+  &:not(:first-child) {
+    border-top: var(--login-dropdown-divider, 1px solid var(--color-border-primary));
+  }
+}
