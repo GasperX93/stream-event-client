@@ -43,6 +43,8 @@ export function Chat({ chat, topic }: ChatProps) {
     sendMessage,
     sendReaction,
     sendReply,
+    checkMessage,
+    checkReply,
     fetchOlderMessages,
     retrySendMessage,
     restart,
@@ -136,6 +138,7 @@ export function Chat({ chat, topic }: ChatProps) {
                 label="Reply"
                 placeholder="Reply in the thread"
                 onSend={(text) => sendReply(threadParent.id, text)}
+                checkDraft={(text) => checkReply(threadParent.id, text)}
               />
             ) : (
               joinButton('Join the chat to reply')
@@ -168,7 +171,7 @@ export function Chat({ chat, topic }: ChatProps) {
           <p className="chat-empty">No messages yet.</p>
         )}
         {session ? (
-          <MessageSender label="Message" placeholder="Type a message" onSend={sendMessage} />
+          <MessageSender label="Message" placeholder="Type a message" onSend={sendMessage} checkDraft={checkMessage} />
         ) : (
           joinButton('Join the chat to send messages')
         )}

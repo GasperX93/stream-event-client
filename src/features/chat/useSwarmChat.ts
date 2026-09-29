@@ -10,6 +10,7 @@ import {
   SwarmChat,
 } from '@solarpunkltd/swarm-chat-js';
 
+import { draftProblem } from './draftCheck';
 import { groupReactions, type ReactionsByMessage } from './reactions';
 
 /** Where a message stands on its way from this browser to the chat feed. */
@@ -229,6 +230,18 @@ export function useSwarmChat(settings: ChatSettings, ownAddress: string | null) 
   );
   const sendReply = useCallback((parentId: string, text: string) => send(text, MessageType.THREAD, parentId), [send]);
 
+  const { chatTopic } = settings.infra;
+  const { nickname } = settings.user;
+  const checkMessage = useCallback(
+    (text: string) => draftProblem({ topic: chatTopic, name: nickname, type: MessageType.TEXT, text }),
+    [chatTopic, nickname],
+  );
+  const checkReply = useCallback(
+    (parentId: string, text: string) =>
+      draftProblem({ topic: chatTopic, name: nickname, type: MessageType.THREAD, target: parentId, text }),
+    [chatTopic, nickname],
+  );
+
   const fetchOlderMessages = useCallback(async () => {
     try {
       await chatRef.current?.fetchPreviousMessages();
@@ -255,6 +268,8 @@ export function useSwarmChat(settings: ChatSettings, ownAddress: string | null) 
     sendMessage,
     sendReaction,
     sendReply,
+    checkMessage,
+    checkReply,
     fetchOlderMessages,
     retrySendMessage,
     restart,
