@@ -4,9 +4,10 @@ A lightweight web app for watching the Devcon 8 streams over [Swarm](https://www
 browse the event's streams, watch one, choose where the video loads from (the event gateway or your
 own Bee node), and chat with the other people watching.
 
-**Status: phase 2 of the plan, the Swarm design.** The stream list, the watch page, the player and
-the Bee node picker work, in the Swarm Brand v3.0 look. The chat comes in phase 3. The plan,
-its phases and its decisions are in [docs/PLAN.md](docs/PLAN.md).
+**Status: phase 3 of the plan, the chat.** The stream list, the watch page, the player and the Bee
+node picker work, in the Swarm Brand v3.0 look, and each stream has a chat beside the video, built and
+tested against stand-ins until the chat's services are set up. The plan, its phases and its decisions
+are in [docs/PLAN.md](docs/PLAN.md).
 
 It is built from the viewer of
 [streaming-monorepo](https://github.com/Solar-Punk-Ltd/streaming-monorepo) and the Swarm design and
@@ -44,10 +45,52 @@ live with the deployment, never in this repository.
 | `gatewayUrl`    | The event gateway: a path on this site such as `/bee`, which the site proxies to Bee, or an http or https address of a Bee node |
 | `catalog.owner` | The Ethereum address that owns the stream list feed                                                                             |
 | `catalog.topic` | The stream list feed's topic, as text                                                                                           |
-| `chat`          | Optional. The chat's settings, checked for shape only until the chat is built in phase 3                                        |
+| `chat`          | Optional. The chat's settings, below. Without it, or with `enabled` false, there is no chat anywhere on the page                |
+
+The `chat` block. With `enabled` true every field must be filled in, and the page refuses to start
+otherwise. With `enabled` false the other fields are not read.
+
+| Field                 | What it is                                                                                                                   |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `chat.enabled`        | Whether the page has a chat                                                                                                  |
+| `chat.beeUrl`         | The chat's Bee endpoint, which every chat read and write goes through: a path on this site or an http or https address       |
+| `chat.gsocResourceId` | 32 bytes as 64 hex digits: the key every viewer writes chat messages with. Shared by design and public, not a secret (below) |
+| `chat.gsocTopic`      | The topic of the address the chat aggregator listens on                                                                      |
+| `chat.feedOwner`      | The Ethereum address that writes the chat feeds, which is the aggregator's                                                   |
+| `chat.pollIntervalMs` | How often an open chat reads its feed, in milliseconds. A positive whole number, raised under load without a rebuild         |
 
 Serve `config.json` with `Cache-Control: no-store`, so a changed setting reaches every page opened
 after the change.
+
+## The chat
+
+One chat per stream, beside the video on a desktop and under it on a phone, where it folds away.
+Anyone can read it. Writing asks once for a display name, 1 to 20 characters, and there is no
+password, wallet or account. A viewer can send a message, react with an emoji, reply in a thread,
+load older messages, and retry a message that did not send. The chat and its library are a file of
+the bundle of their own, fetched once the video is playing, and the emoji picker is fetched the first
+time it opens.
+
+**What it needs, outside this repository.** Two services, set up apart from this app:
+
+- **A Bee endpoint for the chat**, `chat.beeUrl`, that viewers read and write through and that stamps
+  every write, because the page holds no postage stamp. A message costs about three stamped chunks.
+- **The chat aggregator**, which listens on the shared address the key and topic above name, and
+  appends each message to the stream's chat feed, `chat-<stream topic>` under `chat.feedOwner`.
+  Opening a chat reads the aggregator's latest history snapshot first. The endpoint viewers write
+  through must be a different Bee node from the one the aggregator listens on, because Bee hands a
+  message on to a listener only when it arrives from another node.
+
+**Why `gsocResourceId` is not a secret.** Every viewer writes to the same shared address, so every
+viewer's page carries the same key. It is chosen so the address lands where the aggregator listens,
+and it owns nothing but that shared chat address, which every viewer writes to anyway. A check for
+keys in the tree has to know it.
+
+**What the browser keeps.** The display name, the chat key made for it (32 random bytes from the
+browser's own crypto) and its address sit in local storage under `stream-event-client:chat-session`,
+so a reload keeps the name. Logging out removes them. The key proves only that two messages came from
+the same browser, and anyone may choose any name, so the chat shows the last digits of each sender's
+address beside the name.
 
 ## Build it
 
@@ -140,13 +183,16 @@ src/
     catalog/    the stream list: feed reader, schema, polling, previews
     player/     the Swarm HLS player, its loaders and overlays, the watch page
     gateway/    the Bee node picker and its health check
+    chat/       the chat panel, the display-name login, the chat library's lifecycle
   shared/       the stream list format and feed helpers copied from streaming-monorepo, the fetch
                 helpers every feature uses, and the components more than one feature uses
-test/           the unit tests, test/shared for the copied modules
+test/           the unit tests, test/shared for the copied modules, test/chat for the chat against a
+                stand-in for the chat library
 ```
 
 The files in `src/shared` that came from streaming-monorepo name the path and commit they were
-copied from. Refresh them from there when the stream list format changes.
+copied from. Refresh them from there when the stream list format changes. The chat in
+`src/features/chat` started as a copy of msrs-client's at `a2f50151`, and has been rebuilt since.
 
 ## Licence
 

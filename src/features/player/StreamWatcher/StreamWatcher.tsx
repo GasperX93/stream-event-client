@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 
 import { SwarmHlsPlayer } from '@/features/player/SwarmHlsPlayer';
@@ -15,6 +16,7 @@ import {
 import { playableRenditions } from '@/features/player/playableRenditions';
 import { scheduledStartLabel } from '@/features/catalog/scheduledStart';
 import { WATCH_VIEW_PLAYER, watchPageView } from '@/features/catalog/watchPageView';
+import { WatchChat } from '@/features/chat/WatchChat';
 
 import { useIsWaitingForStart } from './useIsWaitingForStart';
 import { WatchLayout } from './WatchLayout';
@@ -35,7 +37,9 @@ export function StreamWatcher() {
     topic: string;
   }>();
   const [searchParams] = useSearchParams();
-  const { streamList, isStreamListLoaded } = useAppContext();
+  const { streamList, isStreamListLoaded, chat } = useAppContext();
+  // Which stream's player has played, so a new stream on the same page waits for its own player.
+  const [playedStream, setPlayedStream] = useState<string | null>(null);
 
   // The ladder lives in the catalog, keyed by the primary feed the browser links to. Current
   // entries name the master, older ones the lowest rung. Waiting for the first catalog read
@@ -47,6 +51,8 @@ export function StreamWatcher() {
   const isWaiting = useIsWaitingForStart(`${owner}/${topic}`, stream);
   const view = watchPageView(isStreamListLoaded, stream, isWaiting);
   useCatalogPoll(watchPageCatalogPollMs(view));
+
+  const streamKey = `${owner}/${topic}`;
 
   const back = (
     <Link className="watch-back" to={ROUTES.STREAM_BROWSER}>
@@ -88,9 +94,21 @@ export function StreamWatcher() {
             enableQoeOverlay={enableQoeOverlay}
             renditions={playableRenditions(stream)}
             level={level}
+            onPlaying={() => setPlayedStream(streamKey)}
           />
         ) : (
           <WatchPlaceholder view={view} startsAt={startsAt} />
+        )
+      }
+      side={
+        chat && (
+          <WatchChat
+            key={streamKey}
+            chat={chat}
+            owner={owner}
+            topic={topic}
+            isPlayerSettled={view !== WATCH_VIEW_PLAYER || playedStream === streamKey}
+          />
         )
       }
       info={

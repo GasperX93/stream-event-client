@@ -145,6 +145,10 @@ const TEXT_ON_SURFACE: Array<[text: string, surface: string]> = [
   ['on-live', 'live'],
   ['error-text', 'surface'],
   ['text', 'overlay'],
+  ['text-tertiary', 'surface'],
+  ['primary', 'input'],
+  ['error-text', 'surface-raised'],
+  ...Array.from({ length: 16 }, (_, i): [string, string] => ['text', `name-${i + 1}`]),
 ];
 
 describe('the text colours', () => {

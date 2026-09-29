@@ -8,11 +8,13 @@ saveExact: true
 minimumReleaseAge: 10080
 minimumReleaseAgeStrict: true
 
-# The dependencies whose install scripts run, true, or are skipped, false. Both are optional native helpers that the
-# dev server and the build work without.
+# The dependencies whose install scripts run, true, or are skipped, false. The first two are optional native helpers
+# that the dev server and the build work without. protobufjs's script only prints a warning about how a dependent
+# names its version.
 allowBuilds:
   '@parcel/watcher': false
   '@swc/core': false
+  protobufjs: false
 
 # Security floors carried from the monorepo's pins, for the packages of theirs that are in this tree. Each pins a
 # package with a published fix, and the advisory is on its line where the monorepo's history names one.

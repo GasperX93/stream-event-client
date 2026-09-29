@@ -1,0 +1,51 @@
+@use '@/design/media';
+
+.login-modal-content {
+  margin-bottom: var(--spacing-base);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.login-modal-input {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-base);
+  background: var(--color-input);
+  transition: border-color var(--duration-base) ease;
+
+  &:focus {
+    border-color: var(--color-primary);
+  }
+
+  &::placeholder {
+    color: var(--color-text-tertiary);
+  }
+
+  &[aria-invalid='true'] {
+    border-color: var(--color-error-text);
+  }
+}
+
+.login-modal-error {
+  min-height: 1.5em;
+  margin: var(--spacing-xs) 0 var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-error-text);
+}
+
+.login-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+
+  // On a phone both buttons share the row, so each is an easy target.
+  > .button {
+    flex: 1;
+
+    @include media.tablet-up {
+      flex: none;
+    }
+  }
+}

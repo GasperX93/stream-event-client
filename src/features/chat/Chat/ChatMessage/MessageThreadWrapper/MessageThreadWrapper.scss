@@ -1,0 +1,15 @@
+.thread-reply-button {
+  min-height: 32px;
+  margin-top: var(--spacing-xs);
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

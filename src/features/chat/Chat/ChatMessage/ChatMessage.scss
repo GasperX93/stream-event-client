@@ -1,0 +1,68 @@
+.chat-message {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-base);
+
+  &:hover,
+  &:focus-within {
+    background: var(--color-button-secondary);
+  }
+
+  &.not-received .chat-message-text {
+    color: var(--color-text-secondary);
+  }
+}
+
+.chat-message-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-message-author {
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-tight);
+}
+
+.chat-message-name {
+  font-weight: var(--font-weight-semibold);
+
+  .own-message & {
+    color: var(--color-primary);
+  }
+}
+
+.chat-message-id {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-tertiary);
+}
+
+.chat-message-text {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.chat-message-status {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+
+  &.error {
+    color: var(--color-error-text);
+  }
+}
+
+.chat-message-retry {
+  min-height: 32px;
+  padding: 0 var(--spacing-xs);
+  border: none;
+  background: none;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  text-decoration: underline;
+  cursor: pointer;
+}

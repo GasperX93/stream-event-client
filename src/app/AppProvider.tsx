@@ -5,7 +5,7 @@ import { manifestFetcher } from '@/features/player/CustomManifestLoader';
 import { ManifestStateManager } from '@/features/player/ManifestManagement';
 import { Stream } from '@/features/catalog/stream';
 import { CatalogFeedReader } from '@/features/catalog/catalogFeed';
-import type { RuntimeConfig } from '@/config/runtimeConfig';
+import { type ChatConfig, enabledChat, type RuntimeConfig } from '@/config/runtimeConfig';
 
 import { CatalogRead, catalogUpdater, StreamCatalog, toCatalogRead } from '@/features/catalog/catalogState';
 
@@ -37,6 +37,8 @@ type AppContextState = {
   setGatewayUrl: (url: string) => void;
   /** The gateway this deployment's config names, which the picker offers as the way back. */
   defaultGatewayUrl: string;
+  /** The chat's settings, or null when this deployment has chat switched off. */
+  chat: ChatConfig | null;
 };
 
 const AppContext = createContext<AppContextState | undefined>(undefined);
@@ -162,6 +164,7 @@ export const AppContextProvider = ({ config, children }: Props) => {
         gatewayUrl,
         setGatewayUrl,
         defaultGatewayUrl: config.gatewayUrl,
+        chat: enabledChat(config),
       }}
     >
       {children}
