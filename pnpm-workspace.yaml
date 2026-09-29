@@ -1,0 +1,23 @@
+# One package, and pnpm's settings for it.
+
+# Every dependency is added at its exact version.
+saveExact: true
+
+# No version younger than one week (in minutes) is installed, transitive ones included, and an install fails rather
+# than fall back to an older version when nothing in a range is old enough.
+minimumReleaseAge: 10080
+minimumReleaseAgeStrict: true
+
+# The dependencies whose install scripts run, true, or are skipped, false. Both are optional native helpers that the
+# dev server and the build work without.
+allowBuilds:
+  '@parcel/watcher': false
+  '@swc/core': false
+
+# Security floors carried from the monorepo's pins, for the packages of theirs that are in this tree. Each pins a
+# package with a published fix, and the advisory is on its line where the monorepo's history names one.
+overrides:
+  immutable: ^5.1.8
+  nanoid@3: ^3.3.18 # GHSA-2v37-7h3g-55p8
+  postcss: ^8.5.18
+  ws: ^8.21.0
