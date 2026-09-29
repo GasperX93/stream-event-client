@@ -41,38 +41,29 @@ export function Dialog({ title, onClose, children }: DialogProps) {
     const previouslyFocused = document.activeElement as HTMLElement | null;
     const panel = panelRef.current;
     if (panel && !panel.contains(document.activeElement)) {
-      const first = panel.querySelector<HTMLElement>(FOCUSABLE);
-      (first ?? panel).focus();
+      firstFocusable(panel).focus();
     }
+
+    // On the document rather than on the panel: a control that disables itself while it works, as
+    // the picker's check does, drops focus to the page, and a listener on the panel would then hear
+    // neither Escape nor Tab.
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === KEY_ESCAPE) {
+        event.stopPropagation();
+        onCloseRef.current();
+        return;
+      }
+      if (event.key === KEY_TAB && panel) {
+        keepTabInside(event, panel);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+
     return () => {
+      document.removeEventListener('keydown', onKeyDown);
       previouslyFocused?.focus?.();
     };
   }, []);
-
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === KEY_ESCAPE) {
-      event.stopPropagation();
-      onCloseRef.current();
-      return;
-    }
-    if (event.key !== KEY_TAB || !panelRef.current) {
-      return;
-    }
-    const focusable = [...panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE)];
-    if (focusable.length === 0) {
-      event.preventDefault();
-      return;
-    }
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  };
 
   return createPortal(
     <div className="dialog-backdrop" onClick={() => onCloseRef.current()}>
@@ -84,7 +75,6 @@ export function Dialog({ title, onClose, children }: DialogProps) {
         aria-labelledby={titleId}
         tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
-        onKeyDown={handleKeyDown}
       >
         <h2 id={titleId} className="dialog-title">
           {title}
@@ -94,4 +84,30 @@ export function Dialog({ title, onClose, children }: DialogProps) {
     </div>,
     document.body,
   );
+}
+
+function focusableIn(panel: HTMLElement): HTMLElement[] {
+  return [...panel.querySelectorAll<HTMLElement>(FOCUSABLE)];
+}
+
+function firstFocusable(panel: HTMLElement): HTMLElement {
+  return focusableIn(panel)[0] ?? panel;
+}
+
+function keepTabInside(event: KeyboardEvent, panel: HTMLElement) {
+  const focusable = focusableIn(panel);
+  if (focusable.length === 0 || !panel.contains(document.activeElement)) {
+    event.preventDefault();
+    firstFocusable(panel).focus();
+    return;
+  }
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
 }
