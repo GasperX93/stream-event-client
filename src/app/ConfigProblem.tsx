@@ -1,4 +1,5 @@
 import { configProblemText } from '@/config/runtimeConfig';
+import { swarmLogoUrl } from '@/design';
 
 import './ConfigProblem.scss';
 
@@ -10,10 +11,13 @@ export function ConfigProblem({ result }: ConfigProblemProps) {
   const text = configProblemText(result);
 
   return (
-    <div className="config-problem" role="alert">
-      <h1 className="config-problem-title">{text.title}</h1>
-      <p className="config-problem-detail">{text.detail}</p>
-      <p className="config-problem-hint">{text.hint}</p>
-    </div>
+    <main className="config-problem">
+      <img src={swarmLogoUrl} alt="Swarm" className="config-problem-logo" />
+      <div className="config-problem-panel" role="alert">
+        <h1 className="config-problem-title">{text.title}</h1>
+        <p className="config-problem-detail">{text.detail}</p>
+        <p className="config-problem-hint">{text.hint}</p>
+      </div>
+    </main>
   );
 }
