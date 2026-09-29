@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { type ChatSettings, EVENTS, type MessageData, MessageType, SwarmChat } from '@solarpunkltd/swarm-chat-js';
+import {
+  type ChatEvent,
+  type ChatEventPayloads,
+  type ChatSettings,
+  EVENTS,
+  type MessageData,
+  MessageType,
+  SwarmChat,
+} from '@solarpunkltd/swarm-chat-js';
 
 import { groupReactions, type ReactionsByMessage } from './reactions';
 
@@ -82,24 +90,30 @@ export function useSwarmChat(settings: ChatSettings, ownAddress: string | null) 
     }
     let stopped = false;
     let chat: SwarmChat | null = null;
+    /** The library keeps its listeners through a stop, so each one added here is taken off again here. */
+    const removeListeners: Array<() => void> = [];
 
     const timer = setTimeout(() => {
       const started = new SwarmChat(current);
       chat = started;
       chatRef.current = started;
 
-      const { on } = started.getEmitter();
+      const { on, off } = started.getEmitter();
+      const listen = <E extends ChatEvent>(event: E, listener: (data: ChatEventPayloads[E]) => void) => {
+        on(event, listener);
+        removeListeners.push(() => off(event, listener));
+      };
       const onMessage = (delivery: DeliveryState) => (data: MessageData) => {
         if (!stopped) {
           setMessages((previous) => mergeMessage(previous, data, delivery));
         }
       };
 
-      on(EVENTS.MESSAGE_REQUEST_INITIATED, onMessage({ error: false, requested: true }));
-      on(EVENTS.MESSAGE_REQUEST_UPLOADED, onMessage({ error: false, uploaded: true }));
-      on(EVENTS.MESSAGE_RECEIVED, onMessage({ error: false, received: true }));
-      on(EVENTS.MESSAGE_REQUEST_ERROR, onMessage({ error: true }));
-      on(EVENTS.LOADING_INIT, (loading: boolean) => {
+      listen(EVENTS.MESSAGE_REQUEST_INITIATED, onMessage({ error: false, requested: true }));
+      listen(EVENTS.MESSAGE_REQUEST_UPLOADED, onMessage({ error: false, uploaded: true }));
+      listen(EVENTS.MESSAGE_RECEIVED, onMessage({ error: false, received: true }));
+      listen(EVENTS.MESSAGE_REQUEST_ERROR, onMessage({ error: true }));
+      listen(EVENTS.LOADING_INIT, (loading: boolean) => {
         if (stopped) {
           return;
         }
@@ -115,7 +129,7 @@ export function useSwarmChat(settings: ChatSettings, ownAddress: string | null) 
               : CHAT_READY,
         );
       });
-      on(EVENTS.LOADING_PREVIOUS_MESSAGES, (loading: boolean) => {
+      listen(EVENTS.LOADING_PREVIOUS_MESSAGES, (loading: boolean) => {
         if (stopped) {
           return;
         }
@@ -124,7 +138,7 @@ export function useSwarmChat(settings: ChatSettings, ownAddress: string | null) 
           setHasOlder(started.hasPreviousMessages());
         }
       });
-      on(EVENTS.CRITICAL_ERROR, () => {
+      listen(EVENTS.CRITICAL_ERROR, () => {
         if (!stopped) {
           setStatus(CHAT_UNREACHABLE);
         }
@@ -149,6 +163,9 @@ export function useSwarmChat(settings: ChatSettings, ownAddress: string | null) 
     return () => {
       stopped = true;
       clearTimeout(timer);
+      for (const removeListener of removeListeners.splice(0)) {
+        removeListener();
+      }
       if (chat) {
         if (chatRef.current === chat) {
           chatRef.current = null;
