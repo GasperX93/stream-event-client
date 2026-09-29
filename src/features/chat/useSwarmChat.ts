@@ -4,6 +4,7 @@ import {
   type ChatEventPayloads,
   type ChatSettings,
   EVENTS,
+  FeedStatus,
   type MessageData,
   MessageType,
   SwarmChat,
@@ -74,6 +75,7 @@ export function useSwarmChat(settings: ChatSettings, ownAddress: string | null) 
   const [status, setStatus] = useState<ChatStatus>(CHAT_LOADING);
   const [isLoadingOlder, setIsLoadingOlder] = useState(false);
   const [hasOlder, setHasOlder] = useState(false);
+  const [feedStatus, setFeedStatus] = useState<FeedStatus | null>(null);
 
   useEffect(() => {
     const current = JSON.parse(settingsKey) as ChatSettings;
@@ -92,6 +94,8 @@ export function useSwarmChat(settings: ChatSettings, ownAddress: string | null) 
     let chat: SwarmChat | null = null;
     /** The library keeps its listeners through a stop, so each one added here is taken off again here. */
     const removeListeners: Array<() => void> = [];
+
+    setFeedStatus(null);
 
     const timer = setTimeout(() => {
       const started = new SwarmChat(current);
@@ -133,6 +137,11 @@ export function useSwarmChat(settings: ChatSettings, ownAddress: string | null) 
         setIsLoadingOlder(loading);
         if (!loading) {
           setHasOlder(started.hasPreviousMessages());
+        }
+      });
+      listen(EVENTS.STATUS, (next) => {
+        if (!stopped) {
+          setFeedStatus(next);
         }
       });
       listen(EVENTS.CRITICAL_ERROR, () => {
@@ -226,6 +235,7 @@ export function useSwarmChat(settings: ChatSettings, ownAddress: string | null) 
 
   return {
     status,
+    feedStatus,
     isLoadingOlder,
     hasOlder,
     messages: grouped.text,

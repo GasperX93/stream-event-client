@@ -9,6 +9,7 @@ import { useChatUser } from '../User';
 import { CHAT_LOADING, CHAT_UNREACHABLE, useSwarmChat, type VisibleMessage } from '../useSwarmChat';
 
 import { ChatMessage } from './ChatMessage/ChatMessage';
+import { FeedNotice } from './FeedNotice/FeedNotice';
 import { MessageSender } from './MessageSender/MessageSender';
 import { ScrollableMessageList } from './ScrollableMessageList/ScrollableMessageList';
 import { ThreadView } from './ThreadView/ThreadView';
@@ -33,6 +34,7 @@ export function Chat({ chat, topic }: ChatProps) {
   const ownAddress = session?.address ?? null;
   const {
     status,
+    feedStatus,
     isLoadingOlder,
     hasOlder,
     messages,
@@ -145,6 +147,7 @@ export function Chat({ chat, topic }: ChatProps) {
 
     return (
       <>
+        <FeedNotice status={feedStatus} />
         {hasOlder && (
           <Button
             variant={ButtonVariant.SECONDARY}
