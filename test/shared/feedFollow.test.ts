@@ -15,7 +15,7 @@ type SlotRequest = Extract<FeedRequest, { kind: 'slot' }>;
 const OWNER = '1f8f0d5d0d2e0b1a3c4d5e6f708192a3b4c5d6e7';
 const TOPIC = Topic.fromString('swarm-hls-feed-follow-vector');
 
-/** One poll by a follower that has read up to `known`, which is how the player and the bench call it. */
+/** One poll by a follower that has read up to `known`, which is how the player calls it. */
 function requestAfter(known: FeedIndex | null): FeedRequest {
   return nextFeedRequest(OWNER, TOPIC, known);
 }
@@ -63,11 +63,9 @@ describe('nextFeedRequest', () => {
   /**
    * The assertion this module was created for.
    *
-   * The bench and the player each had their own copy of this decision, and they disagreed about
-   * exactly this: the player resolved the head once, the bench resolved it on every poll. That is a
-   * 50-57% frozen endpoint against a 0.2% frozen one, and it is why every latency figure taken before
-   * 2026-08-04 measured the instrument. Anything following a feed through this function cannot make
-   * that mistake, and this is the arm that says so.
+   * Resolving the head on every poll instead of once is a 50-57% frozen endpoint against a 0.2%
+   * frozen one. Anything following a feed through this function cannot make that mistake, and this
+   * is the case that says so.
    */
   it('costs exactly one head lookup however long the feed is followed', () => {
     const asked: FeedRequest[] = [];
@@ -129,9 +127,7 @@ describe('feedSlotPath', () => {
 });
 
 /**
- * Tested here rather than beside `resolvedFeedIndex`, whose cases live in `e2e/test/gateway.test.ts`
- * and are therefore outside the mutation runner's reach. A guard nothing can kill a mutant in is not
- * a guard.
+ * A guard nothing can kill a mutant in is not a guard, so this is tested directly.
  */
 describe('extractFeedIndex', () => {
   it('reads the index a head lookup resolved to', () => {

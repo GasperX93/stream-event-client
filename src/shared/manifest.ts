@@ -91,7 +91,7 @@ export function buildProgramDateTime(epochMs: number): string {
  * line is not one or its value is not a date.
  *
  * `Date.parse` accepts every offset form RFC 8216 allows, so a `+00:00` from another origin reads
- * the same as the `Z` this project writes.
+ * the same as the `Z` the uploader writes.
  */
 export function programDateTimeMs(line: string): number | null {
   if (!line.startsWith(`${HLS_PROGRAM_DATE_TIME}:`)) {
@@ -114,7 +114,7 @@ export function programDateTimeMs(line: string): number | null {
  * and every other stamp would be dropped on the floor, silently, because a line that is neither a
  * header nor a segment has nowhere else to go. `#EXT-X-GAP` is read on exactly the same terms.
  *
- * **This reads the playlists this project produces, not RFC 8216 in general**, and the difference is
+ * **This reads the playlists the uploader produces, not RFC 8216 in general**, and the difference is
  * worth stating because the function now lives in a shared package where it looks more general than
  * it is. It requires the media URI on the line immediately after its `#EXTINF`, so anything RFC 8216
  * permits in between takes the segment with it rather than only itself: a blank line, a comment, or

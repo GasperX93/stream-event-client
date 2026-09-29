@@ -11,11 +11,9 @@ import { absoluteGatewayUrl } from '@/features/player/gatewayUrl';
  * a browser: this is the code that decides what hls.js actually parses, and getting a tag or a URI
  * wrong here fails as a mute player rather than as an error.
  *
- * What is *not* defined here lives in the shared package instead: the parser and the segment shape,
- * beside the tags the uploader builds a manifest with, and the master-playlist builder and the swarm
- * URI scheme, beside the uploader that publishes the master this one synthesises as a fallback. Both
- * halves of each contract are then one definition rather than two that promise to agree. They are
- * re-exported for the call sites that used to find them here. See ARCH-1.
+ * What is *not* defined here lives in src/shared instead, copied from the stream format the
+ * uploader writes: the parser and the segment shape beside the HLS tags, and the master-playlist
+ * builder and the swarm URI scheme. They are re-exported for the call sites that find them here.
  */
 
 export { buildMasterPlaylist, buildSwarmUri, parseManifest, parseSwarmUri, type Segment };

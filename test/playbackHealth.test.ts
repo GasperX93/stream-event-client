@@ -45,7 +45,7 @@ function makeWatchedPlayer() {
 /**
  * The signal behind the `degraded` feed state, taken from the media element rather than from hls.js.
  *
- * Deliberately the same counter the bench reports are denominated in: `rebufferCount` there is a
+ * Deliberately the same counter as `rebufferCount` in the metrics: a
  * `waiting` after the first `playing`, de-duplicated per stall, so the burst threshold in
  * `feedState.ts` is measured in the units this produces rather than translated into them.
  */

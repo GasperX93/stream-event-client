@@ -6,10 +6,9 @@ import { RequestJitter } from '../src/shared/requestJitter';
 
 /**
  * The first browser ever pointed at a published ladder failed with three
- * `networkError manifestLoadError` and zero rung requests (sitting 2026-08-28, arm
- * `20260828-062459`). The uploader's half was proven correct on the host: the group feed served
- * exactly the master below, inline, 200. So the defect is between receiving this text and starting
- * the rung walks, and this test replays that exact input through `fetchSource`.
+ * `networkError manifestLoadError` and zero rung requests, although the group feed served exactly
+ * the master below, inline, 200. So the defect was between receiving this text and starting the
+ * rung walks, and this test replays that exact input through `fetchSource`.
  */
 
 /** Verbatim from the live group feed, 2026-08-28, minus only the trailing newline. */
@@ -59,7 +58,7 @@ function feedResponse(body: string, index = 10): Response {
   });
 }
 
-describe('a published ladder master starts the rungs (the 2026-08-28 sitting failure)', () => {
+describe('a published ladder master starts the rungs', () => {
   let fetched: string[];
   let fetcher: ManifestFetcher;
 
@@ -104,7 +103,7 @@ describe('a published ladder master starts the rungs (the 2026-08-28 sitting fai
 
   /**
    * The level request hls.js makes right after parsing the master, for the rung it picked. The
-   * failed arm's gateway log shows the master served and then silence, which is also what a level
+   * failed run's gateway log showed the master served and then silence, which is also what a level
    * fetch that never resolves looks like from outside.
    */
   it('serves a rung playlist to the level request that follows the master', async () => {

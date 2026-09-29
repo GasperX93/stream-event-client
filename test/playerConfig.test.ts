@@ -81,7 +81,7 @@ describe('SwarmHlsPlayer hls.js tuning', () => {
     assert.equal(
       Hls.DefaultConfig.maxLiveSyncPlaybackRate,
       1,
-      'the default this overrides has moved, so the reading behind LAT-2 needs taking again',
+      'the default this overrides has moved, so the catch-up tuning needs re-checking',
     );
     assert.ok(SHIPPED_TUNING.maxLiveSyncPlaybackRate! > 1);
   });

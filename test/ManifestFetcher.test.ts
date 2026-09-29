@@ -89,13 +89,12 @@ function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } {
  * is the absence of a second advance, and waiting for something not to happen has no signal to watch.
  * The budget is bounded and generous: once the fetch stub has resolved there is no I/O left, so the
  * callbacks need a handful of ticks, and a defect that needed more than fifty is not the one here.
- * Verified the other way round, which is the part that matters: on 37d1cba these tests fail.
+ * Verified the other way round, which is the part that matters: these tests fail without the fix.
  *
  * ⛔ **One poll per call, never a loop of them.** Node floors `setTimeout(0)` at about a millisecond,
- * so this budget costs tens of milliseconds of real time and a loop pays that per poll. Six loops here
- * used to, the worst two measuring 2306ms and 677ms on a quiet machine, and the 677ms one took
- * **5491ms** under a full `pnpm verify`, past vitest's 5000ms default, which failed the repo gate with
- * nothing wrong. A budget is also the weaker wait: it can only be long enough or too short. Every loop here
+ * so this budget costs tens of milliseconds of real time and a loop pays that per poll. Loops here
+ * used to measure 2306ms and 677ms on a quiet machine, and the 677ms one took **5491ms** on a loaded
+ * one, past vitest's 5000ms default, failing with nothing wrong. A budget is also the weaker wait: it can only be long enough or too short. Every loop here
  * now awaits {@link ManifestFetcher.settled}, which is the walk's own completion signal. See the note
  * above `poll` in the block on keeping up with a publisher that writes faster than hls.js reloads,
  * which reached this conclusion first.
@@ -466,7 +465,7 @@ describe('ManifestFetcher follow-up fetches (CON-29)', () => {
  * spent frozen: 0.82x at a 0.25s segment with 17.3% of the clock frozen, 0.90x at 0.5s, 0.98x at
  * 1.0s, each matching that ratio to within 0.02, over 897 logged requests. The shorter the segment
  * the worse it got, because a shorter segment does not make the client faster, it makes it ask more
- * often at a fixed cost per ask. See `docs/bench/what-starves-the-viewer-2026-08-05.md`.
+ * often at a fixed cost per ask.
  *
  * The fix is not to poll faster. It is to stop treating one poll as worth one slot.
  */
@@ -681,16 +680,16 @@ describe('keeping up with a publisher that writes faster than hls.js reloads', (
  * A lower bound rather than a window, because that is the clock assertion that survives contention.
  *
  * **Contention was never what broke these, and the lower bound was never the problem.** Both used to
- * assert `elapsed >= requested` exactly, and one failed under a full `pnpm verify` and then passed
+ * assert `elapsed >= requested` exactly, and one failed under a full suite run and then passed
  * three times in isolation, which reads like load and is not: contention only makes elapsed longer.
  * `setTimeout` schedules on libuv's clock and this measures with `performance.now()`, and the two
  * disagree slightly. Measured over 4000 runs on this machine, `setTimeout(20)` returned in under
  * 20ms by `performance.now()` **1.18% of the time**, worst case 0.87ms early. Two assertions per
- * run is roughly a 2% chance of a red `pnpm verify` on a branch with nothing wrong with it.
+ * run is roughly a 2% chance of a red suite run on a branch with nothing wrong with it.
  *
  * So the bound carries the slack that granularity needs and nothing more. It still separates every
  * defect worth naming, because those are a wait that returns immediately and a wait that ignores its
- * argument, and both are off by tens of milliseconds rather than by one. See TEST-53.
+ * argument, and both are off by tens of milliseconds rather than by one.
  */
 
 /** Measured worst-case early return is 0.87ms, so this is a shade over 2x that and still tiny. */
@@ -717,7 +716,7 @@ describe('the wait the fetcher ships with', () => {
   });
 });
 
-describe('ManifestFetcher against a gateway that stops answering (LAT-3)', () => {
+describe('ManifestFetcher against a gateway that stops answering', () => {
   let fetcher: ManifestFetcher;
   let health: FeedHealthTracker;
   let waited: number[];
@@ -1089,19 +1088,16 @@ describe('ManifestFetcher against a gateway that stops answering (LAT-3)', () =>
 });
 
 /**
- * The property the bench and the player disagreed about for the whole of LAT-10.
- *
  * `GET /feeds/{owner}/{topic}` asks a node to resolve the newest update, and it cannot keep up with a
- * feed advancing once a second: measured on 2026-08-04 it was 50 to 57% frozen at 1.0 to 7.0 seconds
- * against 0.2% frozen at 46ms for explicit-address reads of the same chunks on the same node. The
- * player has always resolved it once and then walked slot addresses. The bench resolved it on every
- * poll, and so reported the lookup's freeze as the product's.
+ * feed advancing once a second: it was measured 50 to 57% frozen at 1.0 to 7.0 seconds against 0.2%
+ * frozen at 46ms for explicit-address reads of the same chunks on the same node. The player
+ * therefore resolves the head once and then walks slot addresses, and resolving it on every poll
+ * would report the lookup's freeze as the product's.
  *
- * Both sides now route through `nextFeedRequest`, and this is the client's arm of that: the same
- * assertion runs in `packages/shared/test/feedFollow.test.ts` against the shared decision and in
- * `e2e/test/gateway.test.ts` against the bench's follower.
+ * The same assertion is made against the shared decision, `nextFeedRequest`, in
+ * `shared/feedFollow.test.ts`.
  */
-describe('following the feed costs one head lookup (LAT-10)', () => {
+describe('following the feed costs one head lookup', () => {
   let fetcher: ManifestFetcher;
   let requested: string[];
   let publishedThrough: bigint;
@@ -1183,8 +1179,7 @@ describe('following the feed costs one head lookup (LAT-10)', () => {
  * | worst stall | **65 consecutive polls, 19.1s** |
  * | nearest served distance | **+1 in 73 of 74** |
  *
- * `docs/bench/what-is-behind-a-refused-slot-2026-08-06.md`. The reader was one request away from
- * moving for the whole of that nineteen seconds.
+ * The reader was one request away from moving for the whole of that nineteen seconds.
  *
  * ## Why skipping is safe
  *

@@ -65,8 +65,8 @@ describe('CustomFragmentLoader reporting the gateway it just reached', () => {
   });
 
   /**
-   * The whole of fix 0.8b. On 2026-08-06 a viewer's gateway was stopped for 20.5 seconds and the
-   * feed was not asked for again until 30, because the manifest backoff doubles from the failure
+   * A viewer's gateway was stopped for 20.5 seconds and the feed was not asked for again until 30,
+   * because the manifest backoff doubles from the failure
    * that set it. Segments travel through the same gateway on hls.js's own retry cadence and started
    * arriving the moment it returned, so the client already knew and had nowhere to put it. Wiring
    * this costs no extra request: it reports something the player was fetching anyway.
@@ -120,7 +120,7 @@ describe('CustomFragmentLoader reporting the gateway it just reached', () => {
  * that names no host at all.
  *
  * This used to be rebuilt against `window.location.origin` and handed to the transport. That is the
- * client, whose nginx proxies `/bee/` and not `/bytes/`, so the fragment 404'd at a host that never
+ * client, whose host proxies `/bee/` and not `/bytes/`, so the fragment 404'd at a host that never
  * held it and no message connected the failure to the fallback.
  */
 describe('CustomFragmentLoader meeting a url that names no gateway', () => {

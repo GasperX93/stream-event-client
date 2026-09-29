@@ -283,8 +283,8 @@ export class LadderFeedPoller {
     let steps = 0;
     while (steps < MAX_CATCH_UP_PER_PASS && !entry.stopped) {
       const current = this.stateManager.getIndex(entry.hexTopic)!;
-      // Which request follows is `nextFeedRequest`'s to decide, on the same input, for everything in
-      // this repository that reads a feed. See `packages/shared/src/feedFollow.ts`.
+      // Which request follows is `nextFeedRequest`'s to decide, on the same input, for everything that
+      // reads a feed. See `src/shared/feedFollow.ts`.
       const { path, index: next } = nextFeedRequest(owner, entry.topic, current);
 
       let response: TimedResponse;

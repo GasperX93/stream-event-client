@@ -1,5 +1,6 @@
 // Copied from Solar-Punk-Ltd/streaming-monorepo at c1696c26, apps/hls-stream/packages/shared/src/abrTuning.ts.
-// Refresh it from there when the stream list format changes.
+// Refresh it from there when the stream list format changes. Its comments lost the monorepo's
+// references to its own measurement tools.
 
 /**
  * The two hls.js rules that decide which rung a player may take, and the numbers this client runs
@@ -11,11 +12,8 @@
  * when its bitrate is under that adjusted figure. So a link capped at exactly a rung's bitrate never
  * carries that rung, and climbing to a rung needs an estimate well above it.
  *
- * Both numbers live here because two things read them: the client hands them to hls.js, and the e2e
- * harness uses them to say which rungs a cap left within a player's reach. A copy in each would be a
- * report describing a player that no longer exists. Measured 2026-09-02: a viewer capped at 2800 kbps,
- * the 720p rung's own bitrate, could not take 720p on the way down (it needed 2947) and needed a
- * 4000 kbps estimate to climb back to it (`docs/bench/browser-quality-2026-09-02T12-52-16-340Z.md`).
+ * Measured 2026-09-02: a viewer capped at 2800 kbps, the 720p rung's own bitrate, could not take
+ * 720p on the way down (it needed 2947) and needed a 4000 kbps estimate to climb back to it.
  */
 
 /** Fraction of the measured bandwidth a rung must sit under to be chosen going down or staying. hls.js's own default. */

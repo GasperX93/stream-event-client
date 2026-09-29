@@ -71,8 +71,8 @@ describe('thumbnailManifestUrl', () => {
  * which gateway was meant.
  *
  * The rooted case is the one that used to be passed through untouched, and `MANIFEST_ACCESS_URL` set
- * to a path rather than a full URL is what produces it. No env file in the repo does that today,
- * which is why it went unnoticed: `.env.latbench` sets a full URL and `.env.sample` leaves it empty.
+ * to a path rather than a full URL is what produces it. No example configuration does that,
+ * which is why it went unnoticed.
  */
 describe('previewSegmentUrl', () => {
   const PAGE_ORIGIN = 'http://viewer.example:10064';
@@ -80,13 +80,10 @@ describe('previewSegmentUrl', () => {
   /**
    * The gateway every deployed viewer is handed, and the case these tests used to miss.
    *
-   * The deploy builds the viewer with `VITE_READER_BEE_URL=/bee` (`deploy/Dockerfile.client`,
-   * `deploy/scripts/deploy.sh`), so the viewer reaches Bee through its own nginx proxy and the
-   * gateway a card holds is a rooted path, not a URL. Joined onto a media line as it was, every card
-   * on every deployed viewer asked hls.js for `/bee/bytes/<ref>`, the fragment loader refused it as
-   * naming no gateway, and the card fell back to the placeholder. Seen on 2026-09-24 on the tester's
-   * deployment: four blank cards, and three of them loaded once the viewer was pointed at the same
-   * proxy by its absolute address.
+   * A deployed viewer may reach Bee through a proxy on its own origin, so the gateway a card holds
+   * is a rooted path, not a URL. Joined onto a media line as it was, every card asked hls.js for
+   * `/bee/bytes/<ref>`, the fragment loader refused it as naming no gateway, and the card fell back
+   * to the placeholder.
    */
   const VIEWER_PROXY_GATEWAY = '/bee';
 

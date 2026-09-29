@@ -146,8 +146,8 @@ describe('the ladder entry points', () => {
 
     /**
      * The overlay subscribes to the SOURCE topic, so the ended signal has to land there, not on the
-     * rung topics finalization is actually read from. V5's first live run is why this is asserted at
-     * this level: the poller stopped its walks on ENDLIST while the viewer stayed on `live` over a
+     * rung topics finalization is actually read from. This is asserted at
+     * this level because a poller once stopped its walks on ENDLIST while the viewer stayed on `live` over a
      * frozen frame.
      */
     it('ends the source topic once every rung the master names is finalized', async () => {

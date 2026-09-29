@@ -141,9 +141,8 @@ export const StreamPreview = ({
         const seg = source.firstSegment;
         const segUrl = previewSegmentUrl(seg.uri, gatewayUrl, window.location.origin);
 
-        // Spelled from the shared constants rather than by hand. These six literals were the last
-        // place a tag rename could pass every type check and every test and still leave the preview
-        // player asking for a playlist no decoder accepts. See ARCH-1.
+        // Spelled from the shared constants rather than by hand, so a tag rename cannot leave the
+        // preview player asking for a playlist no decoder accepts.
         const miniManifest = [
           HLS_M3U,
           `${HLS_VERSION}:3`,

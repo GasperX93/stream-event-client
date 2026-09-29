@@ -64,7 +64,7 @@ const MANIFEST_RETRY_BASE_MS = 2_000;
  * ⭐ **It is the largest ceiling that keeps a ladder viewer no worse off than a single rendition
  * one.** The same client on one rendition was measured on 2026-08-27 taking **10.7s and 9.9s to
  * recover after the gateway had started answering again**, across both byte sources, on a 20.5
- * second gateway stop. See `docs/bench/crash-at-an-in-tab-viewer-2026-08-27.md`. A ladder walks five
+ * second gateway stop. A ladder walks five
  * feeds where a single rendition walks one, and walking more of them must not cost more to recover
  * than the one-rung case a ladder is built out of.
  *
@@ -99,8 +99,7 @@ export const MANIFEST_RETRY_CAP_MS = 8_000;
  * is called stalled.
  *
  * ⛔⛔⛔ **This was a POLL COUNT, and the poll rate is not a constant.** It collapses during exactly
- * the stall it counts. Measured on two recorded uploader crashes
- * (`docs/bench/overlay-silence-during-a-crash-2026-08-07.md`), feed reads went from a 264ms gap
+ * the stall it counts. Measured on two recorded uploader crashes, feed reads went from a 264ms gap
  * before the crash to 1064ms during the freeze, because each read takes about three times as long
  * and the client also spaces unserved reads about four times wider. So thirty polls was about eight
  * seconds while healthy and about thirty-two during a stall, and when a viewer heard anything was a
@@ -123,9 +122,9 @@ export const UNSERVED_SLOT_STALL_MS = 8_000;
  *
  * ⛔⛔⛔ **SEGMENTS, AND DELIBERATELY NOT SECONDS. Every regression this rule has had was a clock.**
  * Four attempts judged a rung by how long it had been quiet, and three of them shipped a fault:
- * a gateway outage (V6, 2026-08-30) amputated a healthy 480p rung that had merely been between
- * segments when the gateway went away; an uploader crash (V7, same day) amputated two rungs because
- * the rungs resumed staggered; and the patch for that (V3, 2026-08-31) fired during ordinary
+ * a gateway outage (2026-08-30) amputated a healthy 480p rung that had merely been between
+ * segments when the gateway went away, an uploader crash (the same day) amputated two rungs because
+ * the rungs resumed staggered, and the patch for that (2026-08-31) fired during ordinary
  * operation, because "every rung is quiet at once" is also what a ladder looks like between
  * segments, and it disabled the feature outright.
  *
@@ -142,7 +141,7 @@ export const UNSERVED_SLOT_STALL_MS = 8_000;
  * before anything is said.
  *
  * ⚠️ **How long that takes is a property of the deployment, on purpose.** Four segments is about 8
- * seconds at the 2s in-browser stage and about 2 at the 0.5s gateway stage, and a viewer on shorter
+ * seconds at 2s segments and about 2 at 0.5s segments, and a viewer on shorter
  * segments starves sooner, so noticing sooner is right. Against the 87.2s and 103.2s freezes
  * measured on 2026-08-30, both are the same answer.
  */
@@ -173,7 +172,7 @@ export const UNSERVED_POLLS_PROBE_CEILING = 30;
  *
  * ⭐ **Both numbers are measured rather than chosen**, by replaying every archived browser run's
  * rebuffer counter through candidate rules. Within a rolling twenty seconds and after the first
- * frame, the fourteen-minute collapse of `docs/bench/the-fourteen-minute-collapse-2026-08-07.md`
+ * frame, the fourteen-minute collapse measured on 2026-08-07
  * reaches 4 stalls, the one other run with viewer-visible degradation reaches 4, and the worst run a
  * viewer would call healthy reaches 1, including four separate clean hours. The next rule down, 3
  * stalls in fifteen seconds, fires 2786 seconds into one of those hours.
@@ -402,7 +401,7 @@ export class FeedHealthTracker {
    * the only one their link carries and the only one that survives a restart, while the rung topics
    * are per session and are discovered from the master playlist. Every gateway fault is recorded
    * against a rung, so `reconnecting` and `stalled` had no way to reach a watching viewer. Caught
-   * live by V6 on 2026-08-29: a gateway taken away froze the picture for 26.6 seconds and the client
+   * live on 2026-08-29: a gateway taken away froze the picture for 26.6 seconds and the client
    * said nothing at all, which is how it says the feed is live.
    */
   private readonly rungsOfGroup = new Map<string, readonly string[]>();
@@ -732,7 +731,7 @@ export class FeedHealthTracker {
    *
    * ⛔ Read by the player so the console line that announces a dead rung carries the arithmetic that
    * condemned it. A warning that says only "this rung stopped" cannot be checked against a broadcast
-   * afterwards, and on 2026-08-31 that cost two sittings: the client dropped three healthy rungs and
+   * afterwards, and on 2026-08-31 that cost two live test runs: the client dropped three healthy rungs and
    * said so, and there was no way to tell from what it said whether the count or the rule was wrong.
    */
   ladderLagOf(rungTopicId: string): number {
@@ -795,7 +794,7 @@ export class FeedHealthTracker {
         // ⛔⛔⛔ **The unserved run ends here, and leaving it running cost a viewer their picture.**
         // An unserved slot means the gateway ANSWERED and had nothing in it. A gateway that did not
         // answer is no evidence at all about the slot, so a run carried through an outage measures
-        // the outage. Caught live by V6 on 2026-08-30: a 20.5 second gateway outage under a watching
+        // the outage. Caught live on 2026-08-30: a 20.5 second gateway outage under a watching
         // viewer, and 480p was dropped from the ladder on the other side of it while the uploader
         // was publishing it normally, 24 segments across the window it was removed in. That rung had
         // simply been between segments when the gateway went away, so it came back looking silent

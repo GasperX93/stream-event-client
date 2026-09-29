@@ -108,8 +108,7 @@ describe('CatalogFeedReader', () => {
    * The property that stops a follower falling permanently behind.
    *
    * Advancing one slot per poll gives a catch-up rate equal to the poll rate, so a reader that drops
-   * behind never recovers. This is the same shape that made the bench unable to measure a quarter
-   * second GOP, found the expensive way on 2026-08-05.
+   * behind never recovers.
    */
   it('walks past several new slots in one read, so it can catch up', async () => {
     const { urls, fetcher } = stubFetcher([

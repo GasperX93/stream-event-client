@@ -29,8 +29,8 @@ const rendition = (name: string, width: number, height: number, bandwidth: numbe
 });
 
 /**
- * The shared behaviour is asserted once, in `packages/shared/test/masterPlaylist.test.ts`. There is
- * one builder and one URI scheme now, rather than a copy in each package promising to match.
+ * There is one master playlist builder and one URI scheme, rather than a copy in each place
+ * promising to match.
  *
  * Identity rather than a re-assertion of the output. Re-checking the text would pass just as well
  * against a fresh local copy, which is exactly the arrangement this replaced.

@@ -9,14 +9,14 @@ import {
 } from '../../src/shared/abrTuning.js';
 
 /**
- * The rules the e2e quality report reads to say which rungs a cap left within reach.
+ * The rules that say which rungs a bandwidth cap leaves within reach.
  *
- * The 2026-09-02 report called 720p affordable under a 2800 kbps cap because 2800 <= 2800, and the
- * player never took it: hls.js wants the rung under 95% of what it measures. These pin the rule the
- * player actually applies, so the report cannot drift back to plain arithmetic.
+ * 720p is not affordable under a 2800 kbps cap just because 2800 <= 2800: hls.js wants the rung
+ * under 95% of what it measures. These pin the rule the player actually applies, so callers cannot
+ * drift back to plain arithmetic.
  */
 describe('which rungs a player may take', () => {
-  it('holds hls.js defaults, so the client and the harness read one pair of numbers', () => {
+  it('holds hls.js defaults, so every caller reads one pair of numbers', () => {
     assert.equal(ABR_BANDWIDTH_FACTOR, 0.95);
     assert.equal(ABR_BANDWIDTH_UP_FACTOR, 0.7);
   });

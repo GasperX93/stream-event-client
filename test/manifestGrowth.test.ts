@@ -33,8 +33,8 @@ function segmentUris(manifest: string): string[] {
  * exist so the growth stays a known cost rather than a surprise.
  *
  * The cost is a function of the segment COUNT, not of how long each segment is, so the segment
- * length a deployment picks sets how fast the count climbs. `docs/bench/manifest-growth-2026-08-12.md`
- * measures the wall-clock side of it, which does not belong in a test.
+ * length a deployment picks sets how fast the count climbs. The wall-clock side of it is a
+ * measurement and does not belong in a test.
  */
 describe('a live viewer accumulates the whole broadcast', () => {
   const TOPIC = 'growth-test';

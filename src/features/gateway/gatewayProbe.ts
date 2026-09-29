@@ -17,9 +17,9 @@ import { FetchTimeoutError, fetchWithTimeout } from '@/shared/fetchWithTimeout';
 export const PROBE_TIMEOUT_MS = 5_000;
 
 /**
- * Bee answers this on its API port with `{"status":"ok",...}` in every version this project has
- * targeted, and the deployed nginx `/bee/` proxy forwards it unchanged, so one path covers the
- * default gateway and a viewer's own node alike.
+ * Bee answers this on its API port with `{"status":"ok",...}` in every version this viewer has
+ * targeted, and a `/bee` proxy on this site forwards it unchanged, so one path covers the event
+ * gateway and a viewer's own node alike.
  */
 export const BEE_PROBE_PATH = '/health';
 
@@ -32,11 +32,8 @@ function withoutTrailingSlash(url: string): string {
  * What a viewer typed, as a base URL a Bee API path can be appended to, or an empty string.
  *
  * A bare `host:port` gets `http://`, because that is how an address is copied out of Swarm Desktop or
- * a terminal. A path-only value such as `/bee` is kept as it is, since that is what a deployed build
- * defaults to.
- *
- * Named apart from `normalizeGatewayUrl` in `e2e/src/browser/gatewaySweep.ts`, which strips the
- * trailing slash and nothing else. Two functions under one name doing different work is the trap.
+ * a terminal. A path-only value such as `/bee` is kept as it is, and {@link checkOwnNodeAddress}
+ * refuses it.
  */
 export function beeBaseUrlFromTypedAddress(input: string): string {
   const trimmed = withoutTrailingSlash(input.trim());
@@ -236,12 +233,12 @@ export function describeProbeFailure(failure: GatewayProbeFailure): string {
 }
 
 /**
- * Whether a viewer is already on the gateway the build ships with, which is what decides whether a way
- * back to it is worth offering.
+ * Whether a viewer is already on the event gateway, which is what decides whether a way back to it
+ * is worth offering.
  *
  * Compared without trailing slashes, because a saved address has been through `setGatewayUrl`, which
- * strips them, while the build's own value comes from an environment variable that may carry one. A
- * strict comparison would offer a viewer a way back to where they already are.
+ * strips them, while the config's value may carry one. A strict comparison would offer a viewer a
+ * way back to where they already are.
  */
 export function isDefaultGateway(gatewayUrl: string, defaultGatewayUrl: string): boolean {
   return withoutTrailingSlash(gatewayUrl) === withoutTrailingSlash(defaultGatewayUrl);
@@ -249,9 +246,9 @@ export function isDefaultGateway(gatewayUrl: string, defaultGatewayUrl: string):
 
 /**
  * What the header shows beside the picker, so a viewer can see whose node is serving them without
- * opening anything. The default is named rather than shown, because a deployed build's default is
- * `/bee` or an environment value the viewer has never seen. Their own node shows as its host, which
- * is what they typed and will recognise.
+ * opening anything. The event gateway is named rather than shown, because its address is `/bee` or
+ * a setting the viewer has never seen. Their own node shows as its host, which is what they typed and
+ * will recognise.
  */
 export function gatewayLabel(gatewayUrl: string, defaultGatewayUrl: string): string {
   if (isDefaultGateway(gatewayUrl, defaultGatewayUrl)) {

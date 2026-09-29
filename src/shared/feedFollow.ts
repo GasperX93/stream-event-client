@@ -1,19 +1,17 @@
 // Copied from Solar-Punk-Ltd/streaming-monorepo at c1696c26, apps/hls-stream/packages/shared/src/feedFollow.ts.
-// Refresh it from there when the stream list format changes.
+// Refresh it from there when the stream list format changes. Its comments lost the monorepo's
+// references to its own measurement tools.
 
 /**
  * Which request follows a sequential Swarm feed, so that everything reading one asks the same way.
  *
- * **This exists because two implementations of it drifted and cost the project every latency figure
- * it had.** The player resolves the feed head once, on mount, and then walks explicit slot addresses.
- * The bench resolved the head on every single poll. Measured on 2026-08-04 against a feed advancing
- * one slot per second, `GET /feeds/{owner}/{topic}` was 50 to 57% frozen with responses of 1.0 to 7.0
- * seconds, while explicit-address reads of the same chunks on the same node were 0.2% frozen at 46ms.
- * So the two ways of following a feed are not interchangeable, the bench was on the slow one, and
- * every "frozen share" this project published described the instrument. See
- * `docs/bench/feed-reader-ab.md`.
+ * **This exists because two implementations of it drifted.** The player resolves the feed head
+ * once, on mount, and then walks explicit slot addresses. Measured on 2026-08-04 against a feed
+ * advancing one slot per second, `GET /feeds/{owner}/{topic}` was 50 to 57% frozen with responses of
+ * 1.0 to 7.0 seconds, while explicit-address reads of the same chunks on the same node were 0.2%
+ * frozen at 46ms. So the two ways of following a feed are not interchangeable.
  *
- * The paths are relative, because the player and the bench each hold their own gateway base URL.
+ * The paths are relative, because every caller holds its own gateway base URL.
  */
 
 import { FeedIndex, Identifier, Topic } from '@ethersphere/bee-js';
@@ -84,9 +82,8 @@ export function nextFeedRequest(owner: string, topic: Topic, knownIndex: FeedInd
  * something better to do than fail. A follower that cannot read it falls back to a head lookup, which
  * is slow rather than wrong.
  *
- * Lives here rather than beside either caller because both the client and the bench need it and they
- * need it to agree. The last time a feed-reading rule existed twice, the two copies diverged and the
- * instrument was reported as the product for weeks. See `nextFeedRequest` above.
+ * Lives here rather than beside a caller because every feed reader needs it and they need it to
+ * agree. See `nextFeedRequest` above.
  */
 export function resolvedFeedIndex(headers: Headers): number | null {
   const raw = headers.get('swarm-feed-index');

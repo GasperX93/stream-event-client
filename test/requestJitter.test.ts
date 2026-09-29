@@ -167,11 +167,10 @@ describe('RequestJitter staggering the work itself', () => {
  */
 describe('the shipped defaults, which nothing else in this file exercises', () => {
   /**
-   * ⛔ Pinned deliberately, and this assertion is the only thing standing between a reader and
-   * repeating a measurement that has already been paid for. It shipped at 60ms on the reasoning that
-   * spreading viewers across it would land them in cohorts of the size that held. Eight arms at 128
-   * paced viewers then put a jittered herd at 8041 and 10826ms of ending lag against an unjittered one
-   * at 9437 and 9711: no effect, in both rounds.
+   * ⛔ Pinned deliberately. It shipped at 60ms on the reasoning that spreading viewers across it
+   * would land them in cohorts of the size that held. Measuring 128 paced viewers then put a jittered
+   * herd at 8041 and 10826ms of ending lag against an unjittered one at 9437 and 9711: no effect, in
+   * both rounds.
    *
    * The reason is that the cohort finding is about chunk diversity and jitter buys none. Turning this
    * back on is a fine thing to do with evidence from a regime that was not measured. It is not a fine
@@ -181,7 +180,7 @@ describe('the shipped defaults, which nothing else in this file exercises', () =
     assert.equal(
       GATEWAY_REQUEST_JITTER_MS,
       0,
-      'see docs/bench/jitter-is-not-what-breaks-a-herd-2026-08-08.md before turning this on',
+      'jitter was measured to have no effect on a herd, so do not turn this on without new evidence',
     );
   });
 

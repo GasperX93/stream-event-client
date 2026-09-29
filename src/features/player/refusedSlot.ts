@@ -102,7 +102,6 @@ type ProbeResult = ProbeServed | ProbeFoundNothing | ProbeGatewayFailed;
  * two were the head a 404 is meant to mean. The worst was refused for sixty-five consecutive polls
  * over nineteen seconds with something at +1 on every one of them, and the browser run before it
  * left a viewer frozen for forty-six seconds after the service was healthy again.
- * `docs/bench/what-is-behind-a-refused-slot-2026-08-06.md`.
  *
  * ## Why stepping over the refusal loses nothing
  *
@@ -115,7 +114,7 @@ type ProbeResult = ProbeServed | ProbeFoundNothing | ProbeGatewayFailed;
  * `GET /feeds/{owner}/{topic}` would answer this in one request and is the wrong request to make:
  * it measured 50 to 57% frozen at 1.0 to 7.0 seconds on this deployment against 46ms for an
  * explicit address, so recovering through it would pay the slowest request the deployment has, in
- * the one moment the gateway is already struggling. See `packages/shared/src/feedFollow.ts`.
+ * the one moment the gateway is already struggling. See `src/shared/feedFollow.ts`.
  *
  * ## Why this stops at finding the slot
  *

@@ -2,11 +2,9 @@
  * Reports the picture stopping, which is the only symptom of a gateway that is slow rather than
  * absent.
  *
- * Taken from the media element rather than from hls.js, and deliberately in the same units the bench
- * reports are denominated in: `rebufferCount` there is a `waiting` after the first `playing`,
- * de-duplicated per stall. `PLAYBACK_STALL_BURST` was measured against those reports, so counting it
- * the same way here means the threshold is read in the units it was derived in rather than
- * translated into them.
+ * Taken from the media element rather than from hls.js: a stall is a `waiting` after the first
+ * `playing`, de-duplicated per stall. `PLAYBACK_STALL_BURST` was measured in exactly those units, so
+ * counting it the same way here means the threshold is read in the units it was derived in.
  *
  * @param onStall Called once per stall. Never during startup, and never after the broadcast ends.
  */

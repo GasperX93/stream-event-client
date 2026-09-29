@@ -14,9 +14,8 @@ import { LadderFeedPoller } from './LadderFeedPoller';
 import { absoluteBytesBase, buildMasterPlaylist, isMasterPlaylist, masterVariants, parseSwarmUri } from './playlist';
 import { isSlotNotWrittenYet, ManifestFetchError, probePastRefusal, shouldProbePastRefusal } from './refusedSlot';
 
-// The parser and the segment shape now live beside the tags the uploader builds with, so the two
-// halves of the manifest contract cannot drift apart. Re-exported because the player's own modules
-// and tests import them from here. See ARCH-1.
+// The parser and the segment shape live in src/shared beside the HLS tags, the format the uploader
+// writes. Re-exported because the player's own modules and tests import them from here.
 export { parseManifest, type Segment };
 
 interface TopicState {
@@ -189,8 +188,8 @@ export class ManifestStateManager {
     // ⛔⛔⛔ The gateway is part of the cache key, not just an argument. A viewer who changes gateway
     // through `setGatewayUrl` is covered by `markAllDirty`, but anything that changes it another way
     // was silently served the previous gateway's playlist. On 2026-08-13 that put every segment of
-    // both arms of a funded-versus-unfunded sitting on the SAME node while the client truthfully
-    // reported two different gateways, which would have reported that funding does not matter.
+    // a comparison between two gateways on the SAME node while the client truthfully reported two
+    // different gateways.
     if (!state.dirty && state.cachedBytesUrl === bytesUrl) {
       return state.cachedManifest;
     }
@@ -642,10 +641,8 @@ export class ManifestFetcher {
       return this.stateManager.serialize(hexTopic, this.bytesBaseUrl());
     }
 
-    // Which request follows is `nextFeedRequest`'s to decide, on the same input, for everything in
-    // this repository that reads a feed. The bench used to decide it separately and decided it
-    // differently, which is what put every latency figure the project published on a lookup that is
-    // frozen half the time. See `packages/shared/src/feedFollow.ts`.
+    // Which request follows is `nextFeedRequest`'s to decide, on the same input, for everything that
+    // reads a feed. See `src/shared/feedFollow.ts`.
     const knownIndex = this.stateManager.getIndex(hexTopic);
     if (knownIndex === null) {
       return this.handleInitialFetch(owner, topic);
@@ -900,8 +897,7 @@ export class ManifestFetcher {
    * spent frozen. Watched in a real browser on 2026-08-05, over 897 logged requests: **0.82x at a
    * 0.25s segment with 17.3% of the clock frozen, 0.90x at 0.5s, 0.98x at 1.0s**, each within 0.02
    * of that ratio. Shorter segments made it worse rather than better, because a shorter segment does
-   * not make the client faster, it makes it ask more often at a fixed cost per ask. See
-   * `docs/bench/what-starves-the-viewer-2026-08-05.md`.
+   * not make the client faster, it makes it ask more often at a fixed cost per ask.
    *
    * Asking more often was the wrong fix: the cadence belongs to hls.js, and a poll loop of this
    * side's own would be a second thing to tear down and a second thing to get wrong. Reading every

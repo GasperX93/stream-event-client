@@ -95,9 +95,8 @@ afterEach(() => {
  * target duration and leaves it there for the rest of the broadcast, and the catch-up that exists to
  * pull latency back down measures itself against the moved target and stops firing.
  *
- * It cost a real measurement: the 1080p ABA of 2026-08-07 ran two identical control arms that came
- * back 0.92s apart, which the write-up called an unexplained drift in the sitting. One arm had
- * stalled at its join. Every instrument in that run reported zero rebuffers, zero stalled samples and
+ * Two otherwise identical runs can therefore differ by a second of latency when only one of them
+ * stalled at its join, while every other counter reports zero rebuffers, zero stalled samples and
  * zero fatal errors, because a stall is none of those things.
  */
 describe('a stall moves the latency target, and nothing used to say so', () => {
@@ -199,7 +198,7 @@ describe('switch frequency is a rate over elapsed time, not over playback time',
   it('counts switches against the wall clock, so a struggling session does not inflate the rate', () => {
     const player = makeTrackedPlayer();
 
-    // The harness fires no 'playing' event, so no playback time accumulates. Dividing switches by
+    // The test player fires no 'playing' event, so no playback time accumulates. Dividing switches by
     // playback time reported zero however many happened, and a real struggling session, where
     // playback time shrinks against elapsed while down-switches cluster in the excluded rebuffering,
     // inflated the rate by the same mechanism.

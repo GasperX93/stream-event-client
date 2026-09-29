@@ -1,5 +1,6 @@
 // Copied from Solar-Punk-Ltd/streaming-monorepo at c1696c26, apps/hls-stream/packages/shared/src/masterPlaylist.ts.
-// Refresh it from there when the stream list format changes.
+// Refresh it from there when the stream list format changes. Its comments lost the monorepo's
+// references to its own measurement tools.
 
 import { HLS_INDEPENDENT_SEGMENTS, HLS_M3U, HLS_STREAM_INF, HLS_VERSION } from './hlsTags.js';
 
@@ -55,9 +56,9 @@ export function parseSwarmUri(url: string): { owner: string; topic: string } {
  * ⛔ **One definition, because there are two producers.** The uploader publishes the master to a
  * feed of its own and the client builds the same text locally as a fallback for catalog entries
  * written before masters were published. Both used to carry their own copy of this function, each
- * with a comment saying the two had to keep producing identical text, which is the arrangement
- * ARCH-1 exists to remove: a viewer switching between the published master and the synthesised one
- * mid-session would otherwise see the ladder change shape.
+ * with a comment saying the two had to keep producing identical text. One definition keeps a viewer
+ * who switches between the published master and the synthesised one mid-session from seeing the
+ * ladder change shape.
  *
  * No CODECS attribute. The uploader never sees the codec string and hls.js takes it from the first
  * parsed fragment anyway, so omitting it is legal where guessing it would let hls.js discard a rung

@@ -154,10 +154,10 @@ describe('dropping a rung that has stopped being produced', () => {
   });
 
   /**
-   * ⛔⛔⛔ Owner ruling, 2026-09-01: **one drop per broadcast, and no more.**
+   * ⛔⛔⛔ **One drop per broadcast, and no more.**
    *
-   * The first sitting with this armed killed the uploader in V7, so every rung stopped. The player
-   * read that as three separate rungs failing and deleted them one by one, hls.js raised a fatal
+   * If the uploader dies, every rung stops. The player would read that as three separate rungs
+   * failing and delete them one by one, hls.js would raise a fatal
    * `levelSwitchError`, and the whole player destroyed and restarted itself. Rungs do not stop at
    * the same instant: each drains what it was already holding, the queues differ, and a rung that
    * drains further pushes the reference past rungs that stopped with less in hand.
@@ -265,8 +265,8 @@ describe('dropping a rung that has stopped being produced', () => {
   /**
    * ⛔ The other reason `loadLevel` is -1. A player that has not chosen a level yet reads exactly like
    * one whose level was just removed, and steering the first forces a level while hls.js is still
-   * settling the ladder. V6 removed a rung from a freshly restarted player on 2026-08-30 and that
-   * viewer's playhead never left zero.
+   * settling the ladder. Removing a rung from a freshly restarted player left the viewer's playhead
+   * at zero for good.
    */
   it('does not steer a player that had not chosen a level in the first place', () => {
     const player = makeLadderPlayer();

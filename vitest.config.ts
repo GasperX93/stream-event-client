@@ -12,13 +12,8 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
-    // 30s, not vitest's 5s default, and now a backstop against a hang rather than a margin anything
-    // relies on. It was raised because three tests failed the repo gate on time alone under a loaded
-    // box, and the cause has since been removed at the source: the poll loops in
-    // ManifestFetcher.test.ts pumped a fixed budget of macrotask ticks per poll, which Node floors at
-    // about a millisecond each, so their cost was proportional to the poll count and inflated 8x under
-    // `pnpm verify`. They await the walk's own completion signal instead. The slowest case in this
-    // package is now 239ms and the whole package runs in 1.77s, so nothing here sits near any cap.
+    // A backstop against a hang rather than a margin anything relies on: the slowest case runs in
+    // well under a second.
     testTimeout: 30_000,
   },
 });

@@ -1,7 +1,7 @@
 /**
  * Where a preview card gets its picture from, decided before anything is fetched.
  *
- * Extracted from the component for the same reason `previewSource.ts` was: `packages/client` runs
+ * Extracted from the component for the same reason `previewSource.ts` was: this package runs
  * vitest with `environment: 'node'` and no jsdom, so a rule left inside the card is a rule nothing
  * covers, and the bug this exists to prevent was entirely in the branching.
  *

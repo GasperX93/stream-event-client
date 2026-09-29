@@ -23,8 +23,8 @@ const MB = 1024 * 1024;
  *
  * ## Re-derived 2026-08-05, and it stays at six
  *
- * The four clean runs of `docs/bench/quarter-second-2026-08-05.md`, which are the first arrivals
- * measured with the bench's follower reaching the live edge:
+ * The four clean runs measured on 2026-08-05, the first arrivals measured with a follower reaching
+ * the live edge:
  *
  * | segment | samples | observed floor | so this constant needs |
  * | ------- | ------: | -------------: | ---------------------: |
@@ -72,10 +72,8 @@ const MB = 1024 * 1024;
  * {@link LIVE_MAX_LATENCY_DURATION_S}.
  *
  * A paragraph here used to say that a player on this deployment rebuffers every 63 seconds whatever
- * this number is. That was LAT-10 and it is **retracted**: the freeze was bee's sequential feed head
- * lookup, which the bench polled every cycle and a player calls only on mount. See
- * `docs/bench/feed-reader-ab.md` for the reader comparison that showed it, and
- * `docs/reviews/upstream-bee-feed-lookup.md` for what the lookup costs.
+ * this number is. That is **retracted**: the freeze was bee's sequential feed head lookup, which the
+ * measuring tool polled every cycle and a player calls only on mount.
  */
 export const LIVE_SYNC_DURATION_S = 6;
 
@@ -101,8 +99,7 @@ export const LIVE_MAX_LATENCY_DURATION_S = 2 * LIVE_SYNC_DURATION_S;
  *
  * hls.js reads exactly 1, its default, as "never adapt", so without this a second lost to a slow
  * fetch or a rebuffer is kept for the rest of the session and latency only ever grows, until it
- * crosses {@link LIVE_MAX_LATENCY_DURATION_S} and the viewer is jumped forward instead. That was
- * LAT-2.
+ * crosses {@link LIVE_MAX_LATENCY_DURATION_S} and the viewer is jumped forward instead.
  *
  * 1.1 rather than the 1.5 the low-latency presets use. Browsers pitch-correct transparently to
  * around 1.1 and audibly past it, and 10% recovers a two second overshoot inside twenty seconds

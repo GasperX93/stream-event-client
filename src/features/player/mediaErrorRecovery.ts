@@ -8,7 +8,7 @@
  * black player pulling media forever.
  *
  * Kept as a pure function of an explicit clock reading so the escalation can be tested at all. The
- * player component has no test: `packages/client` runs vitest with `environment: 'node'` and no jsdom,
+ * player component has no test: this package runs vitest with `environment: 'node'` and no jsdom,
  * so the decision has to leave the component to be covered.
  */
 

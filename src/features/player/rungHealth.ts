@@ -27,8 +27,8 @@ const MIN_LEVELS_TO_DROP_ONE = 2;
 /**
  * How many rungs this player will ever take out of one ladder.
  *
- * ⛔⛔⛔ Owner ruling, 2026-09-01, after the first sitting with this armed. V7 kills the uploader, so
- * every rung stops. The player read that as three separate rungs failing, deleted them one by one,
+ * ⛔⛔⛔ Owner ruling, 2026-09-01, after the first live test with this on killed the uploader, so
+ * every rung stopped. The player read that as three separate rungs failing, deleted them one by one,
  * hls.js raised a fatal `levelSwitchError`, and the whole player destroyed and restarted itself.
  *
  * Rungs do not stop at the same instant, which is what the rule's safety argument assumed. Each
@@ -43,7 +43,7 @@ const MIN_LEVELS_TO_DROP_ONE = 2;
  * dead one in the ladder, and a viewer sitting on it can freeze.
  *
  * **Kept the same as the uploader's `MAX_RUNGS_DROPPED_AT_ONCE`**, which decides what the master
- * advertises. `e2e/test/rungDeathAgreement.test.ts` pins the pair that must move together.
+ * advertises, so the two must move together.
  */
 const MAX_RUNGS_DROPPED_PER_LADDER = 1;
 
@@ -124,7 +124,7 @@ export function attachRungFailover(hls: Hls, feedHealth: FeedHealthTracker): () 
     const index = levelIndexOfRung(hls, rungTopicId);
     if (index < 0) {
       // ⛔ Silent until 2026-09-01, and it shares its silence with "the rung was never reported
-      // stopped at all". V3 went red that day having logged NOTHING: no drop, no refusal, no
+      // stopped at all". A live test went red that day having logged NOTHING: no drop, no refusal, no
       // detection, so the two had to be told apart by reasoning rather than by reading. Most
       // announcements really are another ladder's and this is the right answer for them, which is
       // why it says which ladder rather than warning.
@@ -147,7 +147,7 @@ export function attachRungFailover(hls: Hls, feedHealth: FeedHealthTracker): () 
     const level = hls.levels[index];
     // ⛔ The arithmetic that condemned it, in the line that announces it. A warning saying only that
     // a rung stopped cannot be checked against the broadcast afterwards, and on 2026-08-31 that cost
-    // two sittings: the client dropped three healthy rungs, said so four times, and nothing it said
+    // two live test runs: the client dropped three healthy rungs, said so four times, and nothing it said
     // could distinguish a wrong count from a wrong rule.
     const lag = `${feedHealth.ladderLagOf(rungTopicId)} segments behind the ladder`;
     if (hls.levels.length < MIN_LEVELS_TO_DROP_ONE) {
