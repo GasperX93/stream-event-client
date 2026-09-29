@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import {
   CONFIG_URL,
   configProblemText,
+  enabledChat,
   loadRuntimeConfig,
   parseRuntimeConfig,
   type RuntimeConfigResult,
@@ -107,7 +108,6 @@ describe('checking the runtime config', () => {
     );
     expect(problemOf(parseRuntimeConfig({ ...VALID, chat: { ...CHAT, enabled: 'yes' } }))).toContain('chat.enabled');
   });
-
   it('names every field it refused, not only the first', () => {
     const problem = problemOf(parseRuntimeConfig({ gatewayUrl: '', catalog: { owner: '', topic: '' } }));
 
@@ -117,11 +117,83 @@ describe('checking the runtime config', () => {
   });
 });
 
+describe('the chat settings', () => {
+  const withChat = (chat: Record<string, unknown>) => parseRuntimeConfig({ ...VALID, chat: { ...CHAT, ...chat } });
+
+  it('accepts a chat endpoint on this site or at an http or https address', () => {
+    for (const beeUrl of ['/chat-bee', 'http://localhost:1633', 'https://chat.example.com']) {
+      expect(withChat({ beeUrl }).ok).toBe(true);
+    }
+  });
+
+  it('refuses, when chat is on, a field still holding the example placeholder, naming it', () => {
+    for (const field of ['beeUrl', 'gsocResourceId', 'gsocTopic', 'feedOwner']) {
+      const problem = problemOf(withChat({ [field]: '<example>' }));
+      expect(problem).toContain(`chat.${field}`);
+    }
+  });
+
+  it('refuses, when chat is on, an empty field, naming it', () => {
+    for (const field of ['beeUrl', 'gsocResourceId', 'gsocTopic', 'feedOwner']) {
+      expect(problemOf(withChat({ [field]: '' }))).toContain(`chat.${field}`);
+    }
+  });
+
+  it('refuses a chat endpoint that is neither a path on this site nor an http address', () => {
+    for (const beeUrl of ['bee', '//chat.example.com', 'ftp://chat.example.com']) {
+      expect(problemOf(withChat({ beeUrl }))).toContain('chat.beeUrl');
+    }
+  });
+
+  it('refuses a feed owner that is not an Ethereum address', () => {
+    expect(problemOf(withChat({ feedOwner: '0x1234' }))).toContain('chat.feedOwner');
+  });
+
+  it('refuses a GSOC key that is not 32 bytes of hex', () => {
+    for (const gsocResourceId of ['abc', 'z'.repeat(64), 'a'.repeat(63)]) {
+      expect(problemOf(withChat({ gsocResourceId }))).toContain('chat.gsocResourceId');
+    }
+    expect(withChat({ gsocResourceId: '0x' + 'b'.repeat(64) }).ok).toBe(true);
+  });
+
+  it('refuses a poll interval that is not a positive whole number of milliseconds', () => {
+    for (const pollIntervalMs of [0, -500, 1.5, '500']) {
+      expect(problemOf(withChat({ pollIntervalMs }))).toContain('chat.pollIntervalMs');
+    }
+  });
+
+  it('refuses a chat block that is on but misses a field', () => {
+    const { gsocTopic: _, ...missing } = CHAT;
+    expect(problemOf(parseRuntimeConfig({ ...VALID, chat: missing }))).toContain('chat.gsocTopic');
+  });
+
+  it('accepts a chat block that is off whatever its other fields hold, placeholders included', () => {
+    expect(
+      parseRuntimeConfig({ ...VALID, chat: { enabled: false, beeUrl: '<chat bee>', feedOwner: '<owner>' } }).ok,
+    ).toBe(true);
+    expect(parseRuntimeConfig({ ...VALID, chat: { enabled: false } }).ok).toBe(true);
+  });
+
+  it('hands the chat settings on only when chat is on', () => {
+    const on = parseRuntimeConfig({ ...VALID, chat: CHAT });
+    const off = parseRuntimeConfig({ ...VALID, chat: { ...CHAT, enabled: false } });
+    const absent = parseRuntimeConfig(VALID);
+
+    expect(on.ok && enabledChat(on.config)).toEqual(CHAT);
+    expect(off.ok && enabledChat(off.config)).toBeNull();
+    expect(absent.ok && enabledChat(absent.config)).toBeNull();
+  });
+});
+
 describe('the example config the repository ships', () => {
   const example = JSON.parse(readFileSync(join(ROOT, 'public', 'config.json'), 'utf8')) as unknown;
 
   it('is refused until its placeholders are filled in, so it can never pass for a real deployment', () => {
     expect(problemOf(parseRuntimeConfig(example))).toContain('placeholder');
+  });
+
+  it('ships the chat off', () => {
+    expect((example as { chat?: { enabled?: unknown } }).chat?.enabled).toBe(false);
   });
 
   it('is valid once the placeholders are filled in', () => {
