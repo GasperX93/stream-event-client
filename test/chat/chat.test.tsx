@@ -183,6 +183,20 @@ describe('the chat on a watch page', () => {
     expect(FakeSwarmChat.instances).toHaveLength(1);
   });
 
+  it('says when the chat is reconnecting or not updating, and nothing once it is live again', async () => {
+    await open();
+    emit(EVENTS.MESSAGE_RECEIVED, message({ id: 'm' }));
+    emit(EVENTS.STATUS, 'reconnecting');
+    expect(text()).toContain('Reconnecting to the chat');
+    expect(messageTexts()).toEqual(['text of m']);
+    emit(EVENTS.STATUS, 'stalled');
+    expect(text()).toContain('The chat is not updating right now');
+    expect(text()).not.toContain('Reconnecting to the chat');
+    emit(EVENTS.STATUS, 'live');
+    expect(text()).not.toContain('Reconnecting to the chat');
+    expect(text()).not.toContain('The chat is not updating right now');
+  });
+
   it('reads again, and shows the chat once it answers, after a sign-in while it could not be reached', async () => {
     await open(
       createElement(
