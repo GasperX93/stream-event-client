@@ -37,3 +37,14 @@ jobs:
 
       - name: First page load size, reported and not a gate
         run: node scripts/first-load-size.mjs dist
+
+      # The whole journey in a real browser, from recorded Bee answers, with no node and no network.
+      - run: pnpm e2e
+
+      - name: Keep the browser run's traces when it fails
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browser-smoke
+          path: test-results/
+          retention-days: 7

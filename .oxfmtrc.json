@@ -14,5 +14,5 @@
       }
     }
   ],
-  "ignorePatterns": ["**/dist/**", "**/coverage/**", "pnpm-lock.yaml"]
+  "ignorePatterns": ["**/dist/**", "**/coverage/**", "pnpm-lock.yaml", "e2e/recorded/**"]
 }
