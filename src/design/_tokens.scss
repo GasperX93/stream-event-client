@@ -6,12 +6,13 @@
 // The tokens test fails on a variable a stylesheet reads that nothing defines, on a token nothing
 // reads, on a theme missing a variable another theme has, and on a text colour below 4.5:1.
 
-// Only these weights are bundled: Geist 400 and 600, Vend Sans 600, JetBrains Mono 500. Another
-// weight needs its file imported in `fonts.ts`, or the browser fakes it.
+// Only these weights are bundled: Geist 400, 500, 600 and 700, Vend Sans 600, JetBrains Mono 500.
+// Another weight needs its file imported in `fonts.ts`, or the browser fakes it.
 $font-weight: (
   'normal': 400,
   'medium': 500,
   'semibold': 600,
+  'bold': 700,
 );
 
 $font-size: (
@@ -25,55 +26,105 @@ $font-size: (
   '2xl': 20px,
   '3xl': 24px,
   '4xl': 32px,
+  // The steps msrs-client writes in rem off the browser's 16px, which sit between the ones above.
+  'label-sm': 10.4px,
+  'label': 11.2px,
+  'lead': 16.8px,
+  'title-sm': 18.4px,
+  'title': 22px,
+  'figure': 28px,
+  'display': 48px,
 );
 
 $line-height: (
+  'compact': 1.1,
   'tight': 1.2,
+  'snug': 1.3,
   'normal': 1.5,
+  'relaxed': 1.6,
+  'tagline': 20px,
 );
 
+// As the Swarm theme of msrs-client sets them, plus the two its uppercase labels and badges use.
 $letter-spacing: (
   'tight': -0.02em,
-  'wide': 0.05em,
-  'wider': 0.08em,
+  'snug': -0.01em,
+  'wide': 0.025em,
+  'label': 0.08em,
+  'badge': 0.1em,
 );
 
+// The in-between steps are named for the two steps they sit between.
 $spacing: (
   '2xs': 2px,
+  '2xs-xs': 3px,
   'xs': 4px,
+  'xs-sm': 6px,
   'sm': 8px,
+  'sm-md': 10px,
   'md': 12px,
+  'md-base': 14px,
   'base': 16px,
+  'base-lg': 20px,
   'lg': 24px,
   'xl': 32px,
   '2xl': 40px,
   '3xl': 48px,
+  '4xl': 64px,
 );
 
 // Brand v3.0 draws rectangular controls with a small radius, not pills.
 $radius: (
   'sm': 4px,
   'base': 8px,
+  'input': 10px,
   'md': 12px,
   'full': 9999px,
 );
 
 $shadow: (
   'modal': 0 16px 48px rgba(0, 0, 0, 0.6),
-  'badge': 0 1px 2px rgba(0, 0, 0, 0.4),
+  'dropdown': 0 8px 24px rgba(0, 0, 0, 0.5),
+  // Read through `drop-shadow()`, which takes no spread.
+  'icon': 0 2px 4px rgba(0, 0, 0, 0.5),
 );
 
 $duration: (
   'fast': 150ms,
   'base': 200ms,
+  'pulse': 1.6s,
+  'pulse-fast': 1.4s,
 );
 
 $size: (
-  'header-height': 56px,
-  'header-height-desktop': 72px,
+  'header-height': 120px,
   'logo-height': 24px,
   'logo-height-desktop': 32px,
   'content-max-width': 1200px,
+  'hero-subtitle-width': 640px,
+  'featured-description-width': 520px,
+  'search-width': 320px,
+  'search-icon': 18px,
+  'search-clear': 20px,
+  'search-clear-icon': 16px,
+  'thumbnail-width': 210px,
+  'thumbnail-height': 180px,
+  'play-icon': 48px,
+  'placeholder-icon': 64px,
+  'live-dot': 8px,
+  'badge-dot': 7px,
+  'agenda-dot': 5px,
+  'countdown-divider': 32px,
+  'pagination-button': 28px,
+  'pagination-icon': 18px,
+  'pagination-info': 45px,
+  'dropdown-min-width': 150px,
+  'login-name-width': 96px,
+  'login-name-width-desktop': 200px,
+  'gateway-name-width': 120px,
+  'gateway-name-width-desktop': 260px,
+  'footer-max-width': 1152px,
+  'footer-logo-height': 26px,
   'focus-ring': 2px,
   'avatar': 32px,
   'chat-height': 480px,

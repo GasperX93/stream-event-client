@@ -1,42 +1,53 @@
 @use '@/design/media';
 
-.stream-browser {
+.stream-browser-page {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  gap: var(--spacing-lg);
-
-  @include media.tablet-up {
-    gap: var(--spacing-xl);
-  }
+  gap: var(--spacing-4xl);
+  line-height: normal;
 }
 
 .stream-browser-hero {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-  padding-top: var(--spacing-sm);
+  padding: var(--spacing-3xl) var(--spacing-lg) 0;
+  text-align: center;
 
   @include media.tablet-up {
-    padding-top: var(--spacing-lg);
+    padding-top: var(--spacing-4xl);
   }
 }
 
 .stream-browser-title {
-  font-size: var(--font-size-3xl);
+  margin-bottom: var(--spacing-base);
+  font-size: var(--font-size-4xl);
+  line-height: normal;
+  letter-spacing: var(--letter-spacing-tight);
 
   @include media.tablet-up {
-    font-size: var(--font-size-4xl);
+    font-size: var(--font-size-display);
   }
 }
 
 .stream-browser-subtitle {
-  max-width: 560px;
-  font-size: var(--font-size-md);
+  max-width: var(--size-hero-subtitle-width);
+  margin: 0 auto;
+  font-size: var(--font-size-lead);
+  line-height: var(--line-height-relaxed);
   color: var(--color-text-secondary);
 }
 
+.stream-browser {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--spacing-base) var(--spacing-xs);
+
+  @include media.tablet-up {
+    max-width: var(--size-content-max-width);
+  }
+}
+
 // Stands where the list would, so a gateway that cannot be reached, a first read in flight and an
-// empty event each say so in the same place.
+// empty event each say so in the same place, in the plain centred words msrs-client uses.
 .stream-browser-notice {
   display: flex;
   flex-direction: column;
@@ -44,12 +55,9 @@
   justify-content: center;
   gap: var(--spacing-base);
   min-height: 200px;
-  padding: var(--spacing-lg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
   text-align: center;
-  color: var(--color-text-secondary);
 
   &.unreachable {
     color: var(--color-error-text);

@@ -7,31 +7,29 @@
   min-height: 100dvh;
 }
 
+// Tall and see-through, fading from the page colour, and not sticky, as msrs-client draws it.
 .main-layout-header {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: var(--z-index-header);
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-base);
   height: var(--size-header-height);
-  padding: 0 var(--spacing-base);
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface-glass);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-
-  @include media.tablet-up {
-    height: var(--size-header-height-desktop);
-    padding: 0 var(--spacing-lg);
-  }
+  padding: var(--spacing-lg);
+  background: linear-gradient(180deg, var(--color-background), var(--color-background-clear));
 }
 
 .main-layout-logo-link {
   display: inline-flex;
   flex-shrink: 0;
+  align-items: center;
   border-radius: var(--radius-sm);
+
+  &:focus-visible {
+    outline-offset: 4px;
+  }
 }
 
 .main-layout-logo {
@@ -47,18 +45,14 @@
 .main-layout-actions {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-lg);
   min-width: 0;
 }
 
+// Each page sets its own width, as the browse and watch pages of msrs-client do.
 .main-layout-content {
+  display: flex;
   flex: 1;
+  flex-direction: column;
   width: 100%;
-  max-width: var(--size-content-max-width);
-  margin: 0 auto;
-  padding: var(--spacing-base) var(--spacing-base) var(--spacing-2xl);
-
-  @include media.tablet-up {
-    padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-3xl);
-  }
 }
