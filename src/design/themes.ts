@@ -1,16 +1,7 @@
 import swarmLogoUrl from './assets/swarm-logo.svg';
+import { type ThemeName } from './themeNames';
 
-/**
- * Every theme this build carries, by the name a deployment selects it with in config.json. The
- * stylesheet defines one `:root[data-theme]` block for each, in `themes/_index.scss`, and the tokens
- * test holds the two lists to each other.
- */
-export const THEME_NAMES = ['swarm'] as const;
-
-export type ThemeName = (typeof THEME_NAMES)[number];
-
-/** Used when the config names no theme, and applied by the stylesheet before any is chosen. */
-export const DEFAULT_THEME: ThemeName = 'swarm';
+export { DEFAULT_THEME, THEME_NAMES, type ThemeName } from './themeNames';
 
 /** What a theme decides that a stylesheet cannot: its images and its words. */
 export interface ThemeSettings {

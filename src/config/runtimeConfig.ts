@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
-import { DEFAULT_THEME, THEME_NAMES, type ThemeName } from '@/design/themes';
+// Imported by its file name, so Node reads this schema without the bundler, as the deployment's own tests do.
+import { DEFAULT_THEME, THEME_NAMES, type ThemeName } from '../design/themeNames.ts';
 
 /**
  * Served beside the page, so one build serves every deployment and a setting changes without a
