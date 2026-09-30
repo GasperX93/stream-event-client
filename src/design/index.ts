@@ -1,4 +1,4 @@
 import './fonts';
 import './theme.scss';
 
-export { default as swarmLogoUrl } from './assets/swarm-logo.svg';
+export { applyTheme, DEFAULT_THEME, THEMES, type ThemeName, type ThemeSettings } from './themes';

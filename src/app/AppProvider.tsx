@@ -5,7 +5,8 @@ import { manifestFetcher } from '@/features/player/CustomManifestLoader';
 import { ManifestStateManager } from '@/features/player/ManifestManagement';
 import { Stream } from '@/features/catalog/stream';
 import { CatalogFeedReader } from '@/features/catalog/catalogFeed';
-import { type ChatConfig, enabledChat, type RuntimeConfig } from '@/config/runtimeConfig';
+import { type ChatConfig, enabledChat, type RuntimeConfig, selectedTheme } from '@/config/runtimeConfig';
+import { THEMES, type ThemeSettings } from '@/design/themes';
 
 import { CatalogRead, catalogUpdater, StreamCatalog, toCatalogRead } from '@/features/catalog/catalogState';
 
@@ -39,6 +40,8 @@ type AppContextState = {
   defaultGatewayUrl: string;
   /** The chat's settings, or null when this deployment has chat switched off. */
   chat: ChatConfig | null;
+  /** The logo and page copy of the theme this deployment wears. */
+  theme: ThemeSettings;
 };
 
 const AppContext = createContext<AppContextState | undefined>(undefined);
@@ -165,6 +168,7 @@ export const AppContextProvider = ({ config, children }: Props) => {
         setGatewayUrl,
         defaultGatewayUrl: config.gatewayUrl,
         chat: enabledChat(config),
+        theme: THEMES[selectedTheme(config)],
       }}
     >
       {children}

@@ -1,88 +1,10 @@
-// The design tokens, with the Swarm Brand v3.0 values: near-black surfaces, the orange #f47a20 as a
-// sparing accent, Vend Sans headings, Geist body text and JetBrains Mono labels. `theme.scss` emits
-// every entry below once on `:root` as `--<group>-<name>`, and components read only those variables.
+// The design's scales: sizes, spacing, type steps, radii, timing. They hold for every theme, and
+// `theme.scss` emits them once on `:root` as `--<group>-<name>`. What a theme decides, its colours and
+// its typefaces, is in `themes/`, one file per theme.
 //
-// To add a token, add it to its map here and read it as `var(--<group>-<name>)`. The tokens test
-// fails on a variable a stylesheet reads that is not defined here, on a token nothing reads, and on a
-// text colour that falls below 4.5:1 against its background.
-
-$color: (
-  'background': #151517,
-  'surface': #1b1b1c,
-  'surface-raised': #252626,
-  'surface-glass': rgba(27, 27, 28, 0.88),
-  'input': #242424,
-  'border': #333333,
-  'border-strong': #4c4c4c,
-  'overlay': rgba(0, 0, 0, 0.75),
-  // Behind a letterboxed picture, where anything but black reads as part of the video.
-  'video': #000000,
-  'primary': #f47a20,
-  'primary-hover': #f79c5a,
-  // Light text on the orange measures 2.6:1, so anything written on it is the darkest neutral.
-  'on-primary': #151517,
-  'text': #fafafa,
-  'text-secondary': rgba(250, 250, 250, 0.72),
-  'text-tertiary': rgba(250, 250, 250, 0.5),
-  'button-secondary': rgba(250, 250, 250, 0.1),
-  'button-secondary-hover': rgba(250, 250, 250, 0.16),
-  // Badges are light pills with the darkest neutral on them.
-  'badge': rgba(250, 250, 250, 0.9),
-  'on-badge': #242424,
-  // The brand's #fb2c36 carries white text at 3.6:1, so the badge uses its darker step.
-  'live': #b91c1c,
-  'on-live': #fafafa,
-  'error-text': #ff8a8a,
-  'warning': #f28b0a,
-  'spinner-track': rgba(250, 250, 250, 0.15),
-  // A chat name's colour, behind its initial in light text. The chat picks one by hashing the name.
-  'name-1': #b91c1c,
-  'name-2': #b45309,
-  'name-3': #047857,
-  'name-4': #1d4ed8,
-  'name-5': #c2410c,
-  'name-6': #7e22ce,
-  'name-7': #be123c,
-  'name-8': #0f766e,
-  'name-9': #6d28d9,
-  'name-10': #0369a1,
-  'name-11': #a21caf,
-  'name-12': #a16207,
-  'name-13': #0e7490,
-  'name-14': #be185d,
-  'name-15': #15803d,
-  'name-16': #4338ca,
-);
-
-$font-family: (
-  'base': (
-    'Geist',
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    Arial,
-    sans-serif,
-  ),
-  'heading': (
-    'Vend Sans',
-    'Geist',
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    Arial,
-    sans-serif,
-  ),
-  'mono': (
-    'JetBrains Mono',
-    ui-monospace,
-    'SFMono-Regular',
-    Menlo,
-    Monaco,
-    monospace,
-  ),
-);
+// To add a token, add it to its map here or to every theme, and read it as `var(--<group>-<name>)`.
+// The tokens test fails on a variable a stylesheet reads that nothing defines, on a token nothing
+// reads, on a theme missing a variable another theme has, and on a text colour below 4.5:1.
 
 // Only these weights are bundled: Geist 400 and 600, Vend Sans 600, JetBrains Mono 500. Another
 // weight needs its file imported in `fonts.ts`, or the browser fakes it.
@@ -167,8 +89,6 @@ $z-index: (
 
 // Every group above, under the prefix its variables carry.
 $groups: (
-  'color': $color,
-  'font-family': $font-family,
   'font-weight': $font-weight,
   'font-size': $font-size,
   'line-height': $line-height,

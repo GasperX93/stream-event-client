@@ -1,5 +1,5 @@
 import { configProblemText } from '@/config/runtimeConfig';
-import { swarmLogoUrl } from '@/design';
+import { DEFAULT_THEME, THEMES } from '@/design';
 
 import './ConfigProblem.scss';
 
@@ -12,7 +12,7 @@ export function ConfigProblem({ result }: ConfigProblemProps) {
 
   return (
     <main className="config-problem">
-      <img src={swarmLogoUrl} alt="Swarm" className="config-problem-logo" />
+      <img src={THEMES[DEFAULT_THEME].logoUrl} alt="Swarm" className="config-problem-logo" />
       <div className="config-problem-panel" role="alert">
         <h1 className="config-problem-title">{text.title}</h1>
         <p className="config-problem-detail">{text.detail}</p>

@@ -1,9 +1,10 @@
 @use 'sass:list';
 @use 'sass:meta';
 @use 'tokens';
+@use 'themes';
 
-:root {
-  @each $group, $values in tokens.$groups {
+@mixin custom-properties($groups) {
+  @each $group, $values in $groups {
     @each $name, $value in $values {
       @if meta.type-of($value) == 'list' and list.separator($value) == 'comma' {
         --#{$group}-#{$name}: #{meta.inspect($value)};
@@ -12,8 +13,25 @@
       }
     }
   }
+}
+
+:root {
+  @include custom-properties(tokens.$groups);
 
   color-scheme: dark;
+}
+
+// A deployment picks its theme with `theme` in config.json, which the app writes to the page as
+// `data-theme` before it renders.
+@each $name, $theme in themes.$themes {
+  $selector: ":root[data-theme='#{$name}']";
+  @if $name == themes.$default {
+    $selector: ':root, #{$selector}';
+  }
+
+  #{$selector} {
+    @include custom-properties($theme);
+  }
 }
 
 *,

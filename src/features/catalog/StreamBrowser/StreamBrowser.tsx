@@ -9,7 +9,7 @@ import { CATALOG_VIEW_MESSAGE, catalogViewFrom } from './catalogView';
 import './StreamBrowser.scss';
 
 export function StreamBrowser() {
-  const { streamList, isStreamListFromCurrentGateway } = useAppContext();
+  const { streamList, isStreamListFromCurrentGateway, theme } = useAppContext();
   // `error` and `isLoading` used to be dropped here, which is why a gateway nobody could reach looked
   // exactly like a gateway with nothing on it.
   const { error, isLoading } = useCatalogPoll(CATALOG_POLL_INTERVAL_MS);
@@ -24,8 +24,8 @@ export function StreamBrowser() {
   return (
     <div className="stream-browser">
       <div className="stream-browser-hero">
-        <h1 className="stream-browser-title">Devcon 8 streams</h1>
-        <p className="stream-browser-subtitle">Live talks and recordings, delivered over the Swarm network.</p>
+        <h1 className="stream-browser-title">{theme.heroTitle}</h1>
+        <p className="stream-browser-subtitle">{theme.heroSubtitle}</p>
       </div>
       {view === 'streams' ? (
         <StreamList />

@@ -46,6 +46,11 @@ live with the deployment, never in this repository.
 | `catalog.owner` | The Ethereum address that owns the stream list feed                                                                             |
 | `catalog.topic` | The stream list feed's topic, as text                                                                                           |
 | `chat`          | Optional. The chat's settings, below. Without it, or with `enabled` false, there is no chat anywhere on the page                |
+| `theme`         | Optional. Which of the build's themes the page wears, `swarm` today and the default. A name the build does not carry is refused |
+
+A theme is a set of colours and typefaces in `src/design/themes/`, with its logo and page copy in
+`src/design/themes.ts`. Every theme defines the same variables, so switching theme leaves nothing
+unset, and the tokens test fails on a theme that misses one or on a text colour below 4.5:1.
 
 The `chat` block. With `enabled` true every field must be filled in, and the page refuses to start
 otherwise. With `enabled` false the other fields are not read.

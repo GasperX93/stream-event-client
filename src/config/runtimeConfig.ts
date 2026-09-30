@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { DEFAULT_THEME, THEME_NAMES, type ThemeName } from '@/design/themes';
+
 /**
  * Served beside the page, so one build serves every deployment and a setting changes without a
  * rebuild. Relative, because the app is built with `base: './'` and may be served under a path.
@@ -62,6 +64,8 @@ const disabledChatSchema = z.looseObject({ enabled: z.literal(false) });
 const chatSchema = z.discriminatedUnion('enabled', [enabledChatSchema, disabledChatSchema]);
 
 const runtimeConfigSchema = z.object({
+  /** Which of this build's themes the page wears. Absent means the default. */
+  theme: z.enum(THEME_NAMES, { message: `must be one of ${THEME_NAMES.join(', ')}` }).optional(),
   gatewayUrl: gatewayUrlSchema,
   catalog: catalogSchema,
   chat: chatSchema.optional(),
@@ -77,6 +81,11 @@ function describeIssues(error: z.ZodError): string {
   return error.issues
     .map((issue) => `${issue.path.length > 0 ? issue.path.join('.') : 'the config'}: ${issue.message}`)
     .join('; ');
+}
+
+/** The theme this deployment wears. */
+export function selectedTheme(config: RuntimeConfig): ThemeName {
+  return config.theme ?? DEFAULT_THEME;
 }
 
 /** The chat's settings when chat is on, and null when it is off or not configured. */

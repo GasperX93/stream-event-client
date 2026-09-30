@@ -57,7 +57,8 @@ function rules(css: string): Array<{ selector: string; body: string }> {
   return [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(([, selector, body]) => ({ selector: selector.trim(), body }));
 }
 
-const THEME_SELECTOR = /:root\[data-theme=["']([\w-]+)["']\]/g;
+// Sass drops the quotes around a plain name, so both spellings are read.
+const THEME_SELECTOR = /:root\[data-theme=["']?([\w-]+)["']?\]/g;
 
 /** The body each theme's variables are written in, by the theme's name. */
 function themeBodies(css: string): Map<string, string> {
@@ -87,7 +88,7 @@ describe('the design tokens', () => {
 
   it('apply the default theme before any theme is selected', () => {
     const defaultRule = rules(themeCss).find(({ selector }) =>
-      selector.split(',').some((part) => part.trim() === `:root[data-theme='${DEFAULT_THEME}']`),
+      [...selector.matchAll(THEME_SELECTOR)].some(([, name]) => name === DEFAULT_THEME),
     );
 
     expect(defaultRule?.selector.split(',').map((part) => part.trim())).toContain(':root');
