@@ -35,31 +35,35 @@ export function LoginModal() {
   return (
     <Dialog title="Join the chat" onClose={close}>
       <p id={descriptionId} className="login-modal-content">
-        Choose a display name of up to {DISPLAY_NAME_MAX_LENGTH} characters. It is shown beside your messages, and this
+        Choose a display name of up to {DISPLAY_NAME_MAX_LENGTH} characters. It is shown on your messages, and this
         browser remembers it.
       </p>
-      <input
-        value={name}
-        className="login-modal-input"
-        placeholder="Display name"
-        aria-label="Display name"
-        aria-describedby={`${descriptionId} ${problemId}`}
-        aria-invalid={problem !== null}
-        autoComplete="nickname"
-        onChange={(event) => {
-          setName(event.target.value);
-          setProblem(null);
-        }}
-        onKeyDown={handleKeyDown}
-      />
+      <div className="login-modal-input-container">
+        <input
+          value={name}
+          className="login-modal-input"
+          placeholder="Display name"
+          aria-label="Display name"
+          aria-describedby={`${descriptionId} ${problemId}`}
+          aria-invalid={problem !== null}
+          autoComplete="nickname"
+          onChange={(event) => {
+            setName(event.target.value);
+            setProblem(null);
+          }}
+          onKeyDown={handleKeyDown}
+        />
+      </div>
       <p id={problemId} className="login-modal-error" role="alert">
         {problem}
       </p>
       <div className="login-modal-actions">
-        <Button variant={ButtonVariant.SECONDARY} onClick={close}>
+        <Button variant={ButtonVariant.SECONDARY} className="login-modal-button cancel" onClick={close}>
           Cancel
         </Button>
-        <Button onClick={join}>Join</Button>
+        <Button className="login-modal-button" onClick={join}>
+          Join
+        </Button>
       </div>
     </Dialog>
   );

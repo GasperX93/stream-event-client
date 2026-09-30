@@ -193,6 +193,16 @@ const TEXT_ON_SURFACE: Array<[text: string, surface: string]> = [
   ['text-tertiary', 'surface'],
   ['primary', 'input'],
   ['error-text', 'surface-raised'],
+  ['text', 'surface-glass'],
+  ['text', 'message'],
+  ['text-secondary', 'surface-glass'],
+  ['text-secondary', 'error-surface'],
+  ['text-tertiary', 'surface-glass'],
+  ['text-soft', 'surface-glass'],
+  ['on-scrim', 'scrim'],
+  ['on-scrim-secondary', 'scrim'],
+  ['on-button-light', 'button-light'],
+  ['on-button-light', 'button-light-hover'],
   ...Array.from({ length: 16 }, (_, i): [string, string] => ['text', `name-${i + 1}`]),
 ];
 

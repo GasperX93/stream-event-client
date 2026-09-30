@@ -1,0 +1,17 @@
+// The Swarm design draws some controls smaller than a finger. Where such a control is the only way to
+// do something, a coarse pointer gets an invisible hit area of the touch-target size around it, and
+// the control keeps the size the design drew. The control must be positioned, relative or otherwise,
+// for the hit area to sit around it.
+@mixin touch-target {
+  @media (pointer: coarse) {
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: max(100%, var(--size-touch-target));
+      height: max(100%, var(--size-touch-target));
+      transform: translate(-50%, -50%);
+    }
+  }
+}

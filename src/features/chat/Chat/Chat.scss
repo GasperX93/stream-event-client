@@ -1,15 +1,17 @@
 @use '@/design/media';
+@use '@/design/touch';
 
-// Under the video on a phone and a foldable, beside it on a desktop, where the layout gives the panel
-// a column of its own.
+// The Swarm site's chat panel. Stacked under the video it takes most of a phone's screen, and beside
+// the video on a desktop it takes the window's height, where the layout keeps it in view.
 .chat-container {
   display: flex;
   flex-direction: column;
   height: var(--size-chat-height);
+  height: var(--size-chat-height-dynamic);
+  padding: var(--spacing-sm) var(--spacing-md);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: var(--color-surface);
-  overflow: hidden;
+  background: var(--color-surface-glass);
 
   &.folded {
     height: auto;
@@ -20,47 +22,59 @@
     &,
     &.folded {
       height: var(--size-chat-height-desktop);
+      min-height: var(--size-chat-min-height-desktop);
     }
   }
 }
 
+// Only a phone and a tablet have a header, to fold the chat away. The title stays for a screen
+// reader, which names the panel by it.
 .chat-header {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-base);
-  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--color-hairline);
 
   .folded & {
+    padding-bottom: 0;
     border-bottom: none;
+  }
 
-    @include media.desktop-up {
-      border-bottom: 1px solid var(--color-border);
-    }
+  @include media.desktop-up {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
 
 .chat-title {
-  font-size: var(--font-size-lg);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: normal;
+  color: var(--color-text-secondary);
 }
 
-// Folding is for a phone, where the chat pushes the stream's title down the page.
+// Folding is for a phone, where the chat pushes the stream's title down the page. It is the only way
+// to fold, so a finger gets the whole target.
 .chat-fold-button {
-  min-height: 44px;
-  padding: 0 var(--spacing-sm);
+  min-height: var(--size-touch-target);
+  padding: 0 var(--spacing-xs);
   border: none;
   background: none;
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
   cursor: pointer;
 
   &:hover {
-    color: var(--color-text);
-  }
-
-  @include media.desktop-up {
-    display: none;
+    text-decoration: underline;
   }
 }
 
@@ -80,37 +94,83 @@
   }
 }
 
+.chat-loading {
+  padding: var(--spacing-md) 0;
+  font-size: var(--font-size-sm);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
 .chat-state {
   display: flex;
-  flex: 1;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: var(--spacing-sm);
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md);
+  font-size: var(--font-size-sm);
   text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.chat-state-error {
+  border: 1px solid var(--color-error-border);
+  border-radius: var(--radius-base);
+  background: var(--color-error-surface);
 }
 
 .chat-state-title {
   font-weight: var(--font-weight-semibold);
-}
-
-.chat-state-detail,
-.chat-empty {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  color: var(--color-text);
 }
 
 .chat-empty {
   flex: 1;
   padding: var(--spacing-lg) var(--spacing-base);
+  font-size: var(--font-size-sm);
   text-align: center;
+  color: var(--color-text-tertiary);
 }
 
 .chat-load-more {
-  margin: var(--spacing-sm) var(--spacing-base) 0;
+  @include touch.touch-target;
+
+  position: relative;
+  align-self: center;
+  padding: var(--spacing-xs) var(--spacing-base);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) ease;
+
+  &:hover:not(:disabled) {
+    background: var(--color-button-secondary);
+  }
+
+  &:disabled {
+    cursor: progress;
+  }
 }
 
+// A quiet bar where the message field goes, as the Swarm site's "Log in to join the chat".
 .chat-login-prompt {
-  margin: var(--spacing-sm) var(--spacing-base) var(--spacing-base);
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  margin-top: auto;
+  padding: var(--spacing-md);
+  border: none;
+  border-radius: var(--radius-base);
+  background: var(--color-surface-glass);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: background-color var(--duration-base) ease;
+
+  &:hover {
+    background: var(--color-message);
+  }
 }

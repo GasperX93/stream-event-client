@@ -1,51 +1,97 @@
 @use '@/design/media';
 
 .login-modal-content {
-  margin-bottom: var(--spacing-base);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-lg);
+  font-size: var(--font-size-lg);
+}
+
+// A filled box with the field inside it and no border of its own, as the Swarm site draws it. The box
+// shows focus, which the design leaves out and a keyboard needs.
+.login-modal-input-container {
+  display: flex;
+  align-items: center;
+  height: var(--size-modal-input-height);
+  margin: var(--spacing-sm) 0;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  background: var(--color-input);
+
+  &:focus-within {
+    box-shadow: inset 0 0 0 1px var(--color-primary);
+  }
+
+  &:has([aria-invalid='true']) {
+    box-shadow: inset 0 0 0 1px var(--color-error-text);
+  }
 }
 
 .login-modal-input {
   width: 100%;
-  min-height: 44px;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-base);
-  background: var(--color-input);
-  transition: border-color var(--duration-base) ease;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
 
-  &:focus {
-    border-color: var(--color-primary);
+  &:focus-visible {
+    outline: none;
   }
 
   &::placeholder {
+    font-weight: var(--font-weight-normal);
     color: var(--color-text-tertiary);
-  }
-
-  &[aria-invalid='true'] {
-    border-color: var(--color-error-text);
   }
 }
 
 .login-modal-error {
-  min-height: 1.5em;
-  margin: var(--spacing-xs) 0 var(--spacing-sm);
   font-size: var(--font-size-sm);
+  text-align: center;
   color: var(--color-error-text);
+
+  &:not(:empty) {
+    margin-top: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-error-border);
+    border-radius: var(--radius-base);
+    background: var(--color-error-surface);
+  }
 }
 
 .login-modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-base);
+  margin-top: var(--spacing-lg);
+}
 
-  // On a phone both buttons share the row, so each is an easy target.
-  > .button {
-    flex: 1;
+// Written over the shared button's look, as the Swarm site's modal does: a light pill to back out, the
+// orange to go ahead.
+.button.login-modal-button {
+  height: var(--size-dialog-button-height-phone);
+  min-height: 0;
+  padding: 0 var(--spacing-base);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
 
-    @include media.tablet-up {
-      flex: none;
+  @media (pointer: coarse) {
+    min-height: var(--size-touch-target);
+  }
+
+  @include media.tablet-up {
+    height: var(--size-dialog-button-height);
+    padding: 0 var(--spacing-lg);
+    font-size: var(--font-size-lg);
+  }
+
+  &.cancel {
+    background: var(--color-button-light);
+    color: var(--color-on-button-light);
+
+    &:hover:not(:disabled) {
+      background: var(--color-button-light-hover);
     }
   }
 }

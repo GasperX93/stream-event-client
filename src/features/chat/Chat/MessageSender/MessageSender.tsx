@@ -52,8 +52,8 @@ export function MessageSender({ onSend, label, placeholder, checkDraft }: Messag
 
   return (
     <div className="message-sender-wrapper">
+      <ReactionToolbar onEmojiSelect={(emoji) => setInput((previous) => previous + emoji)} />
       <div className="message-sender">
-        <ReactionToolbar onEmojiSelect={(emoji) => setInput((previous) => previous + emoji)} />
         <input
           ref={inputRef}
           type="text"
@@ -73,7 +73,7 @@ export function MessageSender({ onSend, label, placeholder, checkDraft }: Messag
           disabled={sending || !draft || draftRefusal !== null}
           onClick={() => void send()}
         >
-          <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
             <path
               fill="currentColor"
               d="M.344.245A1 1 0 0 1 1.446.105l18 9a1 1 0 0 1 0 1.79l-18 9A1 1 0 0 1 .05 18.684L2.612 11H8a1 1 0 1 0 0-2H2.612L.05 1.316A1 1 0 0 1 .344.245Z"

@@ -68,3 +68,12 @@ export function watchPageView(
   }
   return listed.state === STREAM_STATUS_SCHEDULED ? WATCH_VIEW_NOT_STARTED : WATCH_VIEW_PLAYER;
 }
+
+/**
+ * The text the watch page puts under a stream's title, or null when there is none to show. The catalog
+ * is JSON off a feed that nobody checks this field of, so anything that is not text counts as none.
+ */
+export function watchPageDescription(listed: Pick<Stream, 'description'>): string | null {
+  const { description } = listed;
+  return typeof description === 'string' && description.trim() !== '' ? description.trim() : null;
+}
