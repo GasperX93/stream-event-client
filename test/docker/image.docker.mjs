@@ -18,7 +18,8 @@ const LABEL = 'stream-event-client-image-test';
 const NETWORK = 'stream-event-client-image-test';
 // An address, not a name, so nginx starts without a gateway to resolve. A read through /bee then fails upstream.
 const GATEWAY = 'http://127.0.0.1:1633';
-const CHAT = 'https://chat.example.com';
+const CHAT_READ = 'https://chat-read.example.com';
+const CHAT_WRITE = 'https://chat-write.example.com';
 const CONFIG = JSON.stringify({ gatewayUrl: '/bee', catalog: { owner: `0x${'1'.repeat(40)}`, topic: 'image-test' } });
 
 function docker(args, { allowFailure = false, timeoutMs } = {}) {
@@ -121,7 +122,11 @@ for (const mode of ['proxy', 'direct']) {
 void describe('proxy mode, the default', () => {
   let base;
   before(async () => {
-    base = startContainer('image-test-proxy', { BEE_GATEWAY_URL: GATEWAY, CHAT_BEE_URL: CHAT });
+    base = startContainer('image-test-proxy', {
+      BEE_GATEWAY_URL: GATEWAY,
+      CHAT_READ_URL: CHAT_READ,
+      CHAT_WRITE_URL: CHAT_WRITE,
+    });
     await waitForServer(base, 'image-test-proxy');
   });
 
@@ -134,7 +139,7 @@ void describe('proxy mode, the default', () => {
       const policy = policyOf(response);
       assert.match(
         policy,
-        /connect-src 'self' https:\/\/chat\.example\.com http:\/\/localhost:\* http:\/\/127\.0\.0\.1:\*/,
+        /connect-src 'self' https:\/\/chat-read\.example\.com https:\/\/chat-write\.example\.com http:\/\/localhost:\* http:\/\/127\.0\.0\.1:\*/,
       );
       assert.doesNotMatch(policy, /127\.0\.0\.1:1633/, 'a proxied gateway is on the page own origin');
       assert.equal(response.headers.get('x-content-type-options'), 'nosniff');

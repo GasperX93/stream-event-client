@@ -50,14 +50,15 @@ live with the deployment, never in this repository.
 The `chat` block. With `enabled` true every field must be filled in, and the page refuses to start
 otherwise. With `enabled` false the other fields are not read.
 
-| Field                 | What it is                                                                                                                   |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `chat.enabled`        | Whether the page has a chat                                                                                                  |
-| `chat.beeUrl`         | The chat's Bee endpoint, which every chat read and write goes through: a path on this site or an http or https address       |
-| `chat.gsocResourceId` | 32 bytes as 64 hex digits: the key every viewer writes chat messages with. Shared by design and public, not a secret (below) |
-| `chat.gsocTopic`      | The topic of the address the chat aggregator listens on                                                                      |
-| `chat.feedOwner`      | The Ethereum address that writes the chat feeds, which is the aggregator's                                                   |
-| `chat.pollIntervalMs` | How often an open chat reads its feed, in milliseconds. A positive whole number, raised under load without a rebuild         |
+| Field                 | What it is                                                                                                                                                       |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `chat.enabled`        | Whether the page has a chat                                                                                                                                      |
+| `chat.readUrl`        | Where the chat's feed and history files are read: a path on this site or an http or https address                                                                |
+| `chat.writeUrl`       | Where chat messages are written, an endpoint that stamps each write: a path on this site or an http or https address. The one `chat.beeUrl` of before is refused |
+| `chat.gsocResourceId` | 32 bytes as 64 hex digits: the key every viewer writes chat messages with. Shared by design and public, not a secret (below)                                     |
+| `chat.gsocTopic`      | The topic of the address the chat aggregator listens on                                                                                                          |
+| `chat.feedOwner`      | The Ethereum address that writes the chat feeds, which is the aggregator's                                                                                       |
+| `chat.pollIntervalMs` | How often an open chat reads its feed, in milliseconds. A positive whole number, raised under load without a rebuild                                             |
 
 Serve `config.json` with `Cache-Control: no-store`, so a changed setting reaches every page opened
 after the change.
@@ -73,9 +74,9 @@ time it opens.
 
 **What it needs, outside this repository.** Two services, set up apart from this app:
 
-- **A Bee endpoint for the chat**, `chat.beeUrl`, that viewers read and write through and that stamps
-  every write, because the page holds no postage stamp. A message costs one stamped chunk, and one more for each
-  resend while it has not been read back.
+- **Two Bee endpoints for the chat.** `chat.readUrl` serves the chat's feed and history files.
+  `chat.writeUrl` takes the messages and stamps every write, because the page holds no postage stamp.
+  A message costs one stamped chunk, and one more for each resend while it has not been read back.
 - **The chat aggregator**, which listens on the shared address the key and topic above name, and
   appends each message to the stream's chat feed, `chat-<stream topic>` under `chat.feedOwner`.
   Opening a chat reads the newest history file the chat feed points to, then the entries after it. The endpoint viewers write
@@ -117,7 +118,8 @@ container starts.
 docker build -t stream-event-client .
 docker run -p 8080:80 \
   -e BEE_GATEWAY_URL=https://gateway.example.com \
-  -e CHAT_BEE_URL=https://chat.example.com \
+  -e CHAT_READ_URL=https://chat-read.example.com \
+  -e CHAT_WRITE_URL=https://chat-write.example.com \
   -v "$PWD/config.json:/usr/share/nginx/html/config.json:ro" \
   stream-event-client
 ```
@@ -126,7 +128,8 @@ docker run -p 8080:80 \
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GATEWAY_MODE`    | `proxy`, the default: the page reads the gateway at `/bee` on its own origin, so `config.json` names `/bee` as `gatewayUrl`. `direct`: the page reads the gateway at its own address, which `config.json` names |
 | `BEE_GATEWAY_URL` | Required. The gateway's address, with no path. In proxy mode `/bee` forwards to it. In direct mode the page is allowed to reach it                                                                              |
-| `CHAT_BEE_URL`    | The chat endpoint's address, the same as `chat.beeUrl` in `config.json`, which the page is then allowed to reach. Leave it out when there is no chat                                                            |
+| `CHAT_READ_URL`   | The chat's read endpoint, the same as `chat.readUrl` in `config.json`, which the page is then allowed to reach. Leave it out when there is no chat                                                              |
+| `CHAT_WRITE_URL`  | The chat's write endpoint, the same as `chat.writeUrl`, allowed the same way. The one `CHAT_BEE_URL` of before stops the container                                                                              |
 | `config.json`     | Mounted over the image's example at `/usr/share/nginx/html/config.json`. Without it the page shows the example's placeholders as a configuration problem                                                        |
 
 A setting that is missing or malformed stops the container at start, and its log says which one.
@@ -144,7 +147,7 @@ records the browser smoke test's answers, which is what a job with a Docker daem
   offers. Inline styles are allowed because the emoji picker writes its own, and blob URLs because the
   player plays through them.
 - **The proxy passes reads only.** `/bee` forwards `GET` and `HEAD`, so the site cannot be used to
-  write to the gateway. The chat writes through its own endpoint, `CHAT_BEE_URL`.
+  write to the gateway. The chat writes through its own endpoint, `CHAT_WRITE_URL`.
 
 ## What the viewer does
 

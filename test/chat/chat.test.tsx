@@ -43,7 +43,8 @@ const OTHER = 'c'.repeat(40);
 
 const CHAT: ChatConfig = {
   enabled: true,
-  beeUrl: '/chat-bee',
+  readUrl: '/chat-read',
+  writeUrl: '/chat-write',
   gsocResourceId: 'd'.repeat(64),
   gsocTopic: 'gsoc-topic',
   feedOwner: FEED_OWNER,
@@ -110,7 +111,8 @@ describe('the chat on a watch page', () => {
     await open();
     const { infra } = FakeSwarmChat.latest().settings;
     expect(infra).toMatchObject({
-      beeUrl: '/chat-bee',
+      beeUrl: '/chat-read',
+      writeUrl: '/chat-write',
       gsocResourceId: CHAT.gsocResourceId,
       gsocTopic: 'gsoc-topic',
       chatTopic: 'chat-stream-one',

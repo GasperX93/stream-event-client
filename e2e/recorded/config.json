@@ -6,7 +6,8 @@
   },
   "chat": {
     "enabled": true,
-    "beeUrl": "http://127.0.0.1:4173/bee",
+    "readUrl": "http://127.0.0.1:4173/bee",
+    "writeUrl": "http://127.0.0.1:4173/bee",
     "gsocResourceId": "1111111111111111111111111111111111111111111111111111111111111111",
     "gsocTopic": "stream-event-client-recording",
     "feedOwner": "c1ba847ef00a1ff117b8cb2a31ad601ddcfe6618",

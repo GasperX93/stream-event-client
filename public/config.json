@@ -6,7 +6,8 @@
   },
   "chat": {
     "enabled": false,
-    "beeUrl": "<Bee endpoint the chat reads and writes through>",
+    "readUrl": "<Bee endpoint the chat is read through>",
+    "writeUrl": "<Bee endpoint that stamps and takes chat writes>",
     "gsocResourceId": "<the shared key every viewer writes chat messages with>",
     "gsocTopic": "<GSOC topic>",
     "feedOwner": "<chat feed owner address>",

@@ -65,11 +65,15 @@ describe('the image start-up script', () => {
     expect(policy(started.headers)).toMatch(/img-src [^;]*https:\/\/gateway\.example\.com/);
   });
 
-  it('allows the chat endpoint, a node on the viewer own machine, and blob media', () => {
+  it('allows both chat endpoints, a node on the viewer own machine, and blob media', () => {
     const csp = policy(
-      start({ BEE_GATEWAY_URL: 'http://gateway:1633', CHAT_BEE_URL: 'https://chat.example.com' }).headers,
+      start({
+        BEE_GATEWAY_URL: 'http://gateway:1633',
+        CHAT_READ_URL: 'https://chat-read.example.com',
+        CHAT_WRITE_URL: 'https://chat-write.example.com/',
+      }).headers,
     );
-    expect(csp).toMatch(/connect-src [^;]*https:\/\/chat\.example\.com/);
+    expect(csp).toMatch(/connect-src [^;]*https:\/\/chat-read\.example\.com https:\/\/chat-write\.example\.com /);
     expect(csp).toMatch(/connect-src [^;]*http:\/\/localhost:\* http:\/\/127\.0\.0\.1:\*/);
     expect(csp).toContain("media-src 'self' blob:");
     expect(csp).toContain("worker-src 'self' blob:");
@@ -82,8 +86,16 @@ describe('the image start-up script', () => {
     [{ BEE_GATEWAY_URL: 'gateway.example.com' }, 'BEE_GATEWAY_URL must be an address'],
     [{ BEE_GATEWAY_URL: 'https://gateway.example.com/bee' }, 'BEE_GATEWAY_URL must be an address'],
     [
-      { BEE_GATEWAY_URL: 'https://gateway.example.com', CHAT_BEE_URL: 'https://chat.example.com/x y' },
-      'CHAT_BEE_URL must be an address',
+      { BEE_GATEWAY_URL: 'https://gateway.example.com', CHAT_READ_URL: 'https://chat.example.com/x y' },
+      'CHAT_READ_URL must be an address',
+    ],
+    [
+      { BEE_GATEWAY_URL: 'https://gateway.example.com', CHAT_WRITE_URL: 'chat.example.com' },
+      'CHAT_WRITE_URL must be an address',
+    ],
+    [
+      { BEE_GATEWAY_URL: 'https://gateway.example.com', CHAT_BEE_URL: 'https://chat.example.com' },
+      'CHAT_BEE_URL is replaced by CHAT_READ_URL and CHAT_WRITE_URL',
     ],
     [{ BEE_GATEWAY_URL: 'https://gateway.example.com', GATEWAY_MODE: 'both' }, 'GATEWAY_MODE must be proxy or direct'],
   ])('refuses to start on %j', (settings, reason) => {

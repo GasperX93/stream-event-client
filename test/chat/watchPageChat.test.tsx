@@ -29,7 +29,8 @@ vi.mock('../../src/features/player/SwarmHlsPlayer', () => ({
 
 const CHAT: ChatConfig = {
   enabled: true,
-  beeUrl: '/chat-bee',
+  readUrl: '/chat-read',
+  writeUrl: '/chat-write',
   gsocResourceId: 'd'.repeat(64),
   gsocTopic: 'gsoc-topic',
   feedOwner: '0x' + 'b'.repeat(40),
