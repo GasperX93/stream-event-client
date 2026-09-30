@@ -59,16 +59,18 @@ export async function watchAndChat(page: Page, published: Published): Promise<vo
     })
     .toBeGreaterThan(PLAYED_SECONDS);
 
-  const chat = page.getByRole('region', { name: 'Chat' });
+  // Every name is matched exactly: Playwright matches a name as a substring by default, so "Message" also finds the
+  // "Messages" list and each "Message actions" button, and "Send" finds "Resend".
+  const chat = page.getByRole('region', { name: 'Chat', exact: true });
   for (const text of published.chat.texts) {
     await expect(chat.getByText(text, { exact: true }), `the chat shows "${text}"`).toBeVisible({ timeout: 20_000 });
   }
 
-  await chat.getByRole('button', { name: 'Join the chat to send messages' }).click();
-  await page.getByLabel('Display name').fill(SMOKE_USER);
+  await chat.getByRole('button', { name: 'Join the chat to send messages', exact: true }).click();
+  await page.getByRole('textbox', { name: 'Display name', exact: true }).fill(SMOKE_USER);
   await page.getByRole('button', { name: 'Join', exact: true }).click();
-  await chat.getByLabel('Message').fill(SMOKE_MESSAGE);
-  await chat.getByRole('button', { name: 'Send' }).click();
+  await chat.getByRole('textbox', { name: 'Message', exact: true }).fill(SMOKE_MESSAGE);
+  await chat.getByRole('button', { name: 'Send', exact: true }).click();
   await expect(chat.getByText(SMOKE_MESSAGE, { exact: true }), 'the sent message is shown').toBeVisible();
   await expect(chat.getByText('Not sent.'), 'the write was not refused').toHaveCount(0);
 }
