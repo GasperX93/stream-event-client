@@ -111,21 +111,21 @@ before(() => {
 after(removeAll);
 
 for (const mode of ['proxy', 'direct']) {
-  it(`passes nginx -t in ${mode} mode`, () => {
+  void it(`passes nginx -t in ${mode} mode`, () => {
     const settings = ['-e', `GATEWAY_MODE=${mode}`, '-e', `BEE_GATEWAY_URL=${GATEWAY}`];
     const result = docker(['run', '--rm', '--label', LABEL, ...settings, IMAGE, 'nginx', '-t'], { allowFailure: true });
     assert.equal(result.status, 0, `nginx -t in ${mode} mode:\n${result.stdout}\n${result.stderr}`);
   });
 }
 
-describe('proxy mode, the default', () => {
+void describe('proxy mode, the default', () => {
   let base;
   before(async () => {
     base = startContainer('image-test-proxy', { BEE_GATEWAY_URL: GATEWAY, CHAT_BEE_URL: CHAT });
     await waitForServer(base, 'image-test-proxy');
   });
 
-  it('serves the page no-cache, with the policy, at the root and at any app route', async () => {
+  void it('serves the page no-cache, with the policy, at the root and at any app route', async () => {
     for (const path of ['/', '/watch/video/owner/topic']) {
       const response = await get(`${base}${path}`);
       assert.equal(response.status, 200, path);
@@ -141,7 +141,7 @@ describe('proxy mode, the default', () => {
     }
   });
 
-  it('serves the mounted config.json no-store', async () => {
+  void it('serves the mounted config.json no-store', async () => {
     const response = await get(`${base}/config.json`);
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('cache-control'), 'no-store');
@@ -149,7 +149,7 @@ describe('proxy mode, the default', () => {
     assert.deepEqual(await response.json(), JSON.parse(CONFIG));
   });
 
-  it('keeps the hashed bundle for a year, and answers a missing asset 404', async () => {
+  void it('keeps the hashed bundle for a year, and answers a missing asset 404', async () => {
     const response = await get(`${base}/${await anAsset(base)}`);
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('cache-control'), 'public, max-age=31536000, immutable');
@@ -157,7 +157,7 @@ describe('proxy mode, the default', () => {
     assert.equal((await get(`${base}/assets/not-there.js`)).status, 404);
   });
 
-  it('forwards reads at /bee to the gateway and refuses writes', async () => {
+  void it('forwards reads at /bee to the gateway and refuses writes', async () => {
     // Nothing listens at the gateway address, so a forwarded read fails upstream rather than serving the page.
     assert.equal((await get(`${base}/bee/health`)).status, 502);
     const write = await get(`${base}/bee/soc/${'a'.repeat(40)}/${'b'.repeat(64)}`, { method: 'POST', body: 'x' });
@@ -165,7 +165,7 @@ describe('proxy mode, the default', () => {
   });
 });
 
-describe('direct mode', () => {
+void describe('direct mode', () => {
   let base;
   before(async () => {
     base = startContainer('image-test-direct', {
@@ -175,20 +175,20 @@ describe('direct mode', () => {
     await waitForServer(base, 'image-test-direct');
   });
 
-  it('lets the page reach the gateway itself', async () => {
+  void it('lets the page reach the gateway itself', async () => {
     const policy = policyOf(await get(`${base}/`));
     assert.match(policy, /connect-src 'self' https:\/\/gateway\.example\.com /);
     assert.match(policy, /img-src [^;]*https:\/\/gateway\.example\.com/);
   });
 
-  it('serves no /bee, rather than the page', async () => {
+  void it('serves no /bee, rather than the page', async () => {
     const response = await get(`${base}/bee/health`);
     assert.equal(response.status, 404);
     assert.doesNotMatch(await response.text(), /<div id="root">/);
   });
 });
 
-it('refuses to start without BEE_GATEWAY_URL, and says why', () => {
+void it('refuses to start without BEE_GATEWAY_URL, and says why', () => {
   // A container that started anyway would serve for ever, so the wait is bounded and a timeout reads as a failure.
   const result = docker(['run', '--rm', '--label', LABEL, IMAGE], { allowFailure: true, timeoutMs: 60_000 });
   assert.equal(result.signal, null, 'the container kept running without BEE_GATEWAY_URL');
