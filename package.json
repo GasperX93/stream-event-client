@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p e2e",
     "test": "vitest run",
     "e2e": "pnpm build && playwright test -c e2e/playwright.config.ts",
-    "e2e:record": "pnpm build && playwright test -c e2e/record.config.ts"
+    "e2e:record": "pnpm build && playwright test -c e2e/record.config.ts",
+    "test:docker": "PLAYWRIGHT_INSTALL_DEPS=1 pnpm e2e:record"
   },
   "dependencies": {
     "@ethersphere/bee-js": "13.1.0",
