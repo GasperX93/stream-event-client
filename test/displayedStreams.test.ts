@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { displayedStreams, streamGroups } from '../src/features/catalog/StreamList/displayedStreams';
+import { browseSections, displayedStreams, streamGroups } from '../src/features/catalog/StreamList/displayedStreams';
 import {
   type Stream,
   STREAM_STATUS_LIVE,
@@ -79,5 +79,62 @@ describe('the streams the browse page shows', () => {
     displayedStreams(catalog);
 
     expect(catalog.map((stream) => stream.topic)).toEqual(before);
+  });
+});
+
+const NOW = Date.parse('2026-11-04T12:00:00Z');
+
+describe('the sections of the browse page', () => {
+  it('features the soonest upcoming stream that has not reached its start time', () => {
+    const catalog = [
+      entry(0, STREAM_STATUS_SCHEDULED, 1_000, '2026-11-04T09:00:00Z'),
+      entry(1, STREAM_STATUS_SCHEDULED, 1_001, '2026-11-06T09:00:00Z'),
+      entry(2, STREAM_STATUS_SCHEDULED, 1_002, '2026-11-05T09:00:00Z'),
+    ];
+
+    const sections = browseSections(catalog, NOW);
+
+    expect(sections.next?.topic).toBe('topic-2');
+    expect(sections.upcoming.map((stream) => stream.topic)).toEqual(['topic-0', 'topic-1']);
+  });
+
+  it('features the first upcoming stream when every start time has passed or is unknown', () => {
+    const catalog = [
+      entry(0, STREAM_STATUS_SCHEDULED, 1_000, null),
+      entry(1, STREAM_STATUS_SCHEDULED, 1_001, '2026-11-03T09:00:00Z'),
+    ];
+
+    const sections = browseSections(catalog, NOW);
+
+    expect(sections.next?.topic).toBe('topic-1');
+    expect(sections.upcoming.map((stream) => stream.topic)).toEqual(['topic-0']);
+  });
+
+  it('features nothing when no stream is upcoming', () => {
+    expect(browseSections([entry(0, STREAM_STATUS_VOD, 1_000)], NOW).next).toBeNull();
+  });
+
+  it('moves the feature on once the clock passes its start time', () => {
+    const catalog = [
+      entry(0, STREAM_STATUS_SCHEDULED, 1_000, '2026-11-04T12:10:00Z'),
+      entry(1, STREAM_STATUS_SCHEDULED, 1_001, '2026-11-04T15:00:00Z'),
+    ];
+
+    expect(browseSections(catalog, NOW).next?.topic).toBe('topic-0');
+    expect(browseSections(catalog, Date.parse('2026-11-04T12:30:00Z')).next?.topic).toBe('topic-1');
+  });
+
+  it('keeps every live stream, and the finished ones newest first as past streams', () => {
+    const catalog = [
+      entry(0, STREAM_STATUS_VOD, 1_000),
+      entry(1, STREAM_STATUS_LIVE, 1_001),
+      entry(2, STREAM_STATUS_LIVE, 1_002),
+      entry(3, STREAM_STATUS_VOD, 1_003),
+    ];
+
+    const sections = browseSections(catalog, NOW);
+
+    expect(sections.live.map((stream) => stream.topic)).toEqual(['topic-2', 'topic-1']);
+    expect(sections.past.map((stream) => stream.topic)).toEqual(['topic-3', 'topic-0']);
   });
 });
