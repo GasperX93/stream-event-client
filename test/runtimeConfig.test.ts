@@ -23,7 +23,8 @@ const VALID = {
 
 const CHAT = {
   enabled: true,
-  beeUrl: 'http://localhost:1633',
+  readUrl: 'http://localhost:1633',
+  writeUrl: 'http://localhost:1733',
   gsocResourceId: 'a'.repeat(64),
   gsocTopic: 'chat',
   feedOwner: OWNER,
@@ -120,28 +121,42 @@ describe('checking the runtime config', () => {
 describe('the chat settings', () => {
   const withChat = (chat: Record<string, unknown>) => parseRuntimeConfig({ ...VALID, chat: { ...CHAT, ...chat } });
 
-  it('accepts a chat endpoint on this site or at an http or https address', () => {
-    for (const beeUrl of ['/chat-bee', 'http://localhost:1633', 'https://chat.example.com']) {
-      expect(withChat({ beeUrl }).ok).toBe(true);
+  it('accepts a read and a write endpoint each on this site or at an http or https address', () => {
+    for (const url of ['/chat-bee', 'http://localhost:1633', 'https://chat.example.com']) {
+      expect(withChat({ readUrl: url }).ok).toBe(true);
+      expect(withChat({ writeUrl: url }).ok).toBe(true);
     }
   });
 
+  it('refuses the single chat.beeUrl of before, naming the two fields that replace it', () => {
+    const problem = problemOf(withChat({ beeUrl: 'https://chat.example.com' }));
+    expect(problem).toContain('chat.beeUrl');
+    expect(problem).toContain('chat.readUrl');
+    expect(problem).toContain('chat.writeUrl');
+  });
+
+  it('refuses a chat block with no write endpoint, naming it', () => {
+    const { writeUrl: _, ...readOnly } = CHAT;
+    expect(problemOf(parseRuntimeConfig({ ...VALID, chat: readOnly }))).toContain('chat.writeUrl');
+  });
+
   it('refuses, when chat is on, a field still holding the example placeholder, naming it', () => {
-    for (const field of ['beeUrl', 'gsocResourceId', 'gsocTopic', 'feedOwner']) {
+    for (const field of ['readUrl', 'writeUrl', 'gsocResourceId', 'gsocTopic', 'feedOwner']) {
       const problem = problemOf(withChat({ [field]: '<example>' }));
       expect(problem).toContain(`chat.${field}`);
     }
   });
 
   it('refuses, when chat is on, an empty field, naming it', () => {
-    for (const field of ['beeUrl', 'gsocResourceId', 'gsocTopic', 'feedOwner']) {
+    for (const field of ['readUrl', 'writeUrl', 'gsocResourceId', 'gsocTopic', 'feedOwner']) {
       expect(problemOf(withChat({ [field]: '' }))).toContain(`chat.${field}`);
     }
   });
 
   it('refuses a chat endpoint that is neither a path on this site nor an http address', () => {
-    for (const beeUrl of ['bee', '//chat.example.com', 'ftp://chat.example.com']) {
-      expect(problemOf(withChat({ beeUrl }))).toContain('chat.beeUrl');
+    for (const url of ['bee', '//chat.example.com', 'ftp://chat.example.com']) {
+      expect(problemOf(withChat({ readUrl: url }))).toContain('chat.readUrl');
+      expect(problemOf(withChat({ writeUrl: url }))).toContain('chat.writeUrl');
     }
   });
 
@@ -169,7 +184,10 @@ describe('the chat settings', () => {
 
   it('accepts a chat block that is off whatever its other fields hold, placeholders included', () => {
     expect(
-      parseRuntimeConfig({ ...VALID, chat: { enabled: false, beeUrl: '<chat bee>', feedOwner: '<owner>' } }).ok,
+      parseRuntimeConfig({
+        ...VALID,
+        chat: { enabled: false, readUrl: '<chat reads>', beeUrl: '<old field>', feedOwner: '<owner>' },
+      }).ok,
     ).toBe(true);
     expect(parseRuntimeConfig({ ...VALID, chat: { enabled: false } }).ok).toBe(true);
   });

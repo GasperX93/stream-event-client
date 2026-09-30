@@ -49,7 +49,7 @@ export const RECORDING_INBOX_TOPIC = 'stream-event-client-recording';
 export const SMOKE_USER = 'smoke';
 export const SMOKE_MESSAGE = 'hello from the smoke test';
 
-/** The viewer's settings for a recording. The chat reads through the same prefix as the video. */
+/** The viewer's settings for a recording. The chat reads and writes through the same prefix as the video. */
 export function recordingConfig(
   catalog: { owner: string; topic: string },
   chat: { gsocResourceId: string; gsocTopic: string; feedOwner: string },
@@ -57,6 +57,12 @@ export function recordingConfig(
   return {
     gatewayUrl: GATEWAY_PATH,
     catalog,
-    chat: { enabled: true, beeUrl: `${PREVIEW_ORIGIN}${GATEWAY_PATH}`, ...chat, pollIntervalMs: 1000 },
+    chat: {
+      enabled: true,
+      readUrl: `${PREVIEW_ORIGIN}${GATEWAY_PATH}`,
+      writeUrl: `${PREVIEW_ORIGIN}${GATEWAY_PATH}`,
+      ...chat,
+      pollIntervalMs: 1000,
+    },
   };
 }

@@ -17,8 +17,8 @@ const SOC_READ_TIMEOUT_MS = 5_000;
 
 /**
  * One chat per stream. The topic and the owner follow the aggregator's conventions: the stream's chat
- * feed is `chat-<stream topic>`, written by the chat feed owner. No stamp is passed, because the chat's
- * Bee endpoint stamps what is written through it.
+ * feed is `chat-<stream topic>`, written by the chat feed owner. The chat is read through one endpoint and
+ * written through another. No stamp is passed, because the write endpoint stamps what is written through it.
  */
 export function chatSettings(config: ChatConfig, streamTopic: string, session: Session | null): ChatSettings {
   return {
@@ -27,7 +27,8 @@ export function chatSettings(config: ChatConfig, streamTopic: string, session: S
       nickname: session?.username ?? '',
     },
     infra: {
-      beeUrl: config.beeUrl,
+      beeUrl: config.readUrl,
+      writeUrl: config.writeUrl,
       gsocResourceId: config.gsocResourceId,
       gsocTopic: config.gsocTopic,
       chatTopic: `chat-${streamTopic}`,

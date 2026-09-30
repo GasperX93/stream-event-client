@@ -141,7 +141,8 @@ so the chat, the player and the picker can each be read, tested and replaced on 
   "catalog": { "owner": "<stream list feed owner address>", "topic": "<stream list topic>" },
   "chat": {
     "enabled": true,
-    "beeUrl": "<Bee endpoint the chat reads and writes through>",
+    "readUrl": "<Bee endpoint the chat is read through>",
+    "writeUrl": "<Bee endpoint that stamps and takes chat writes>",
     "gsocResourceId": "<the shared key every viewer writes chat messages with>",
     "gsocTopic": "<GSOC topic>",
     "feedOwner": "<chat feed owner address>",

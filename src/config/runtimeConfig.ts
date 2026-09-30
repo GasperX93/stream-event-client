@@ -32,11 +32,18 @@ const catalogSchema = z.object({
   topic: notEmpty,
 });
 
+const chatEndpoint = filledIn.refine(isRootedPathOrHttpUrl, {
+  message: 'must be a path on this site or an http or https address',
+});
+
 const enabledChatSchema = z.object({
   enabled: z.literal(true),
-  beeUrl: filledIn.refine(isRootedPathOrHttpUrl, {
-    message: 'must be a path on this site or an http or https address',
-  }),
+  /** Where the chat's feed and history files are read, a gateway that serves only reads. */
+  readUrl: chatEndpoint,
+  /** Where messages are written, a gateway that stamps each write, apart from the one that reads. */
+  writeUrl: chatEndpoint,
+  /** The one endpoint of before, refused by name so a config written for it says what replaced it. */
+  beeUrl: z.undefined({ message: 'is replaced by chat.readUrl and chat.writeUrl' }).optional(),
   /**
    * A private key every viewer receives, so it is configuration and not a secret: the GSOC address it
    * signs for is where the chat aggregator listens, and every viewer writes there with the same key.
