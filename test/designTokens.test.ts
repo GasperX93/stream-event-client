@@ -193,6 +193,14 @@ const TEXT_ON_SURFACE: Array<[text: string, surface: string]> = [
   ['text-tertiary', 'surface'],
   ['primary', 'input'],
   ['error-text', 'surface-raised'],
+  ['text', 'surface-card'],
+  ['text-secondary', 'surface-card'],
+  ['primary', 'surface-card'],
+  ['text-muted', 'surface'],
+  ['text-tertiary', 'footer-end'],
+  ['text', 'badge-dark'],
+  ['text', 'surface-hover'],
+  ['text', 'input-focus'],
   ...Array.from({ length: 16 }, (_, i): [string, string] => ['text', `name-${i + 1}`]),
 ];
 

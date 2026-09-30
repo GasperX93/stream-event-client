@@ -48,8 +48,8 @@ live with the deployment, never in this repository.
 | `chat`          | Optional. The chat's settings, below. Without it, or with `enabled` false, there is no chat anywhere on the page                |
 | `theme`         | Optional. Which of the build's themes the page wears, `swarm` today and the default. A name the build does not carry is refused |
 
-A theme is a set of colours and typefaces in `src/design/themes/`, with its logo and page copy in
-`src/design/themes.ts`. Every theme defines the same variables, so switching theme leaves nothing
+A theme is a set of colours and typefaces in `src/design/themes/`, with its logo, page copy and
+footer links in `src/design/themes.ts`. Every theme defines the same variables, so switching theme leaves nothing
 unset, and the tokens test fails on a theme that misses one or on a text colour below 4.5:1.
 
 The `chat` block. With `enabled` true every field must be filled in, and the page refuses to start
@@ -160,13 +160,18 @@ records the browser smoke test's answers, which is what a job with a Docker daem
 
 ## What the viewer does
 
-- **The stream list.** Read from a Swarm feed and read again every 5 seconds. Every entry is shown in
-  three groups: live streams, then upcoming ones with the soonest start first, then finished ones
-  newest first. A read from a newer feed slot replaces the list
-  whatever changed in it, so an entry edited, unpublished or gone live in place shows on an open page
-  without a reload.
+- **The stream list.** Read from a Swarm feed and read again every 5 seconds. Every live stream gets
+  a featured block of its own, then the next upcoming stream, the soonest whose start is still ahead,
+  gets one with a countdown in days, hours and minutes. The other upcoming streams follow as cards
+  with the soonest start first, then the past streams newest first, eight to a page. The clock is
+  read every 30 seconds, so a page left open moves its countdown and its feature on. A read from a
+  newer feed slot replaces the list whatever changed in it, so an entry edited, unpublished or gone
+  live in place shows on an open page without a reload.
+- **Search.** The box above the list matches a stream's title, description and tags as the viewer
+  types. While it holds a query the matches are one flat list, paged the same way, and a query that
+  matches nothing says so.
 - **Previews.** The entry's uploaded thumbnail when it has one, otherwise a frame decoded from the
-  stream's first segment, with live and upcoming badges and the duration.
+  stream's first segment, with a live badge and the duration.
 - **Scheduled streams.** An entry whose state is `scheduled` has been announced and not yet
   broadcast. Its watch page says the stream has not started, keeps reading the stream list, and starts
   the player as soon as the entry turns live. If it is unpublished while the page waits, the page says
@@ -204,9 +209,9 @@ the playlist's own URL and a URI with a scheme is the one case it leaves untouch
 
 ## The design
 
-One look, Swarm Brand v3.0: near-black surfaces, the Swarm orange `#f47a20` as a sparing accent,
-Vend Sans for headings, Geist for text and JetBrains Mono for small labels. There is no theme
-switcher and no second theme.
+One look, Swarm Brand v3.0 as msrs-client's Swarm theme draws it: near-black surfaces, the Swarm
+orange `#f47a20` as a sparing accent, and Geist for every heading, label and text on the browse page.
+There is no theme switcher and no second theme.
 
 - **The tokens** live in `src/design/_tokens.scss`, one Sass map per group (colour, font, spacing,
   radius and so on). `src/design/theme.scss` emits every entry once on `:root` as a CSS custom
@@ -220,8 +225,8 @@ switcher and no second theme.
   test (`test/designTokens.test.ts`) fails when a stylesheet reads a variable the design does not
   define, when the design defines one nothing reads, and when a text colour falls below 4.5:1
   against its background, so a new colour pairing goes into its list too.
-- **The fonts** are bundled from `@fontsource`, only the weights used: Geist 400 and 600, Vend Sans
-  600 and JetBrains Mono 500, imported in `src/design/fonts.ts`. The page makes no font request to a
+- **The fonts** are bundled from `@fontsource`, only the weights used: Geist 400, 500, 600 and 700,
+  Vend Sans 600 and JetBrains Mono 500, imported in `src/design/fonts.ts`. The page makes no font request to a
   third party. Another weight needs its file imported there, or the browser fakes it.
 
 ## Layout
