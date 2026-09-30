@@ -1,0 +1,28 @@
+{
+  "stream": {
+    "owner": "dc014b8a826c0875427aac8bd3736b1b1b27c0f4",
+    "topic": "recorded-finished-stream",
+    "title": "Recorded test pattern",
+    "segments": 3
+  },
+  "chat": {
+    "topic": "chat-recorded-finished-stream",
+    "texts": [
+      "first message",
+      "second message",
+      "third message",
+      "fourth message",
+      "the newest message"
+    ],
+    "names": [
+      "ada",
+      "grace",
+      "alan",
+      "ada",
+      "grace"
+    ]
+  },
+  "bee": {
+    "version": "2.8.2"
+  }
+}
