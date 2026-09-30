@@ -101,11 +101,49 @@ pnpm preview   # serve dist/ locally
 ```
 
 `dist/` is a static site. Serve it with a fallback to `index.html` and with its `config.json` beside
-it.
+it, or run the image below, which does both.
 
 The other scripts: `pnpm test` (vitest), `pnpm lint` (oxlint), `pnpm typecheck`, `pnpm format` and
 `pnpm format:check` (oxfmt). Continuous integration runs the format check, lint, typecheck, tests and
 build on every pull request, and reports what the first page load downloads.
+
+## Run the image
+
+The `Dockerfile` builds one image for every deployment: nginx serving the built page, with the page
+fallback, and the gateway at `/bee` when it is proxied. What a deployment differs by is read when the
+container starts.
+
+```bash
+docker build -t stream-event-client .
+docker run -p 8080:80 \
+  -e BEE_GATEWAY_URL=https://gateway.example.com \
+  -e CHAT_BEE_URL=https://chat.example.com \
+  -v "$PWD/config.json:/usr/share/nginx/html/config.json:ro" \
+  stream-event-client
+```
+
+| Setting           | What it is                                                                                                                                                                                                      |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GATEWAY_MODE`    | `proxy`, the default: the page reads the gateway at `/bee` on its own origin, so `config.json` names `/bee` as `gatewayUrl`. `direct`: the page reads the gateway at its own address, which `config.json` names |
+| `BEE_GATEWAY_URL` | Required. The gateway's address, with no path. In proxy mode `/bee` forwards to it. In direct mode the page is allowed to reach it                                                                              |
+| `CHAT_BEE_URL`    | The chat endpoint's address, the same as `chat.beeUrl` in `config.json`, which the page is then allowed to reach. Leave it out when there is no chat                                                            |
+| `config.json`     | Mounted over the image's example at `/usr/share/nginx/html/config.json`. Without it the page shows the example's placeholders as a configuration problem                                                        |
+
+A setting that is missing or malformed stops the container at start, and its log says which one.
+
+`pnpm test:docker` builds the image and checks it running, in both modes: `nginx -t`, the cache
+headers and the policy on each kind of answer, reads and refused writes at `/bee`, and the refusal to
+start without `BEE_GATEWAY_URL`. It needs a Docker daemon, so it is not part of `pnpm test`.
+
+- **Caching.** The page is served `no-cache`, so a browser asks before reusing it after a deploy.
+  `config.json` is served `no-store`. The bundle under `/assets/` is named by content hash and kept
+  for a year.
+- **Content security policy.** The page may reach its own origin, the gateway in direct mode, the chat
+  endpoint, and a Bee node on the viewer's own machine at any port, which is what the node picker
+  offers. Inline styles are allowed because the emoji picker writes its own, and blob URLs because the
+  player plays through them.
+- **The proxy passes reads only.** `/bee` forwards `GET` and `HEAD`, so the site cannot be used to
+  write to the gateway. The chat writes through its own endpoint, `CHAT_BEE_URL`.
 
 ## What the viewer does
 
