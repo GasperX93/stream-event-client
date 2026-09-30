@@ -8,8 +8,9 @@
 #                 direct: the page reads the gateway at its own address, which config.json names as gatewayUrl.
 # BEE_GATEWAY_URL The gateway's address, such as https://gateway.example.com. In proxy mode nginx forwards /bee to
 #                 it. In direct mode the policy lets the page reach it.
-# CHAT_BEE_URL    The chat endpoint's address, which config.json names as chat.beeUrl. Optional, and allowed by the
+# CHAT_READ_URL   The chat's read endpoint, which config.json names as chat.readUrl. Optional, and allowed by the
 #                 policy when set.
+# CHAT_WRITE_URL  The chat's write endpoint, which config.json names as chat.writeUrl. The same.
 set -eu
 
 OUT_DIR="${STREAM_CLIENT_NGINX_DIR:-/etc/nginx/stream-event-client}"
@@ -31,10 +32,14 @@ origin_of() {
 
 [ -n "${BEE_GATEWAY_URL:-}" ] || refuse "BEE_GATEWAY_URL is not set. It names the Bee gateway the streams are read from."
 GATEWAY="$(origin_of BEE_GATEWAY_URL "$BEE_GATEWAY_URL")"
-CHAT=""
-if [ -n "${CHAT_BEE_URL:-}" ]; then
-  CHAT="$(origin_of CHAT_BEE_URL "$CHAT_BEE_URL")"
-fi
+[ -z "${CHAT_BEE_URL:-}" ] || refuse "CHAT_BEE_URL is replaced by CHAT_READ_URL and CHAT_WRITE_URL."
+CHAT_SOURCE=""
+for setting in CHAT_READ_URL CHAT_WRITE_URL; do
+  value="$(printenv "$setting" || true)"
+  if [ -n "$value" ]; then
+    CHAT_SOURCE="$CHAT_SOURCE $(origin_of "$setting" "$value")"
+  fi
+done
 
 mkdir -p "$OUT_DIR"
 
@@ -71,9 +76,6 @@ CONF
     ;;
 esac
 
-CHAT_SOURCE=""
-[ -z "$CHAT" ] || CHAT_SOURCE=" $CHAT"
-
 # A viewer may pick a Bee node on their own machine, at any port, which the page reads over plain http.
 OWN_NODE="http://localhost:* http://127.0.0.1:*"
 
@@ -93,4 +95,4 @@ add_header X-Content-Type-Options "nosniff" always;
 add_header Referrer-Policy "no-referrer" always;
 CONF
 
-echo "stream-event-client: gateway $MODE at $GATEWAY${CHAT:+, chat endpoint $CHAT}"
+echo "stream-event-client: gateway $MODE at $GATEWAY${CHAT_SOURCE:+, chat endpoints$CHAT_SOURCE}"
