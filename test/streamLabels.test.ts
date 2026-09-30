@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  callToAction,
-  cardDateLabel,
-  startDateTimeLabel,
-  streamLabel,
-} from '../src/features/catalog/streamLabels';
+import { callToAction, cardDateLabel, startDateTimeLabel, streamLabel } from '../src/features/catalog/streamLabels';
 import { STREAM_STATUS_LIVE, STREAM_STATUS_SCHEDULED, STREAM_STATUS_VOD } from '../src/features/catalog/stream';
 
 const EN_UTC = { locale: 'en-US', timeZone: 'UTC' };

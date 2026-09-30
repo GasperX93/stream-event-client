@@ -63,3 +63,33 @@ export function displayedStreams(streamList: readonly Stream[]): Stream[] {
   const { live, upcoming, finished } = streamGroups(streamList);
   return [...live, ...upcoming, ...finished];
 }
+
+/**
+ * The sections of the browse page. Every live stream is featured on its own, then the next upcoming
+ * stream, then the other upcoming ones and the past ones as cards.
+ */
+export interface BrowseSections {
+  live: Stream[];
+  /** The upcoming stream featured above the cards, taken out of `upcoming`. */
+  next: Stream | null;
+  upcoming: Stream[];
+  past: Stream[];
+}
+
+/**
+ * Features the soonest upcoming stream whose start is still ahead of `now`, as msrs-client does, so a
+ * page left open moves the feature on once a start time passes. When no start is ahead, the first
+ * upcoming stream is featured anyway, because an announcement that is late to go live is still the
+ * next thing to watch.
+ */
+export function browseSections(streamList: readonly Stream[], now: number): BrowseSections {
+  const { live, upcoming, finished } = streamGroups(streamList);
+  const next =
+    upcoming.find((stream) => {
+      const start = scheduledStartMs(stream.scheduledStartTime);
+      return start !== null && start >= now;
+    }) ??
+    upcoming[0] ??
+    null;
+  return { live, next, upcoming: upcoming.filter((stream) => stream !== next), past: finished };
+}
