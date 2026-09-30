@@ -134,6 +134,10 @@ docker run -p 8080:80 \
 
 A setting that is missing or malformed stops the container at start, and its log says which one.
 
+A `v*` tag publishes the image, built for amd64, as `ghcr.io/solar-punk-ltd/stream-event-client:<tag>`
+(`.github/workflows/image.yml`). A deployment pins it by the digest that tag resolves to. No tag ever
+moves `latest`.
+
 `pnpm test:image` builds the image and checks it running, in both modes: `nginx -t`, the cache
 headers and the policy on each kind of answer, reads and refused writes at `/bee`, and the refusal to
 start without `BEE_GATEWAY_URL`. It needs a Docker daemon, so it is not part of `pnpm test`. `pnpm test:docker` runs it and then
