@@ -35,7 +35,9 @@ commits of their own, so every change can be read against where the code came fr
 ## What a viewer can do
 
 1. **Browse** the event's streams, live first, then upcoming, then finished, each with its
-   thumbnail or a frame from the stream and a live or upcoming badge. The list is read from a Swarm
+   thumbnail or a frame from the stream. Each live stream and the next upcoming one, with a
+   countdown to its start, are featured above the cards, the past streams come eight to a page, and
+   a search box filters by title, description and tags. The list is read from a Swarm
    feed, an address whose owner can keep publishing new versions of it, and it refreshes every five
    seconds without a reload.
 2. **Watch** a stream. Quality adapts across the qualities the stream is published in, its ladder,
