@@ -131,6 +131,10 @@ docker run -p 8080:80 \
 
 A setting that is missing or malformed stops the container at start, and its log says which one.
 
+`pnpm test:docker` builds the image and checks it running, in both modes: `nginx -t`, the cache
+headers and the policy on each kind of answer, reads and refused writes at `/bee`, and the refusal to
+start without `BEE_GATEWAY_URL`. It needs a Docker daemon, so it is not part of `pnpm test`.
+
 - **Caching.** The page is served `no-cache`, so a browser asks before reusing it after a deploy.
   `config.json` is served `no-store`. The bundle under `/assets/` is named by content hash and kept
   for a year.
