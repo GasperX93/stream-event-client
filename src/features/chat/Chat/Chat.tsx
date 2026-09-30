@@ -1,5 +1,7 @@
 import { useCallback, useId, useMemo, useState } from 'react';
 
+import { FeedStatus } from '@solarpunkltd/swarm-chat-js';
+
 import type { ChatConfig } from '@/config/runtimeConfig';
 import { Button, ButtonVariant } from '@/shared/components/Button/Button';
 import { Spinner } from '@/shared/components/Spinner/Spinner';
@@ -9,6 +11,7 @@ import { useChatUser } from '../User';
 import { CHAT_LOADING, CHAT_UNREACHABLE, useSwarmChat, type VisibleMessage } from '../useSwarmChat';
 
 import { ChatMessage } from './ChatMessage/ChatMessage';
+import { FeedNotice } from './FeedNotice/FeedNotice';
 import { MessageSender } from './MessageSender/MessageSender';
 import { ScrollableMessageList } from './ScrollableMessageList/ScrollableMessageList';
 import { ThreadView } from './ThreadView/ThreadView';
@@ -19,8 +22,7 @@ export { READ_ONLY_PRIVATE_KEY } from '../chatSettings';
 
 interface ChatProps {
   chat: ChatConfig;
-  /** The stream's feed owner and topic, which name the stream's chat. */
-  owner: string;
+  /** The stream's topic, which names the stream's chat. */
   topic: string;
 }
 
@@ -28,12 +30,13 @@ interface ChatProps {
 type PendingReactions = Record<string, string>;
 
 /** The chat beside a stream: read by anyone, written to by a viewer who has chosen a name. */
-export function Chat({ chat, owner, topic }: ChatProps) {
+export function Chat({ chat, topic }: ChatProps) {
   const { session, setIsLoginModalOpen } = useChatUser();
   const settings = useMemo(() => chatSettings(chat, topic, session), [chat, topic, session]);
   const ownAddress = session?.address ?? null;
   const {
     status,
+    feedStatus,
     isLoadingOlder,
     hasOlder,
     messages,
@@ -42,10 +45,12 @@ export function Chat({ chat, owner, topic }: ChatProps) {
     sendMessage,
     sendReaction,
     sendReply,
+    checkMessage,
+    checkReply,
     fetchOlderMessages,
     retrySendMessage,
     restart,
-  } = useSwarmChat(settings, `${owner}/${topic}`, ownAddress);
+  } = useSwarmChat(settings, ownAddress);
 
   const [threadId, setThreadId] = useState<string | null>(null);
   const [pendingReactions, setPendingReactions] = useState<PendingReactions>({});
@@ -53,6 +58,8 @@ export function Chat({ chat, owner, topic }: ChatProps) {
   const bodyId = useId();
 
   const askForName = useCallback(() => setIsLoginModalOpen(true), [setIsLoginModalOpen]);
+  /** Before the library has reported a state nothing has gone wrong, so that counts as live. */
+  const isFeedLive = feedStatus === null || feedStatus === FeedStatus.LIVE;
 
   const react = useCallback(
     async (messageId: string, emoji: string) => {
@@ -87,6 +94,7 @@ export function Chat({ chat, owner, topic }: ChatProps) {
       onOpenThread={inThread ? undefined : () => setThreadId(message.id)}
       onRetry={() => retrySendMessage(message)}
       onHeightChange={onHeightChange}
+      canOfferResend={isFeedLive}
     />
   );
 
@@ -135,6 +143,7 @@ export function Chat({ chat, owner, topic }: ChatProps) {
                 label="Reply"
                 placeholder="Reply in the thread"
                 onSend={(text) => sendReply(threadParent.id, text)}
+                checkDraft={(text) => checkReply(threadParent.id, text)}
               />
             ) : (
               joinButton('Join the chat to reply')
@@ -146,6 +155,7 @@ export function Chat({ chat, owner, topic }: ChatProps) {
 
     return (
       <>
+        <FeedNotice status={feedStatus} />
         {hasOlder && (
           <Button
             variant={ButtonVariant.SECONDARY}
@@ -166,7 +176,7 @@ export function Chat({ chat, owner, topic }: ChatProps) {
           <p className="chat-empty">No messages yet.</p>
         )}
         {session ? (
-          <MessageSender label="Message" placeholder="Type a message" onSend={sendMessage} />
+          <MessageSender label="Message" placeholder="Type a message" onSend={sendMessage} checkDraft={checkMessage} />
         ) : (
           joinButton('Join the chat to send messages')
         )}

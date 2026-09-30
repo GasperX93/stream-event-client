@@ -1,33 +1,33 @@
 import { useRef, useState } from 'react';
 
+import { refusalProblem } from '../../draftCheck';
+
 import { ReactionToolbar } from './ReactionToolbar/ReactionToolbar';
 
 import './MessageSender.scss';
 
 const KEY_ENTER = 'Enter';
 
-/**
- * A message travels as one Swarm chunk of 4 KB, signature and all, and one that does not fit fails
- * only after it was sent. This keeps well inside that.
- */
-export const MESSAGE_MAX_LENGTH = 1000;
-
 interface MessageSenderProps {
   onSend: (text: string) => Promise<void>;
   /** Names the field for a screen reader: what is being written, a message or a reply. */
   label: string;
   placeholder: string;
+  /** Why the chat would refuse this text, or null, so a draft it would refuse is never sent. */
+  checkDraft?: (text: string) => string | null;
 }
 
-export function MessageSender({ onSend, label, placeholder }: MessageSenderProps) {
+export function MessageSender({ onSend, label, placeholder, checkDraft }: MessageSenderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
+  const draft = input.trim();
+  const draftRefusal = draft ? (checkDraft?.(draft) ?? null) : null;
 
   const send = async () => {
-    const text = input.trim();
-    if (!text || sending) {
+    const text = draft;
+    if (!text || sending || draftRefusal) {
       return;
     }
     setSending(true);
@@ -35,8 +35,8 @@ export function MessageSender({ onSend, label, placeholder }: MessageSenderProps
     try {
       await onSend(text);
       setInput('');
-    } catch {
-      setProblem('The message could not be sent. Try again.');
+    } catch (error) {
+      setProblem(refusalProblem(error) ?? 'The message could not be sent. Try again.');
     } finally {
       setSending(false);
       inputRef.current?.focus();
@@ -59,7 +59,6 @@ export function MessageSender({ onSend, label, placeholder }: MessageSenderProps
           type="text"
           name="message"
           value={input}
-          maxLength={MESSAGE_MAX_LENGTH}
           aria-label={label}
           placeholder={placeholder}
           autoComplete="off"
@@ -71,7 +70,7 @@ export function MessageSender({ onSend, label, placeholder }: MessageSenderProps
           type="button"
           className="message-sender-send-button"
           aria-label="Send"
-          disabled={sending || !input.trim()}
+          disabled={sending || !draft || draftRefusal !== null}
           onClick={() => void send()}
         >
           <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
@@ -82,7 +81,12 @@ export function MessageSender({ onSend, label, placeholder }: MessageSenderProps
           </svg>
         </button>
       </div>
-      {problem && (
+      {draftRefusal && (
+        <p className="message-sender-problem" role="status">
+          {draftRefusal}
+        </p>
+      )}
+      {problem && !draftRefusal && (
         <p className="message-sender-problem" role="alert">
           {problem}
         </p>

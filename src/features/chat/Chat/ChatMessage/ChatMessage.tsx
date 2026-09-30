@@ -23,11 +23,13 @@ interface ChatMessageProps {
   onOpenThread?: () => void;
   onRetry: () => void;
   onHeightChange?: () => void;
+  /** False while the chat is reconnecting or stalled, when a resend by hand cannot help. */
+  canOfferResend?: boolean;
 }
 
 /**
- * How long an own message may sit written but unread from the chat feed before it is offered again.
- * Past this the aggregator has most likely missed it rather than being slow.
+ * How long an own message may sit written but unread from the chat feed before the viewer is offered a resend.
+ * The library resends it on its own meanwhile, and a resend by hand sends the same bytes again.
  */
 const UNCONFIRMED_AFTER_MS = 20_000;
 
@@ -60,10 +62,12 @@ export function ChatMessage({
   onOpenThread,
   onRetry,
   onHeightChange,
+  canOfferResend = true,
 }: ChatMessageProps) {
   const { error = false, received = false, uploaded = false, requested = false } = message;
   const isSending = !received && !error && (requested || uploaded);
-  const isUnconfirmed = useIsUnconfirmed(ownMessage && uploaded && !received && !error, onHeightChange);
+  const isUnconfirmed =
+    useIsUnconfirmed(ownMessage && uploaded && !received && !error, onHeightChange) && canOfferResend;
   const color = nameColor(message.username);
 
   const classes = [

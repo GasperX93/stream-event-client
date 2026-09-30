@@ -16,7 +16,6 @@ export const CHAT_LOAD_FALLBACK_MS = 5_000;
 
 interface WatchChatProps {
   chat: ChatConfig;
-  owner: string;
   topic: string;
   /** False while a player is on the page and has not played yet. */
   isPlayerSettled: boolean;
@@ -33,7 +32,7 @@ function ChatPlaceholder() {
   );
 }
 
-export function WatchChat({ chat, owner, topic, isPlayerSettled }: WatchChatProps) {
+export function WatchChat({ chat, topic, isPlayerSettled }: WatchChatProps) {
   const [hasWaitedLongEnough, setHasWaitedLongEnough] = useState(false);
 
   useEffect(() => {
@@ -47,7 +46,7 @@ export function WatchChat({ chat, owner, topic, isPlayerSettled }: WatchChatProp
 
   return (
     <Suspense fallback={<ChatPlaceholder />}>
-      <Chat chat={chat} owner={owner} topic={topic} />
+      <Chat chat={chat} topic={topic} />
     </Suspense>
   );
 }

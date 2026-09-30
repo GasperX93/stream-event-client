@@ -74,10 +74,11 @@ time it opens.
 **What it needs, outside this repository.** Two services, set up apart from this app:
 
 - **A Bee endpoint for the chat**, `chat.beeUrl`, that viewers read and write through and that stamps
-  every write, because the page holds no postage stamp. A message costs about three stamped chunks.
+  every write, because the page holds no postage stamp. A message costs one stamped chunk, and one more for each
+  resend while it has not been read back.
 - **The chat aggregator**, which listens on the shared address the key and topic above name, and
   appends each message to the stream's chat feed, `chat-<stream topic>` under `chat.feedOwner`.
-  Opening a chat reads the aggregator's latest history snapshot first. The endpoint viewers write
+  Opening a chat reads the newest history file the chat feed points to, then the entries after it. The endpoint viewers write
   through must be a different Bee node from the one the aggregator listens on, because Bee hands a
   message on to a listener only when it arrives from another node.
 

@@ -105,7 +105,6 @@ export function StreamWatcher() {
           <WatchChat
             key={streamKey}
             chat={chat}
-            owner={owner}
             topic={topic}
             isPlayerSettled={view !== WATCH_VIEW_PLAYER || playedStream === streamKey}
           />

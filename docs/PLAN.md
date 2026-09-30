@@ -162,19 +162,22 @@ notes on them:
 
 ### How the chat works, and what it needs outside this repository
 
-From swarm-chat-js and swarm-chat-aggregator-js, as they stand:
+From swarm-chat-js 7.0 and the chat server it pairs with:
 
-1. A viewer's message is signed with their chat key and written twice. Swarm stores everything in
-   4 KB pieces called chunks, each paid for with a stamp. The message goes first to the viewer's own
-   feed, a data chunk and a feed update. Then it goes as one chunk to a shared GSOC address, a Swarm
-   address anyone may write to and one node listens on. So every message costs about three stamped
-   chunks, and the chat's Bee endpoint pays for them with its own postage stamp. The client holds no
-   stamp.
+1. A viewer's message is signed with their chat key and written once, as one chunk, to a shared GSOC
+   address, a Swarm address anyone may write to and one node listens on. Swarm stores everything in
+   4 KB pieces called chunks, each paid for with a stamp, and the chat's Bee endpoint pays for this
+   one with its own postage stamp. The client holds no stamp. A message is at most 500 characters of
+   text and 2,048 bytes whole, and the composer counts both before it sends.
+   Until the viewer reads its message back from the chat feed, the library resends the same chunk
+   every 10 seconds, five times at most, and then marks it not sent, with a retry.
 2. The chat aggregator service listens on that address and appends each message to the stream's
    chat feed, signing with its own key and paying with its own stamp.
 3. Viewers read the chat feed by polling it through the same chat endpoint, every half second in
    msrs-client. Here the interval is a setting, so it can be raised under load without a rebuild.
-4. Opening a chat first downloads the aggregator's latest history snapshot, the chat so far.
+4. Opening a chat first downloads the newest history file the chat feed points to, then reads the
+   feed entries written after it. Older messages load on a click. While the chat node does not
+   answer, or a message known to exist has not loaded, the panel says so over the messages it has.
 5. The chat library needs a key even to read, so a viewer with no name reads with a fixed
    placeholder key, and the panel asks for a name before anything is sent.
 
@@ -278,7 +281,8 @@ week, and leave the two weeks before the event for rehearsal with the real strea
 - **Decision 3, the stream list format** (the owner, 2026-09-29): A, copied into `src/shared/` with the
   source commit named and tested against sample entries from the monorepo's tests.
 - **Decision 4, the chat library** (the owner, 2026-09-29): discussed later. Until then chat is built
-  on swarm-chat-js 6.2.8 as it is.
+  on swarm-chat-js 6.2.8 as it is. Later the same day the owner gave the go for swarm-chat-js 7.0 on
+  bee-js 13, and the chat moves to it, from a vendored copy until 7.0 is on npm.
 - **Decision 5, visibility** (the owner, 2026-09-29): public once phase 1 has merged and the tree is
   checked for hosts, addresses and keys.
 - **Decision 6, licence** (the owner, 2026-09-29): MIT, added in phase 1.
@@ -296,8 +300,8 @@ week, and leave the two weeks before the event for rehearsal with the real strea
   snapshot, so late in a busy day every newly opened chat starts with a large read. How big the
   snapshot may grow is the aggregator's to decide.
 - **Chat moderation.** Anyone can post under any name, and the display name proves nothing about who
-  someone is. Every message costs the chat endpoint about three stamped chunks, so a flood of
-  messages spends its stamp. Nothing in this plan filters messages. If the event needs moderation or
+  someone is. Every message costs the chat endpoint one stamped chunk, and one more for each
+  resend, so a flood of messages spends its stamp. Nothing in this plan filters messages. If the event needs moderation or
   a rate limit, it belongs in the aggregator and the chat endpoint, which decide what reaches the
   feed.
 - **The chat key lives in the browser's local storage**, so a reload keeps the name. It proves only

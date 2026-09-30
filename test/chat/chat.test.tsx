@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { EVENTS, MessageType, type MessageData } from '@solarpunkltd/swarm-chat-js';
+import { ChatMessageError, EVENTS, MessageType, type MessageData } from '@solarpunkltd/swarm-chat-js';
 import { act, createElement, StrictMode, type ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -38,7 +38,6 @@ vi.mock('emoji-picker-react', () => ({
   Theme: { DARK: 'dark' },
 }));
 
-const OWNER = 'a'.repeat(40);
 const FEED_OWNER = '0x' + 'b'.repeat(40);
 const OTHER = 'c'.repeat(40);
 
@@ -64,9 +63,9 @@ function message(fields: Partial<MessageData> & Pick<MessageData, 'id'>): Messag
     address: OTHER,
     timestamp: clock,
     signature: 'sig',
-    index: 0,
+    index: clock,
     chatTopic: 'chat-topic',
-    userTopic: 'user-topic',
+    sentAt: clock,
     ...fields,
   };
 }
@@ -76,7 +75,7 @@ function emit(event: string, data: unknown, chat = FakeSwarmChat.latest()) {
 }
 
 function panel(topic = 'stream-one', chat: ChatConfig = CHAT): ReactNode {
-  return createElement(ChatUserProvider, null, createElement(Chat, { chat, owner: OWNER, topic }));
+  return createElement(ChatUserProvider, null, createElement(Chat, { chat, topic }));
 }
 
 async function open(node: ReactNode = panel()) {
@@ -116,7 +115,6 @@ describe('the chat on a watch page', () => {
       gsocTopic: 'gsoc-topic',
       chatTopic: 'chat-stream-one',
       chatAddress: FEED_OWNER,
-      enveloped: false,
       pollingInterval: 750,
     });
     expect(infra.stamp).toBeUndefined();
@@ -131,6 +129,18 @@ describe('the chat on a watch page', () => {
     signIn('Ada');
     await open();
     expect(FakeSwarmChat.latest().settings.user).toEqual({ privateKey: session?.privateKey, nickname: 'Ada' });
+  });
+
+  it('keeps loading through an error the library recovers from while opening, and never calls it unreachable', async () => {
+    mounted = mount(panel());
+    await settle();
+    emit(EVENTS.LOADING_INIT, true);
+    emit(EVENTS.ERROR, new Error('the head lookup timed out, opening from slot 0'));
+    expect(text()).toContain('Loading the chat');
+    expect(text()).not.toContain('The chat cannot be reached right now');
+    emit(EVENTS.LOADING_INIT, false);
+    expect(text()).not.toContain('Loading the chat');
+    expect(text()).toContain('No messages yet.');
   });
 
   it('says it is loading until the chat has read its history', async () => {
@@ -154,6 +164,14 @@ describe('the chat on a watch page', () => {
     expect(text()).toContain('Bea');
   });
 
+  it('shows published messages by their place in the chat feed, and one still sending after them', async () => {
+    await open();
+    emit(EVENTS.MESSAGE_REQUEST_INITIATED, message({ id: 'sending', index: -1, timestamp: 1 }));
+    emit(EVENTS.MESSAGE_RECEIVED, message({ id: 'later-in-feed', index: 8, timestamp: 100 }));
+    emit(EVENTS.MESSAGE_RECEIVED, message({ id: 'earlier-in-feed', index: 7, timestamp: 200 }));
+    expect(messageTexts()).toEqual(['text of earlier-in-feed', 'text of later-in-feed', 'text of sending']);
+  });
+
   it('shows a message once when it arrives twice', async () => {
     await open();
     const once = message({ id: 'once' });
@@ -173,13 +191,39 @@ describe('the chat on a watch page', () => {
     expect(FakeSwarmChat.instances[0].stop).toHaveBeenCalled();
   });
 
+  it('shows the chat again by itself once the library, which keeps trying, gets through', async () => {
+    await open();
+    emit(EVENTS.CRITICAL_ERROR, new Error('opening failed three times'));
+    expect(text()).toContain('The chat cannot be reached right now');
+    emit(EVENTS.LOADING_INIT, true);
+    expect(text()).toContain('The chat cannot be reached right now');
+    emit(EVENTS.LOADING_INIT, false);
+    expect(text()).not.toContain('The chat cannot be reached right now');
+    expect(text()).toContain('No messages yet.');
+    expect(FakeSwarmChat.instances).toHaveLength(1);
+  });
+
+  it('says when the chat is reconnecting or not updating, and nothing once it is live again', async () => {
+    await open();
+    emit(EVENTS.MESSAGE_RECEIVED, message({ id: 'm' }));
+    emit(EVENTS.STATUS, 'reconnecting');
+    expect(text()).toContain('Reconnecting to the chat');
+    expect(messageTexts()).toEqual(['text of m']);
+    emit(EVENTS.STATUS, 'stalled');
+    expect(text()).toContain('The chat is not updating right now');
+    expect(text()).not.toContain('Reconnecting to the chat');
+    emit(EVENTS.STATUS, 'live');
+    expect(text()).not.toContain('Reconnecting to the chat');
+    expect(text()).not.toContain('The chat is not updating right now');
+  });
+
   it('reads again, and shows the chat once it answers, after a sign-in while it could not be reached', async () => {
     await open(
       createElement(
         ChatUserProvider,
         null,
         createElement(LoginButton),
-        createElement(Chat, { chat: CHAT, owner: OWNER, topic: 'stream-one' }),
+        createElement(Chat, { chat: CHAT, topic: 'stream-one' }),
       ),
     );
     emit(EVENTS.CRITICAL_ERROR, new Error('unreachable'));
@@ -208,16 +252,14 @@ describe('sending', () => {
     expect(FakeSwarmChat.latest().settings.user.nickname).toBe('Ada');
   });
 
-  it('sends the text with the stream it belongs to, shows it as sending, then as sent', async () => {
+  it('sends the text, shows it as sending, then as sent', async () => {
     signIn();
     await open();
     const chat = FakeSwarmChat.latest();
     type(input('Message'), '  hello there  ');
     press(input('Message'), 'Enter');
     await settle();
-    expect(chat.sendMessage).toHaveBeenCalledWith('hello there', MessageType.TEXT, undefined, undefined, {
-      streamId: `${OWNER}/stream-one`,
-    });
+    expect(chat.sendMessage).toHaveBeenCalledWith('hello there', MessageType.TEXT, undefined);
     expect(input('Message').value).toBe('');
 
     const own = message({ id: 'own', message: 'hello there', username: 'Ada', address: session!.address });
@@ -244,6 +286,42 @@ describe('sending', () => {
     expect(chat.sendMessage).toHaveBeenCalledTimes(1);
   });
 
+  it('counts a message as the chat does, and does not send one the chat would refuse', async () => {
+    signIn();
+    await open();
+    const chat = FakeSwarmChat.latest();
+    type(input('Message'), 'a'.repeat(500));
+    expect(button('Send').disabled).toBe(false);
+    expect(text()).not.toContain('at most 500 characters');
+
+    type(input('Message'), 'a'.repeat(501));
+    expect(button('Send').disabled).toBe(true);
+    expect(text()).toContain('A message is at most 500 characters.');
+    press(input('Message'), 'Enter');
+    await settle();
+    expect(chat.sendMessage).not.toHaveBeenCalled();
+
+    type(input('Message'), '🐝'.repeat(400));
+    expect(button('Send').disabled).toBe(false);
+
+    type(input('Message'), '🐝'.repeat(500));
+    expect(button('Send').disabled).toBe(true);
+    expect(text()).toContain('This message is too long to send.');
+    expect(text()).not.toContain('at most 500 characters');
+  });
+
+  it('says why when the chat refuses a message', async () => {
+    signIn();
+    await open();
+    const chat = FakeSwarmChat.latest();
+    chat.sendMessage.mockRejectedValueOnce(new ChatMessageError('too-large', 'over the cap'));
+    type(input('Message'), 'hi');
+    click(button('Send'));
+    await settle();
+    expect(text()).toContain('This message is too long to send.');
+    expect(input('Message').value).toBe('hi');
+  });
+
   it('adds an emoji from the picker to the message being written', async () => {
     signIn();
     await open();
@@ -252,6 +330,44 @@ describe('sending', () => {
     click(await waitFor(() => queryButton('pick 🎉')));
     expect(input('Message').value).toBe('party 🎉');
     expect(dialog()).toBeNull();
+  });
+
+  it('shows a message as sending through a reconnect, and as not sent once the library reports it after', async () => {
+    signIn();
+    await open();
+    const own = message({ id: 'own', username: 'Ada', address: session!.address, index: -1 });
+    emit(EVENTS.MESSAGE_REQUEST_INITIATED, own);
+    emit(EVENTS.STATUS, 'reconnecting');
+    expect(text()).toContain('Sending');
+    expect(text()).not.toContain('Not sent');
+    emit(EVENTS.STATUS, 'live');
+    emit(EVENTS.MESSAGE_REQUEST_ERROR, own);
+    expect(text()).toContain('Not sent');
+    expect(button('Retry')).toBeTruthy();
+  });
+
+  it('offers a resend for a message not confirmed after a while, but only while the chat is live', async () => {
+    signIn();
+    await open();
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      const own = message({ id: 'own', username: 'Ada', address: session!.address, index: -1 });
+      emit(EVENTS.MESSAGE_REQUEST_INITIATED, own);
+      emit(EVENTS.MESSAGE_REQUEST_UPLOADED, own);
+      emit(EVENTS.STATUS, 'reconnecting');
+      void act(() => vi.advanceTimersByTime(20_000));
+      expect(text()).toContain('Sending');
+      expect(text()).not.toContain('Not confirmed yet');
+
+      emit(EVENTS.STATUS, 'live');
+      expect(text()).toContain('Not confirmed yet');
+      expect(button('Resend')).toBeTruthy();
+
+      emit(EVENTS.STATUS, 'stalled');
+      expect(text()).not.toContain('Not confirmed yet');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('says a message did not send and sends it again on retry', async () => {
@@ -288,6 +404,18 @@ describe('reactions', () => {
     expect(queryButton(/^👍/)).toBeNull();
   });
 
+  it('do not count a reaction whose sending ran out, since nobody else ever saw it', async () => {
+    signIn();
+    await open();
+    emit(EVENTS.MESSAGE_RECEIVED, message({ id: 'm' }));
+    emit(EVENTS.MESSAGE_RECEIVED, reaction('r1', 'm', '👍', OTHER));
+    const own = reaction('mine', 'm', '👍', session!.address, 'Ada');
+    emit(EVENTS.MESSAGE_REQUEST_INITIATED, { ...own, index: -1 });
+    expect(button('👍 2')).toBeTruthy();
+    emit(EVENTS.MESSAGE_REQUEST_ERROR, { ...own, index: -1 });
+    expect(button('👍 1').getAttribute('aria-pressed')).toBe('false');
+  });
+
   it('counts two people who chose the same name as two', async () => {
     await open();
     emit(EVENTS.MESSAGE_RECEIVED, message({ id: 'm' }));
@@ -305,9 +433,7 @@ describe('reactions', () => {
     expect(button('👍 1').getAttribute('aria-pressed')).toBe('true');
     click(button('👍 1'));
     await settle();
-    expect(chat.sendMessage).toHaveBeenCalledWith('👍', MessageType.REACTION, 'm', undefined, {
-      streamId: `${OWNER}/stream-one`,
-    });
+    expect(chat.sendMessage).toHaveBeenCalledWith('👍', MessageType.REACTION, 'm');
   });
 
   it('are added from the message actions', async () => {
@@ -318,7 +444,7 @@ describe('reactions', () => {
     click(button('Message actions'));
     click(button('React with 😂'));
     await settle();
-    expect(chat.sendMessage).toHaveBeenCalledWith('😂', MessageType.REACTION, 'm', undefined, expect.anything());
+    expect(chat.sendMessage).toHaveBeenCalledWith('😂', MessageType.REACTION, 'm');
   });
 
   it('ask a viewer with no name for one instead of sending', async () => {
@@ -351,9 +477,7 @@ describe('threads', () => {
     type(input('Reply'), 'another answer');
     click(button('Send'));
     await settle();
-    expect(chat.sendMessage).toHaveBeenCalledWith('another answer', MessageType.THREAD, 'parent', undefined, {
-      streamId: `${OWNER}/stream-one`,
-    });
+    expect(chat.sendMessage).toHaveBeenCalledWith('another answer', MessageType.THREAD, 'parent');
 
     click(button('Back to the chat'));
     expect(messageTexts()).toEqual(['the question']);
@@ -401,6 +525,19 @@ describe('the chat lifecycle', () => {
     mounted?.unmount();
     mounted = null;
     expect(chat.stop).toHaveBeenCalledTimes(1);
+  });
+
+  it('takes its own listeners off the chat it stops, since the library keeps them through a stop', async () => {
+    await open(panel('stream-one'));
+    const first = FakeSwarmChat.latest();
+    expect(first.emitter.listenerCount()).toBeGreaterThan(0);
+    mounted?.render(panel('stream-two'));
+    await settle();
+    expect(first.emitter.listenerCount()).toBe(0);
+    const second = FakeSwarmChat.latest();
+    mounted?.unmount();
+    mounted = null;
+    expect(second.emitter.listenerCount()).toBe(0);
   });
 
   it('stops the old chat and starts the new stream chat when the stream changes, dropping the old messages', async () => {

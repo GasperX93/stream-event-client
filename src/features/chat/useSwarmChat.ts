@@ -1,16 +1,27 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { type ChatSettings, EVENTS, type MessageData, MessageType, SwarmChat } from '@solarpunkltd/swarm-chat-js';
+import {
+  type ChatEvent,
+  type ChatEventPayloads,
+  type ChatSettings,
+  EVENTS,
+  FeedStatus,
+  type MessageData,
+  MessageType,
+  SwarmChat,
+} from '@solarpunkltd/swarm-chat-js';
 
+import { draftProblem } from './draftCheck';
 import { groupReactions, type ReactionsByMessage } from './reactions';
 
-/** Where a message stands on its way from this browser to the chat feed. */
+/** Where a message stands on its way from this browser to the chat feed, as the library's sender reports it. */
 interface DeliveryState {
-  /** The send began. */
+  /** Built and signed, about to be written to the chat's shared address. */
   requested?: boolean;
-  /** Written to the sender's own feed, and on its way to the aggregator. */
+  /** The node took the first write. The library resends it until it reads the message back. */
   uploaded?: boolean;
   /** Read back from the chat feed, so everyone watching can see it. */
   received?: boolean;
+  /** The resends ran out without the message being read back. */
   error?: boolean;
 }
 
@@ -22,16 +33,22 @@ export const CHAT_UNREACHABLE = 'unreachable';
 
 export type ChatStatus = typeof CHAT_LOADING | typeof CHAT_READY | typeof CHAT_UNREACHABLE;
 
-/** Carried on every message, so the aggregator can tell which stream it belongs to. */
-type MessageExtras = {
-  streamId: string;
-};
+const PENDING_INDEX = -1;
 
-function byTimestamp(a: MessageData, b: MessageData): number {
-  return a.timestamp - b.timestamp;
+/**
+ * Published messages by their place in the chat feed, then pending ones by the sender's clock, as library 7.0 orders
+ * them. A timestamp cannot order the two kinds together: a published one is the server's, a pending one the sender's.
+ */
+function inChatOrder(a: MessageData, b: MessageData): number {
+  const aPending = a.index === PENDING_INDEX;
+  const bPending = b.index === PENDING_INDEX;
+  if (aPending !== bPending) {
+    return aPending ? 1 : -1;
+  }
+  return aPending ? a.timestamp - b.timestamp : a.index - b.index;
 }
 
-/** One entry per message id, the latest delivery state laid over what was known, in the order written. */
+/** One entry per message id, the latest delivery state laid over what was known, in chat order. */
 export function mergeMessage(
   messages: VisibleMessage[],
   incoming: MessageData,
@@ -42,7 +59,7 @@ export function mergeMessage(
     index === -1
       ? [...messages, { ...incoming, ...delivery }]
       : messages.map((message, at) => (at === index ? { ...message, ...incoming, ...delivery } : message));
-  return merged.sort(byTimestamp);
+  return merged.sort(inChatOrder);
 }
 
 /**
@@ -60,7 +77,7 @@ const START_DELAY_MS = 0;
  * messages on screen stay through that restart, since it is the same chat read again, and only a
  * different stream's chat starts from an empty list.
  */
-export function useSwarmChat(settings: ChatSettings, streamId: string, ownAddress: string | null) {
+export function useSwarmChat(settings: ChatSettings, ownAddress: string | null) {
   const settingsKey = JSON.stringify(settings);
   const chatKey = JSON.stringify(settings.infra);
   const chatRef = useRef<SwarmChat | null>(null);
@@ -71,6 +88,7 @@ export function useSwarmChat(settings: ChatSettings, streamId: string, ownAddres
   const [status, setStatus] = useState<ChatStatus>(CHAT_LOADING);
   const [isLoadingOlder, setIsLoadingOlder] = useState(false);
   const [hasOlder, setHasOlder] = useState(false);
+  const [feedStatus, setFeedStatus] = useState<FeedStatus | null>(null);
 
   useEffect(() => {
     const current = JSON.parse(settingsKey) as ChatSettings;
@@ -87,40 +105,45 @@ export function useSwarmChat(settings: ChatSettings, streamId: string, ownAddres
     }
     let stopped = false;
     let chat: SwarmChat | null = null;
+    /** The library keeps its listeners through a stop, so each one added here is taken off again here. */
+    const removeListeners: Array<() => void> = [];
+
+    setFeedStatus(null);
 
     const timer = setTimeout(() => {
       const started = new SwarmChat(current);
       chat = started;
       chatRef.current = started;
 
-      const { on } = started.getEmitter();
+      const { on, off } = started.getEmitter();
+      const listen = <E extends ChatEvent>(event: E, listener: (data: ChatEventPayloads[E]) => void) => {
+        on(event, listener);
+        removeListeners.push(() => off(event, listener));
+      };
       const onMessage = (delivery: DeliveryState) => (data: MessageData) => {
         if (!stopped) {
           setMessages((previous) => mergeMessage(previous, data, delivery));
         }
       };
 
-      on(EVENTS.MESSAGE_REQUEST_INITIATED, onMessage({ error: false, requested: true }));
-      on(EVENTS.MESSAGE_REQUEST_UPLOADED, onMessage({ error: false, uploaded: true }));
-      on(EVENTS.MESSAGE_RECEIVED, onMessage({ error: false, received: true }));
-      on(EVENTS.MESSAGE_REQUEST_ERROR, onMessage({ error: true }));
-      on(EVENTS.LOADING_INIT, (loading: boolean) => {
+      listen(EVENTS.MESSAGE_REQUEST_INITIATED, onMessage({ error: false, requested: true }));
+      listen(EVENTS.MESSAGE_REQUEST_UPLOADED, onMessage({ error: false, uploaded: true }));
+      listen(EVENTS.MESSAGE_RECEIVED, onMessage({ error: false, received: true }));
+      listen(EVENTS.MESSAGE_REQUEST_ERROR, onMessage({ error: true }));
+      listen(EVENTS.LOADING_INIT, (loading: boolean) => {
         if (stopped) {
           return;
         }
         if (!loading) {
           setHasOlder(started.hasPreviousMessages());
         }
-        // Once a chat has shown, a restart for a new name reads it again behind what is on screen.
+        // The library keeps trying after a critical error, so the end of a load shows the chat whatever came
+        // before. Once a chat has shown, a restart for a new name reads it again behind what is on screen.
         setStatus((previous) =>
-          previous === CHAT_UNREACHABLE || (loading && previous === CHAT_READY)
-            ? previous
-            : loading
-              ? CHAT_LOADING
-              : CHAT_READY,
+          !loading ? CHAT_READY : previous === CHAT_UNREACHABLE || previous === CHAT_READY ? previous : CHAT_LOADING,
         );
       });
-      on(EVENTS.LOADING_PREVIOUS_MESSAGES, (loading: boolean) => {
+      listen(EVENTS.LOADING_PREVIOUS_MESSAGES, (loading: boolean) => {
         if (stopped) {
           return;
         }
@@ -129,7 +152,12 @@ export function useSwarmChat(settings: ChatSettings, streamId: string, ownAddres
           setHasOlder(started.hasPreviousMessages());
         }
       });
-      on(EVENTS.CRITICAL_ERROR, () => {
+      listen(EVENTS.STATUS, (next) => {
+        if (!stopped) {
+          setFeedStatus(next);
+        }
+      });
+      listen(EVENTS.CRITICAL_ERROR, () => {
         if (!stopped) {
           setStatus(CHAT_UNREACHABLE);
         }
@@ -137,8 +165,8 @@ export function useSwarmChat(settings: ChatSettings, streamId: string, ownAddres
 
       started.start().then(
         () => {
-          // The library starts its polling at the end of start() whether or not stop() was called
-          // while start() was still reading, so a chat stopped that early is stopped once more.
+          // Library 6.x began polling at the end of start() even after a stop, and a second stop costs
+          // nothing, so a chat whose start finished after its stop is stopped once more.
           if (stopped) {
             void started.stop();
           }
@@ -154,6 +182,9 @@ export function useSwarmChat(settings: ChatSettings, streamId: string, ownAddres
     return () => {
       stopped = true;
       clearTimeout(timer);
+      for (const removeListener of removeListeners.splice(0)) {
+        removeListener();
+      }
       if (chat) {
         if (chatRef.current === chat) {
           chatRef.current = null;
@@ -170,7 +201,7 @@ export function useSwarmChat(settings: ChatSettings, streamId: string, ownAddres
     for (const message of messages) {
       if (message.type === MessageType.TEXT) {
         text.push(message);
-      } else if (message.type === MessageType.REACTION) {
+      } else if (message.type === MessageType.REACTION && !message.error) {
         reactions.push(message);
       } else if (message.type === MessageType.THREAD) {
         replies.push(message);
@@ -189,13 +220,9 @@ export function useSwarmChat(settings: ChatSettings, streamId: string, ownAddres
     [grouped.replies],
   );
 
-  const send = useCallback(
-    async (text: string, type: MessageType, targetMessageId?: string) => {
-      const extras: MessageExtras = { streamId };
-      await chatRef.current?.sendMessage(text, type, targetMessageId, undefined, extras);
-    },
-    [streamId],
-  );
+  const send = useCallback(async (text: string, type: MessageType, targetMessageId?: string) => {
+    await chatRef.current?.sendMessage(text, type, targetMessageId);
+  }, []);
 
   const sendMessage = useCallback((text: string) => send(text, MessageType.TEXT), [send]);
   const sendReaction = useCallback(
@@ -203,6 +230,18 @@ export function useSwarmChat(settings: ChatSettings, streamId: string, ownAddres
     [send],
   );
   const sendReply = useCallback((parentId: string, text: string) => send(text, MessageType.THREAD, parentId), [send]);
+
+  const { chatTopic } = settings.infra;
+  const { nickname } = settings.user;
+  const checkMessage = useCallback(
+    (text: string) => draftProblem({ topic: chatTopic, name: nickname, type: MessageType.TEXT, text }),
+    [chatTopic, nickname],
+  );
+  const checkReply = useCallback(
+    (parentId: string, text: string) =>
+      draftProblem({ topic: chatTopic, name: nickname, type: MessageType.THREAD, target: parentId, text }),
+    [chatTopic, nickname],
+  );
 
   const fetchOlderMessages = useCallback(async () => {
     try {
@@ -212,26 +251,16 @@ export function useSwarmChat(settings: ChatSettings, streamId: string, ownAddres
     }
   }, []);
 
-  /**
-   * A message that failed is sent again whole. One that reached the sender's own feed but was never
-   * read back from the chat feed is only handed to the aggregator again.
-   */
+  /** A message that failed, or one still waiting to be read back, is sent again with its identical bytes. */
   const retrySendMessage = useCallback((message: VisibleMessage) => {
-    const chat = chatRef.current;
-    if (!chat) {
-      return;
-    }
-    if (message.error) {
-      void chat.retrySendMessage(message);
-    } else if (message.requested && message.uploaded) {
-      void chat.retryBroadcastUserMessage(message);
-    }
+    chatRef.current?.retrySendMessage(message);
   }, []);
 
   const restart = useCallback(() => setRestarts((count) => count + 1), []);
 
   return {
     status,
+    feedStatus,
     isLoadingOlder,
     hasOlder,
     messages: grouped.text,
@@ -240,6 +269,8 @@ export function useSwarmChat(settings: ChatSettings, streamId: string, ownAddres
     sendMessage,
     sendReaction,
     sendReply,
+    checkMessage,
+    checkReply,
     fetchOlderMessages,
     retrySendMessage,
     restart,
