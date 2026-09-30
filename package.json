@@ -15,14 +15,15 @@
     "test": "vitest run",
     "e2e": "pnpm build && playwright test -c e2e/playwright.config.ts",
     "e2e:record": "pnpm build && playwright test -c e2e/record.config.ts",
-    "test:docker": "PLAYWRIGHT_INSTALL_DEPS=1 pnpm e2e:record"
+    "test:image": "node --test test/docker/image.docker.mjs",
+    "test:docker": "pnpm test:image && PLAYWRIGHT_INSTALL_DEPS=1 pnpm e2e:record"
   },
   "dependencies": {
     "@ethersphere/bee-js": "13.1.0",
     "@fontsource/geist": "5.3.0",
     "@fontsource/jetbrains-mono": "5.3.0",
     "@fontsource/vend-sans": "5.3.0",
-    "@solarpunkltd/swarm-chat-js": "file:vendor/solarpunkltd-swarm-chat-js-7.0.0.tgz",
+    "@solarpunkltd/swarm-chat-js": "7.0.0",
     "cafe-utility": "36.3.0",
     "emoji-picker-react": "4.22.2",
     "hls.js": "1.7.3",

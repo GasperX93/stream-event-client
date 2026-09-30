@@ -7,7 +7,8 @@ import { PREVIEW_ORIGIN } from './recording';
 /**
  * Records the Bee answers the smoke test replays. It needs a Docker daemon and ffmpeg, so it runs on a machine that has
  * both, as a job of its own, and never on every pull request. `pnpm e2e:record` builds the app first, and
- * `pnpm test:docker` runs it with the browser's system libraries installed, as a Docker job needs.
+ * `pnpm test:docker` runs it after the image check, with the browser's system libraries installed, as a Docker job
+ * needs.
  *
  * Every such run records afresh into `test-results/recorded/`. Nothing it records reaches the tree on its own: the
  * smoke test replays only what is committed under `e2e/recorded/`.

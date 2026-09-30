@@ -162,34 +162,52 @@ notes on them:
 
 ### How the chat works, and what it needs outside this repository
 
-From swarm-chat-js 7.0 and the chat server it pairs with:
+The chat runs on swarm-chat-js 7.0 and the chat aggregator server it pairs with,
+[swarm-chat-aggregator-js](https://github.com/Solar-Punk-Ltd/swarm-chat-aggregator-js). Swarm stores everything in
+4 KB pieces called chunks, and each chunk is paid for with a postage stamp.
 
-1. A viewer's message is signed with their chat key and written once, as one chunk, to a shared GSOC
-   address, a Swarm address anyone may write to and one node listens on. Swarm stores everything in
-   4 KB pieces called chunks, each paid for with a stamp, and the chat's Bee endpoint pays for this
-   one with its own postage stamp. The client holds no stamp. A message is at most 500 characters of
-   text and 2,048 bytes whole, and the composer counts both before it sends.
-   Until the viewer reads its message back from the chat feed, the library resends the same chunk
-   every 10 seconds, five times at most, and then marks it not sent, with a retry.
-2. The chat aggregator service listens on that address and appends each message to the stream's
-   chat feed, signing with its own key and paying with its own stamp.
-3. Viewers read the chat feed by polling it through the same chat endpoint, every half second in
-   msrs-client. Here the interval is a setting, so it can be raised under load without a rebuild.
-4. Opening a chat first downloads the newest history file the chat feed points to, then reads the
-   feed entries written after it. Older messages load on a click. While the chat node does not
-   answer, or a message known to exist has not loaded, the panel says so over the messages it has.
-5. The chat library needs a key even to read, so a viewer with no name reads with a fixed
-   placeholder key, and the panel asks for a name before anything is sent.
+1. **Sending is one write per message.** A viewer's message is signed with their chat key and written once, as one
+   chunk, to the chat's GSOC address, the inbox. A GSOC address is a Swarm address that anyone holding its shared key
+   may write to and that one node listens on. Every chat of the event shares one inbox, and a message carries its
+   chat's topic. The chat's Bee endpoint stamps the write, so the client holds no stamp. A message is at most 500
+   characters of text and 2,048 bytes whole, and the composer counts both before it sends.
+2. **A message stays pending until the feed shows it.** Until the viewer reads its own message back from the chat
+   feed, the library writes the identical chunk again every 10 seconds, five times at most, and then marks the
+   message not sent, with a retry button. While the chat itself cannot be read, the resends wait, so a message is not
+   failed only because this viewer lost sight of the feed.
+3. **The aggregator publishes.** It listens on the inbox, checks each message's shape and signature, and writes it to
+   that stream's chat feed as the next entry, at index 0, 1, 2 and on, signing with its own key and paying with its
+   own stamp. After publishing it saves a history file of the chat, and every feed entry links to the newest one.
+4. **Viewers read by polling the feed and its history files.** Opening a chat asks Bee for the feed's newest entry
+   once, shows the history file that entry links to, and then reads the entries after it. At the live edge the panel
+   polls the next feed slots, every `pollIntervalMs`, which is a setting so it can be raised under load without a
+   rebuild. Older messages load on a click, one history file at a time. A slot or a history row that fails its checks
+   is skipped and never stops the chat. While the chat endpoint does not answer, or a message known to exist has not
+   loaded, the panel says so over the messages it has.
+5. **Reading needs a key too.** The chat library signs with a key even to read, so a viewer with no name reads with a
+   fixed placeholder key, and the panel asks for a name before anything is sent.
 
-For chat to work live, two things must run outside this repository: the chat's Bee endpoint with
-its stamp, and the aggregator with its key and stamp. A new aggregator is set up for this app,
-apart from this repository, and its details come later (the owner, 2026-09-29). Until then the chat
-is built and tested against stand-ins. One constraint for whoever sets it up: the endpoint viewers
-write through has to be a different Bee node from the one the aggregator listens on, because Bee
-hands a GSOC chunk to a listener only when the chunk arrives from another node.
+For chat to work live, two things must run outside this repository: the chat's Bee endpoint with its stamp, and the
+aggregator with its key and stamp. A new aggregator is set up for this app, apart from this repository, and its details
+come later (the owner, 2026-09-29). The aggregator's own live test bed, three Bee nodes on a local test chain, runs
+messages in the 7.0 format through real nodes. This app's panel is tested against stand-ins until the aggregator is
+set up. Whoever sets that up needs these two constraints:
 
-The Bee node picker moves the stream list and the video. The chat keeps its own endpoint, because a
-viewer's own node holds no stamp for writing.
+- **The node viewers write through must be a different Bee node from the one the aggregator listens on.** Bee hands a
+  GSOC chunk to a listener only when the chunk arrives from another node, so a message written on the listener's own
+  node is never heard.
+- **The chat endpoint's stamp must be a mutable batch of depth 24 or more.** Every message is a write to the one inbox
+  address, so every message lands in the same one of the batch's buckets. A bucket holds 2^(depth - 16) chunks, so 16
+  at depth 20 and 256 at depth 24. Both limits were measured on the aggregator's test bed:
+  - An immutable batch fills that bucket and then refuses every further write with `400 chunk write error`. Bee buys
+    an immutable batch unless it is asked for a mutable one, so a batch bought with the defaults stops the whole
+    event's chat once that one bucket is full, after 256 messages at depth 24.
+  - A mutable batch reuses the bucket's slots instead. At depth 20, 200 messages sent at once reused 16 slots so fast
+    that a write arriving late found its slot already holding a newer message, and the node refused it with
+    `500 done split failed`. At depth 24, 256 slots, the same test ran clean.
+
+The Bee node picker moves the stream list and the video. The chat keeps its own endpoint, because a viewer's own node
+holds no stamp for writing.
 
 ### Tests
 
@@ -213,14 +231,14 @@ Each phase is one branch and one pull request into `main`, reviewed before it me
 it changes in the same pull request. The target dates assume the decisions below are answered this
 week, and leave the two weeks before the event for rehearsal with the real streams and chat.
 
-| #   | Phase                  | Done when                                                                                                                                                                                                                                                                                                                               | Target                 |
-| --- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| 0   | This plan              | The repository exists, this file is on `main`, the decisions are answered                                                                                                                                                                                                                                                               | 2026-09-30             |
-| 1   | The viewer, standalone | The viewer, the shared pieces and the picker are in the new layout, weeb-3 is gone, decision 2 is applied, the runtime config works, every stream is listed, the toolchain is the monorepo's, dependencies are current and checked, the kept tests and CI are green                                                                     | Done 2026-09-29, PR #1 |
-| 2   | Swarm design           | Tokens and the Swarm theme are in, every screen uses them on a phone and on a desktop, the watch page keeps a place for the chat, fonts, logo and favicon are bundled, no theme machinery is left, and the tokens test is green                                                                                                         | Done 2026-09-29, PR #2 |
-| 3   | Chat                   | The display-name login and the chat panel work on the watch page, reading the chat feed by polling, with the ported and new tests green. Built and tested against stand-ins, because the aggregator is not set up yet, so a message has not yet gone through a real endpoint and aggregator                                             | 2026-10-10             |
-| 4   | Ship                   | The Docker image, nginx with the page fallback, caching, `config.json` served uncached, a content security policy that allows the gateway, the viewer's own machine and the chat endpoint, the config mounted at start, and the browser smoke test with its recorded answers in CI. A deploy to a staging host only on the owner's word | 2026-10-15             |
-| 5   | Review and docs        | A review for broken logic, races, loops that never end, unhandled errors and anything that leaves a viewer unsure what is happening, each finding fixed or recorded. Docs and comments read against the code and fixed. A check that no host, address or key is in the tree                                                             | 2026-10-19             |
+| #   | Phase                  | Done when                                                                                                                                                                                                                                                                                                                                               | Target                         |
+| --- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| 0   | This plan              | The repository exists, this file is on `main`, the decisions are answered                                                                                                                                                                                                                                                                               | 2026-09-30                     |
+| 1   | The viewer, standalone | The viewer, the shared pieces and the picker are in the new layout, weeb-3 is gone, decision 2 is applied, the runtime config works, every stream is listed, the toolchain is the monorepo's, dependencies are current and checked, the kept tests and CI are green                                                                                     | Done 2026-09-29, PR #1         |
+| 2   | Swarm design           | Tokens and the Swarm theme are in, every screen uses them on a phone and on a desktop, the watch page keeps a place for the chat, fonts, logo and favicon are bundled, no theme machinery is left, and the tokens test is green                                                                                                                         | Done 2026-09-29, PR #2         |
+| 3   | Chat                   | The display-name login and the chat panel work on the watch page on swarm-chat-js 7.0, reading the chat feed and its history files by polling, with the ported and new tests green. Tested against stand-ins, because the aggregator for this app is not set up yet, so a message from this app has not yet gone through a real endpoint and aggregator | Done 2026-09-30, PRs #3 and #4 |
+| 4   | Ship                   | The Docker image, nginx with the page fallback, caching, `config.json` served uncached, a content security policy that allows the gateway, the viewer's own machine and the chat endpoint, the config mounted at start, and the browser smoke test with its recorded answers in CI. A deploy to a staging host only on the owner's word                 | 2026-10-15                     |
+| 5   | Review and docs        | A review for broken logic, races, loops that never end, unhandled errors and anything that leaves a viewer unsure what is happening, each finding fixed or recorded. Docs and comments read against the code and fixed. A check that no host, address or key is in the tree                                                                             | 2026-10-19                     |
 
 ## Decisions for the owner
 
@@ -282,7 +300,8 @@ week, and leave the two weeks before the event for rehearsal with the real strea
   source commit named and tested against sample entries from the monorepo's tests.
 - **Decision 4, the chat library** (the owner, 2026-09-29): discussed later. Until then chat is built
   on swarm-chat-js 6.2.8 as it is. Later the same day the owner gave the go for swarm-chat-js 7.0 on
-  bee-js 13, and the chat moves to it, from a vendored copy until 7.0 is on npm.
+  bee-js 13, and the chat moved to it, first from a vendored copy. 7.0.0 was published to npm on 2026-09-30, and the
+  app takes it from there.
 - **Decision 5, visibility** (the owner, 2026-09-29): public once phase 1 has merged and the tree is
   checked for hosts, addresses and keys.
 - **Decision 6, licence** (the owner, 2026-09-29): MIT, added in phase 1.
@@ -299,6 +318,20 @@ week, and leave the two weeks before the event for rehearsal with the real strea
 - **The chat's first read grows with the chat.** Opening a chat downloads the latest history
   snapshot, so late in a busy day every newly opened chat starts with a large read. How big the
   snapshot may grow is the aggregator's to decide.
+- **A message can miss the listener on the public network.** A chunk reaches the inbox's listening node only when the
+  node one hop before it pushes the chunk there. Bee's push picks the closest peer it rates healthy first, so while
+  that hop rates the listener unhealthy, it hands the chunk to another node in the neighbourhood, which stores it, and
+  the aggregator never hears the message. Read in Bee's source and seen on the aggregator's test bed, where it lost
+  197 of 200 messages until every node rated the listener healthy. The bed overstates how often it happens, because
+  there a fresh cluster of three nodes rated the listener unhealthy for a whole run, while on the public network such a
+  rating comes and goes. It does not overstate what happens. The net is the library's resend: each resend is a new
+  write and so a new push, which can reach the listener once the hop before it rates it healthy again, and after five
+  the viewer sees the message marked not sent, with a retry. How often it happens there is measured on a staging setup
+  before the event.
+- **The chat endpoint's stamp is a setup step that fails quietly.** A batch bought with Bee's defaults is immutable,
+  and the chat then stops for every viewer once the inbox's one bucket is full. The constraint and its reasons are
+  under how the chat works. Whoever sets up the endpoint checks the batch is mutable and of depth 24 or more, and
+  watches its expiry, because a batch that runs out stops the chat the same way.
 - **Chat moderation.** Anyone can post under any name, and the display name proves nothing about who
   someone is. Every message costs the chat endpoint one stamped chunk, and one more for each
   resend, so a flood of messages spends its stamp. Nothing in this plan filters messages. If the event needs moderation or
