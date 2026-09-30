@@ -15,17 +15,21 @@ interface ProfilePictureProps {
   color: string;
 }
 
-/** Decorative: the name it stands for is written beside it. */
+/**
+ * The initial of whoever wrote a message. As on the Swarm site the row writes no name, so the name and
+ * its short address are the avatar's accessible name and show beside it on hover or focus.
+ */
 export function ProfilePicture({ name, address, color }: ProfilePictureProps) {
   const initial = [...name.trim()][0]?.toUpperCase() ?? '?';
+  const author = `${name.trim()} ${shortAddress(address)}`;
   return (
-    <span
-      className="profile-picture"
-      aria-hidden="true"
-      title={`${name.trim()} ${shortAddress(address)}`}
-      style={{ backgroundColor: color }}
-    >
-      {initial}
+    <span className="profile-picture-anchor">
+      <span className="profile-picture" role="img" aria-label={author} style={{ backgroundColor: color }}>
+        {initial}
+      </span>
+      <span className="profile-picture-tooltip" aria-hidden="true">
+        {author}
+      </span>
     </span>
   );
 }

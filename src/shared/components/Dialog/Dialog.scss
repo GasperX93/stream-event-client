@@ -1,38 +1,31 @@
 @use '@/design/media';
 
+// The Swarm site's modal, near the top of the window over a blurred page. It is the same on a phone,
+// where a panel one inset from each edge still leaves its buttons in easy reach.
 .dialog-backdrop {
   position: fixed;
   inset: 0;
   z-index: var(--z-index-dialog);
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: center;
-  background: var(--color-overlay);
-
-  @include media.tablet-up {
-    align-items: center;
-    padding: var(--spacing-base);
-  }
+  padding: var(--size-dialog-offset-top) var(--spacing-base) var(--spacing-base);
+  background: var(--color-overlay-modal);
+  backdrop-filter: blur(var(--blur-base));
+  -webkit-backdrop-filter: blur(var(--blur-base));
 }
 
-// On a phone the dialog is a sheet along the bottom edge, where a thumb reaches its buttons.
 .dialog {
   width: 100%;
-  max-height: 90vh;
+  max-width: var(--size-dialog-max-width);
+  max-height: calc(100% - var(--spacing-base));
   overflow-y: auto;
-  padding: var(--spacing-lg) var(--spacing-base) var(--spacing-xl);
+  padding: var(--spacing-lg);
   border: 1px solid var(--color-border);
-  border-bottom: none;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  border-radius: var(--radius-md);
   background: var(--color-surface);
   box-shadow: var(--shadow-modal);
-
-  @include media.tablet-up {
-    max-width: 460px;
-    padding: var(--spacing-lg);
-    border-bottom: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-  }
+  color: var(--color-text);
 
   &:focus {
     outline: none;
@@ -40,6 +33,14 @@
 }
 
 .dialog-title {
-  margin-bottom: var(--spacing-base);
-  font-size: var(--font-size-2xl);
+  margin-bottom: var(--spacing-lg);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-normal);
+  letter-spacing: normal;
+
+  @include media.tablet-up {
+    font-size: var(--font-size-2xl);
+  }
 }

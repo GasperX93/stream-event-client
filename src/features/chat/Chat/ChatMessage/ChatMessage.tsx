@@ -7,7 +7,7 @@ import { nameColor } from '../nameColor';
 import { MessageActions } from './MessageActions/MessageActions';
 import { MessageReactionsWrapper } from './MessageReactionsWrapper/MessageReactionsWrapper';
 import { MessageThreadWrapper } from './MessageThreadWrapper/MessageThreadWrapper';
-import { ProfilePicture, shortAddress } from './ProfilePicture/ProfilePicture';
+import { ProfilePicture } from './ProfilePicture/ProfilePicture';
 
 import './ChatMessage.scss';
 
@@ -52,6 +52,7 @@ function useIsUnconfirmed(waiting: boolean, onHeightChange?: () => void): boolea
   return isUnconfirmed;
 }
 
+/** One message as the Swarm site draws it: an initial and a bubble, the viewer's own on the right. */
 export function ChatMessage({
   message,
   ownMessage,
@@ -83,15 +84,8 @@ export function ChatMessage({
     <li className={classes}>
       <ProfilePicture name={message.username} address={message.address} color={color} />
 
-      <div className="chat-message-body">
-        <p className="chat-message-author">
-          <span className="chat-message-name">{message.username}</span>{' '}
-          <span className="chat-message-id">{shortAddress(message.address)}</span>
-        </p>
-
-        <div className="chat-message-text">
-          <span className="message">{message.message}</span>
-        </div>
+      <div className="chat-message-text">
+        <span className="message">{message.message}</span>
 
         {error && (
           <p className="chat-message-status error">

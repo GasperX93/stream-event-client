@@ -1,7 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 
 import type { ChatConfig } from '@/config/runtimeConfig';
-import { Spinner } from '@/shared/components/Spinner/Spinner';
 
 import './WatchChat.scss';
 
@@ -24,10 +23,7 @@ interface WatchChatProps {
 function ChatPlaceholder() {
   return (
     <div className="watch-chat-placeholder" role="status">
-      <p className="watch-chat-placeholder-title">Chat</p>
-      <p className="watch-chat-placeholder-detail">
-        <Spinner /> Loading the chat…
-      </p>
+      <p className="watch-chat-placeholder-detail">Loading the chat…</p>
     </div>
   );
 }

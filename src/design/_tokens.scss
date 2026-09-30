@@ -6,7 +6,7 @@
 // The tokens test fails on a variable a stylesheet reads that nothing defines, on a token nothing
 // reads, on a theme missing a variable another theme has, and on a text colour below 4.5:1.
 
-// Only these weights are bundled: Geist 400, 500, 600 and 700, Vend Sans 600, JetBrains Mono 500.
+// Only these weights are bundled: Geist 400, 500, 600 and 700, and JetBrains Mono 500.
 // Another weight needs its file imported in `fonts.ts`, or the browser fakes it.
 $font-weight: (
   'normal': 400,
@@ -38,6 +38,7 @@ $font-size: (
 
 $line-height: (
   'compact': 1.1,
+  'none': 1,
   'tight': 1.2,
   'snug': 1.3,
   'normal': 1.5,
@@ -87,6 +88,14 @@ $shadow: (
   'dropdown': 0 8px 24px rgba(0, 0, 0, 0.5),
   // Read through `drop-shadow()`, which takes no spread.
   'icon': 0 2px 4px rgba(0, 0, 0, 0.5),
+  'lg': 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+);
+
+$blur: (
+  'sm': 4px,
+  'base': 8px,
+  // Enough to turn a picture into a wash of its own colours.
+  'backdrop': 40px,
 );
 
 $duration: (
@@ -126,9 +135,29 @@ $size: (
   'footer-max-width': 1152px,
   'footer-logo-height': 26px,
   'focus-ring': 2px,
-  'avatar': 32px,
-  'chat-height': 480px,
-  'chat-height-desktop': 640px,
+  'avatar': 24px,
+  'tooltip-max-width': 200px,
+  'watch-max-width': 1440px,
+  'watch-description-max-width': 900px,
+  'chat-column': 400px,
+  // Stacked under the video: most of a phone's screen, never more than the chat needs.
+  'chat-height': min(70vh, 560px),
+  // The same, measured against the visible part of the screen, which iOS Safari's `vh` is not.
+  'chat-height-dynamic': min(70dvh, 560px),
+  // Beside the video: the window's height less the header and the back link above the chat.
+  'chat-height-desktop': calc(100vh - 170px),
+  'chat-min-height-desktop': 320px,
+  // Wide enough to aim at with a finger, where the Swarm design draws the control smaller.
+  'touch-target': 44px,
+  'dialog-max-width': 500px,
+  'dialog-offset-top': 10vh,
+  'dialog-button-height': 40px,
+  'dialog-button-height-phone': 36px,
+  'modal-input-height': 40px,
+  'chat-control': 32px,
+  'reaction-height': 20px,
+  'sender-input-height': 30px,
+  'chat-quick-emoji': 28px,
 );
 
 $z-index: (
@@ -147,6 +176,7 @@ $groups: (
   'spacing': $spacing,
   'radius': $radius,
   'shadow': $shadow,
+  'blur': $blur,
   'duration': $duration,
   'size': $size,
   'z-index': $z-index,

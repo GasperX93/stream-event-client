@@ -1,6 +1,10 @@
 .message-reactions-wrapper {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-2xs);
   margin-top: var(--spacing-xs);
+
+  .own-message & {
+    justify-content: flex-end;
+  }
 }

@@ -226,7 +226,7 @@ There is no theme switcher and no second theme.
   define, when the design defines one nothing reads, and when a text colour falls below 4.5:1
   against its background, so a new colour pairing goes into its list too.
 - **The fonts** are bundled from `@fontsource`, only the weights used: Geist 400, 500, 600 and 700,
-  Vend Sans 600 and JetBrains Mono 500, imported in `src/design/fonts.ts`. The page makes no font request to a
+  and JetBrains Mono 500, imported in `src/design/fonts.ts`. The page makes no font request to a
   third party. Another weight needs its file imported there, or the browser fakes it.
 
 ## Layout

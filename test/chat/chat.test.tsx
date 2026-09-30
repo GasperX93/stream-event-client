@@ -174,6 +174,28 @@ describe('the chat on a watch page', () => {
     expect(messageTexts()).toEqual(['text of earlier-in-feed', 'text of later-in-feed', 'text of sending']);
   });
 
+  it('shows who wrote a message by an initial, with the name and its short address named on it rather than written in the row', async () => {
+    await open();
+    emit(EVENTS.MESSAGE_RECEIVED, message({ id: 'm', username: 'Bea', address: OTHER }));
+    const avatar = document.querySelector('.chat-message [role="img"]');
+
+    expect(avatar?.textContent).toBe('B');
+    expect(avatar?.getAttribute('aria-label')).toBe('Bea ccc:ccc');
+    expect(document.querySelector('.profile-picture-tooltip')?.textContent).toBe('Bea ccc:ccc');
+    expect(document.querySelector('.chat-message-author')).toBeNull();
+  });
+
+  it('puts the viewer own messages on the other side from everyone else', async () => {
+    signIn('Ada');
+    await open();
+    emit(EVENTS.MESSAGE_RECEIVED, message({ id: 'theirs' }));
+    emit(EVENTS.MESSAGE_RECEIVED, message({ id: 'mine', username: 'Ada', address: session!.address }));
+    const [theirs, mine] = [...document.querySelectorAll('.chat-message')];
+
+    expect(theirs.classList.contains('own-message')).toBe(false);
+    expect(mine.classList.contains('own-message')).toBe(true);
+  });
+
   it('shows a message once when it arrives twice', async () => {
     await open();
     const once = message({ id: 'once' });
@@ -331,6 +353,15 @@ describe('sending', () => {
     click(button('Add an emoji'));
     click(await waitFor(() => queryButton('pick 🎉')));
     expect(input('Message').value).toBe('party 🎉');
+    expect(dialog()).toBeNull();
+  });
+
+  it('adds a quick emoji to the message being written, without opening the picker', async () => {
+    signIn();
+    await open();
+    type(input('Message'), 'nice ');
+    click(button('Add 👍'));
+    expect(input('Message').value).toBe('nice 👍');
     expect(dialog()).toBeNull();
   });
 

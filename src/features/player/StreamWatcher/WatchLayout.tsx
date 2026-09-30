@@ -7,7 +7,7 @@ interface WatchLayoutProps {
   back: ReactNode;
   /** The player, or what stands in its place. */
   stage: ReactNode;
-  /** The stream's title and state, under the stage. */
+  /** The stream's title and description, under the stage. */
   info?: ReactNode;
   /**
    * A panel beside the stage on a desktop and under it on a phone. The chat goes here. Without one

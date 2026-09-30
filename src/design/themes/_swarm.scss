@@ -1,11 +1,11 @@
 // The Swarm theme, Swarm Brand v3.0 as msrs-client carries it: near-black surfaces, the orange
-// #f47a20 as a sparing accent, and Geist, Vend Sans and JetBrains Mono. Every theme defines the same
+// #f47a20 as a sparing accent, and Geist with JetBrains Mono for readouts. Every theme defines the same
 // groups and names as this one, and `theme.scss` emits them under `:root[data-theme='swarm']`.
 
 $color: (
   'background': #151517,
   'surface': #1b1b1c,
-  'surface-raised': #252626,
+  'surface-glass': rgba(27, 27, 28, 0.88),
   // A card or featured block, a faint light wash over the page.
   'surface-card': rgba(255, 255, 255, 0.04),
   'surface-hover': rgba(250, 250, 250, 0.08),
@@ -17,6 +17,27 @@ $color: (
   // The page colour at no opacity, where the header fades into the page.
   'background-clear': rgba(21, 21, 23, 0),
   'footer-end': #000000,
+  // Behind a dialog, over a page that stays blurred beneath it.
+  'overlay-modal': rgba(0, 0, 0, 0.7),
+  // A chat message's bubble, and a notice that sits in the flow of the page.
+  'message': rgba(250, 250, 250, 0.06),
+  'border-subtle': #2b2b2b,
+  // The thin lines and faint fills of the chat: reaction pills, the thread's title bar.
+  'hairline': rgba(255, 255, 255, 0.1),
+  'hairline-strong': rgba(255, 255, 255, 0.2),
+  'tint': rgba(255, 255, 255, 0.02),
+  'reaction': rgba(255, 255, 255, 0.05),
+  'reaction-own': rgba(255, 255, 255, 0.534),
+  // Over a picture, where the words have to read whatever the picture is.
+  'scrim': rgba(0, 0, 0, 0.65),
+  'on-scrim': #ffffff,
+  'on-scrim-secondary': rgba(255, 255, 255, 0.75),
+  // The light button of a dialog, the one that backs out.
+  'button-light': #fafafa,
+  'button-light-hover': #ffffff,
+  'on-button-light': #242424,
+  'error-surface': rgba(251, 44, 54, 0.15),
+  'error-border': rgba(251, 44, 54, 0.4),
   // Behind a letterboxed picture, where anything but black reads as part of the video.
   'video': #000000,
   'primary': #f47a20,
@@ -27,11 +48,9 @@ $color: (
   'text-secondary': rgba(250, 250, 250, 0.72),
   'text-tertiary': rgba(250, 250, 250, 0.5),
   'text-muted': #8a8a8a,
+  'text-soft': rgba(255, 255, 255, 0.885),
   'button-secondary': rgba(250, 250, 250, 0.1),
   'button-secondary-hover': rgba(250, 250, 250, 0.16),
-  // Badges are light pills with the darkest neutral on them.
-  'badge': rgba(250, 250, 250, 0.9),
-  'on-badge': #242424,
   // Behind a duration on a thumbnail.
   'badge-dark': rgba(21, 21, 23, 0.95),
   // The brand's #fb2c36 carries white text at 3.6:1, so the badge uses its darker step.
@@ -41,36 +60,27 @@ $color: (
   'warning': #f28b0a,
   'spinner-track': rgba(250, 250, 250, 0.15),
   // A chat name's colour, behind its initial in light text. The chat picks one by hashing the name.
-  'name-1': #b91c1c,
-  'name-2': #b45309,
-  'name-3': #047857,
-  'name-4': #1d4ed8,
-  'name-5': #c2410c,
-  'name-6': #7e22ce,
+  // msrs-client's sixteen hues, each darkened only as far as light text on it needs to read at 4.5:1.
+  'name-1': #dc2626,
+  'name-2': #ad5f05,
+  'name-3': #04835c,
+  'name-4': #2563eb,
+  'name-5': #c64a0a,
+  'name-6': #9333ea,
   'name-7': #be123c,
-  'name-8': #0f766e,
-  'name-9': #6d28d9,
-  'name-10': #0369a1,
-  'name-11': #a21caf,
-  'name-12': #a16207,
-  'name-13': #0e7490,
-  'name-14': #be185d,
+  'name-8': #0b8177,
+  'name-9': #7c3aed,
+  'name-10': #0279b7,
+  'name-11': #be26d1,
+  'name-12': #9a6903,
+  'name-13': #077d9a,
+  'name-14': #d72473,
   'name-15': #15803d,
-  'name-16': #4338ca,
+  'name-16': #4f46e5,
 );
 
 $font-family: (
   'base': (
-    'Geist',
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    Arial,
-    sans-serif,
-  ),
-  'heading': (
-    'Vend Sans',
     'Geist',
     system-ui,
     -apple-system,

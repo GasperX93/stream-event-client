@@ -1,20 +1,26 @@
 @use '@/design/media';
 
+// A plain text link, as the Swarm site's "← Back". It is not the only way back, the logo and the
+// browser's own back both lead there, so it keeps the design's size on a phone too.
 .watch-back {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-xs);
-  min-height: 44px;
-  padding: 0 var(--spacing-xs);
-  margin-left: calc(-1 * var(--spacing-xs));
+  width: fit-content;
+  padding: var(--spacing-xs) 0;
   border-radius: var(--radius-sm);
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-normal);
   text-decoration: none;
-  color: var(--color-text-secondary);
-  transition: color var(--duration-fast) ease;
+  color: var(--color-text);
 
   &:hover {
-    color: var(--color-text);
+    text-decoration: underline;
+  }
+
+  @include media.tablet-up {
+    font-size: var(--font-size-base);
   }
 }
 
@@ -23,59 +29,36 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-lg);
   aspect-ratio: 16 / 9;
-  padding: var(--spacing-lg);
+  padding: var(--spacing-xl);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: var(--color-surface);
+  background: var(--color-surface-glass);
   text-align: center;
-  color: var(--color-text-secondary);
 }
 
 .watch-notice-title {
-  font-family: var(--font-family-heading);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text);
 }
 
-.watch-notice-detail {
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-sm);
-}
-
-.watch-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--spacing-sm);
-}
-
 .watch-info-title {
-  font-size: var(--font-size-2xl);
-
-  @include media.tablet-up {
-    font-size: var(--font-size-3xl);
-  }
+  margin-top: var(--spacing-sm);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-snug);
+  letter-spacing: var(--letter-spacing-snug);
+  color: var(--color-text);
 }
 
-.watch-info-state {
-  padding: var(--spacing-2xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  letter-spacing: var(--letter-spacing-wide);
-  text-transform: uppercase;
-
-  &.live {
-    background: var(--color-live);
-    color: var(--color-on-live);
-  }
-
-  &.upcoming {
-    background: var(--color-badge);
-    color: var(--color-on-badge);
-  }
+.watch-info-description {
+  max-width: var(--size-watch-description-max-width);
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-relaxed);
+  white-space: pre-line;
+  color: var(--color-text-secondary);
 }

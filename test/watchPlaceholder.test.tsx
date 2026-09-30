@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, it } from 'vitest';
+import { afterEach, beforeEach, describe, it, vi } from 'vitest';
 
 import { WatchPlaceholder } from '../src/features/player/StreamWatcher/WatchPlaceholder';
 import {
@@ -12,8 +12,20 @@ import {
   type WatchPageView,
 } from '../src/features/catalog/watchPageView';
 
-const render = (view: WatchPageView, startsAt: string | null = null): string =>
-  renderToStaticMarkup(createElement(WatchPlaceholder, { view, startsAt }));
+const NOW = Date.UTC(2026, 10, 17, 9, 0);
+const DAY = 24 * 60 * 60 * 1000;
+
+const render = (view: WatchPageView, scheduledStart: number | null = null, thumbnailUrl: string | null = null) =>
+  renderToStaticMarkup(createElement(WatchPlaceholder, { view, scheduledStart, thumbnailUrl }));
+
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'] });
+  vi.setSystemTime(NOW);
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 /**
  * What the watch page says in place of the player. A shared link opens before the catalog has been read, and a first
@@ -24,11 +36,30 @@ describe('the watch page in place of the player', () => {
     assert.match(render(WATCH_VIEW_LOADING), /Loading this stream/);
   });
 
-  it('says a scheduled stream has not started, with its start time when there is one', () => {
-    const html = render(WATCH_VIEW_NOT_STARTED, '28 Sep, 20:00');
+  it('counts down to an announced start, and names the day it starts', () => {
+    const html = render(WATCH_VIEW_NOT_STARTED, NOW + 2 * DAY);
+    const day = new Date(NOW + 2 * DAY).toLocaleString(undefined, {
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    assert.match(html, /Live in 2 days/);
+    assert.ok(html.includes(day), `the start day ${day} is not in ${html}`);
+  });
+
+  it('says an announced stream has not started when it names no time', () => {
+    const html = render(WATCH_VIEW_NOT_STARTED);
+
     assert.match(html, /This stream has not started yet\./);
-    assert.match(html, /Scheduled for 28 Sep, 20:00/);
-    assert.doesNotMatch(render(WATCH_VIEW_NOT_STARTED), /Scheduled for/);
+    assert.doesNotMatch(html, /Live in/);
+  });
+
+  it('shows the picture the publisher gave an announced stream behind the countdown', () => {
+    const html = render(WATCH_VIEW_NOT_STARTED, NOW + DAY, '/bee/bzz/abc/');
+
+    assert.match(html, /<img[^>]+src="\/bee\/bzz\/abc\/"/);
   });
 
   it('says a stream that is gone is no longer available', () => {
