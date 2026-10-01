@@ -1,4 +1,5 @@
 import { expect, type BrowserContext, type Page, type Route } from '@playwright/test';
+import { DEFAULT_NOTE_SLOT_MS, noteAddress, noteSlotOf } from '@solarpunkltd/swarm-chat-js';
 
 import { PREVIEW_ORIGIN, type Published, SMOKE_MESSAGE, SMOKE_USER } from './recording';
 
@@ -23,6 +24,28 @@ export async function refuseOtherOrigins(context: BrowserContext): Promise<void>
   await context.route(
     (url) => url.origin !== PREVIEW_ORIGIN,
     (route) => route.abort('blockedbyclient'),
+  );
+}
+
+/** Minutes either side of now whose slot notes a replay answers as absent, far longer than one journey takes. */
+const NOTE_WINDOW_MINUTES = 15;
+
+/**
+ * Answers the chat's slot notes as absent, as a server that writes no notes would. A note's address depends on the
+ * time it is read, so no recording can hold one, and an aborted read is a gateway failing rather than a note missing.
+ * Every other request the recording does not hold still goes on to fail the journey.
+ */
+export async function answerSlotNotesAsAbsent(page: Page, chatTopic: string, feedOwner: string): Promise<void> {
+  const now = noteSlotOf(Date.now(), DEFAULT_NOTE_SLOT_MS);
+  const window = (NOTE_WINDOW_MINUTES * 60_000) / DEFAULT_NOTE_SLOT_MS;
+  const notes = new Set<string>();
+  for (let slot = now - window; slot <= now + window; slot++) {
+    notes.add(noteAddress(chatTopic, DEFAULT_NOTE_SLOT_MS, slot, feedOwner).toHex());
+  }
+  await page.route(
+    (url) => notes.has(url.pathname.split('/').pop() ?? ''),
+    (route) =>
+      route.fulfill({ status: 404, contentType: 'application/json', body: '{"message":"Not Found","code":404}' }),
   );
 }
 

@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import { parseChatMessage } from '@solarpunkltd/swarm-chat-js';
 
-import { onChatWrite, refuseOtherOrigins, serveConfig, watchAndChat } from './journey';
+import { answerSlotNotesAsAbsent, onChatWrite, refuseOtherOrigins, serveConfig, watchAndChat } from './journey';
 import {
   type ChatWriteAnswer,
   GATEWAY_URL_PATTERN,
@@ -28,7 +28,9 @@ test('a viewer opens the list, watches a finished stream and sends a chat messag
   await refuseOtherOrigins(context);
   // A request the recording does not hold is aborted, and so fails the journey, rather than reaching anything.
   await page.routeFromHAR(join(RECORDED_DIR, RecordingFile.HAR), { url: GATEWAY_URL_PATTERN, notFound: 'abort' });
-  await serveConfig(page, read(RecordingFile.CONFIG));
+  const config = read<{ chat: { feedOwner: string } }>(RecordingFile.CONFIG);
+  await serveConfig(page, config);
+  await answerSlotNotesAsAbsent(page, published.chat.topic, config.chat.feedOwner);
   // Every run signs a new message, which no recording can hold, so the page's write gets the node's recorded answer.
   await onChatWrite(page, async (route) => {
     writes.push(route.request().postDataBuffer() ?? Buffer.alloc(0));
