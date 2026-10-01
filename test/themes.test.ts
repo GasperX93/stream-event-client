@@ -42,6 +42,7 @@ describe('choosing a theme', () => {
   it('gives every theme its logo and page copy', () => {
     for (const name of THEME_NAMES) {
       expect(THEMES[name].logoUrl).toBeTruthy();
+      expect(THEMES[name].logoAlt.trim()).not.toBe('');
       expect(THEMES[name].heroTitle.trim()).not.toBe('');
       expect(THEMES[name].heroSubtitle.trim()).not.toBe('');
     }
