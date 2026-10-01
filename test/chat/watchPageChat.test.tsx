@@ -6,7 +6,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ChatConfig } from '../../src/config/runtimeConfig';
 import { StreamWatcher } from '../../src/features/player/StreamWatcher/StreamWatcher';
 import { ChatUserProvider } from '../../src/features/chat/User';
-import { CHAT_LOAD_FALLBACK_MS } from '../../src/features/chat/WatchChat';
 import { FakeSwarmChat } from '../helpers/fakeSwarmChat';
 import { mount, settle, text, waitFor, type Mounted } from '../helpers/dom';
 
@@ -87,35 +86,23 @@ describe('the chat on the watch page', () => {
     expect(FakeSwarmChat.instances).toHaveLength(0);
   });
 
-  it('keeps its place beside the player and loads once the player starts', async () => {
+  it('keeps its place beside the player and loads with the page, before the player has started', async () => {
     appContext.value = { ...appContext.value, chat: CHAT };
     openWatchPage();
-    await settle();
     expect(document.querySelector('.watch-layout-side')).not.toBeNull();
-    expect(FakeSwarmChat.instances).toHaveLength(0);
 
-    playerStarts();
     await waitFor(() => FakeSwarmChat.instances[0]);
     expect(FakeSwarmChat.latest().settings.infra.chatTopic).toBe('chat-stream-one');
     expect(text()).toContain('Chat');
   });
 
-  it('loads anyway when the player has not started in a few seconds', async () => {
-    vi.useFakeTimers();
+  it('keeps the one chat it started when the player starts afterwards', async () => {
     appContext.value = { ...appContext.value, chat: CHAT };
     openWatchPage();
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(CHAT_LOAD_FALLBACK_MS - 1);
-    });
-    expect(FakeSwarmChat.instances).toHaveLength(0);
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(1);
-    });
-    // Runs the chat's own start, a tick later, if the chat module was already loaded.
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(10);
-    });
-    vi.useRealTimers();
     await waitFor(() => FakeSwarmChat.instances[0]);
+
+    playerStarts();
+    await settle();
+    expect(FakeSwarmChat.instances).toHaveLength(1);
   });
 });
