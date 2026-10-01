@@ -1,23 +1,19 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense } from 'react';
 
 import type { ChatConfig } from '@/config/runtimeConfig';
 
 import './WatchChat.scss';
 
 /**
- * The chat, the chat library and its own Bee client are a file of their own, fetched once the video is
- * playing so the first frame never waits for them.
+ * The chat, the chat library and its own Bee client are a file of their own, fetched as the watch page
+ * opens, beside the player rather than after it. The file is small next to the video's first segments,
+ * and a viewer who came for the chat does not wait for the first frame to see it.
  */
 const Chat = lazy(() => import('./Chat/Chat'));
-
-/** A player that has not started by then is not waited for any longer. */
-export const CHAT_LOAD_FALLBACK_MS = 5_000;
 
 interface WatchChatProps {
   chat: ChatConfig;
   topic: string;
-  /** False while a player is on the page and has not played yet. */
-  isPlayerSettled: boolean;
 }
 
 function ChatPlaceholder() {
@@ -28,18 +24,7 @@ function ChatPlaceholder() {
   );
 }
 
-export function WatchChat({ chat, topic, isPlayerSettled }: WatchChatProps) {
-  const [hasWaitedLongEnough, setHasWaitedLongEnough] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setHasWaitedLongEnough(true), CHAT_LOAD_FALLBACK_MS);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (!isPlayerSettled && !hasWaitedLongEnough) {
-    return <ChatPlaceholder />;
-  }
-
+export function WatchChat({ chat, topic }: WatchChatProps) {
   return (
     <Suspense fallback={<ChatPlaceholder />}>
       <Chat chat={chat} topic={topic} />

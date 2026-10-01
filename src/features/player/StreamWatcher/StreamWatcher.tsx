@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 
 import { SwarmHlsPlayer } from '@/features/player/SwarmHlsPlayer';
@@ -38,8 +37,6 @@ export function StreamWatcher() {
   }>();
   const [searchParams] = useSearchParams();
   const { streamList, isStreamListLoaded, chat, gatewayUrl } = useAppContext();
-  // Which stream's player has played, so a new stream on the same page waits for its own player.
-  const [playedStream, setPlayedStream] = useState<string | null>(null);
 
   // The ladder lives in the catalog, keyed by the primary feed the browser links to. Current
   // entries name the master, older ones the lowest rung. Waiting for the first catalog read
@@ -94,7 +91,6 @@ export function StreamWatcher() {
             enableQoeOverlay={enableQoeOverlay}
             renditions={playableRenditions(stream)}
             level={level}
-            onPlaying={() => setPlayedStream(streamKey)}
           />
         ) : (
           <WatchPlaceholder
@@ -104,16 +100,7 @@ export function StreamWatcher() {
           />
         )
       }
-      side={
-        chat && (
-          <WatchChat
-            key={streamKey}
-            chat={chat}
-            topic={topic}
-            isPlayerSettled={view !== WATCH_VIEW_PLAYER || playedStream === streamKey}
-          />
-        )
-      }
+      side={chat && <WatchChat key={streamKey} chat={chat} topic={topic} />}
       info={
         stream && (
           <div className="watch-info">
