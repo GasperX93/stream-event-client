@@ -1,7 +1,8 @@
 @use '@/design/media';
 
-// A phone stacks everything in reading order: back, stage, info, then the side panel. A desktop puts
-// the side panel in a column of its own, beside the stage and the info.
+// The Swarm site's wide watch page. A phone and a tablet stack everything in reading order: back,
+// stage, info, then the side panel. A desktop gives the side panel a column of its own, beside the
+// stage and the info, and keeps it in view while the page scrolls.
 .watch-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -10,17 +11,27 @@
     'stage'
     'info'
     'side';
-  gap: var(--spacing-base);
+  align-items: start;
+  gap: var(--spacing-xs);
+  width: 100%;
+  max-width: var(--size-watch-max-width);
+  margin: 0 auto;
+  padding: 0 var(--spacing-base) var(--spacing-xs);
+
+  @include media.tablet-up {
+    padding: 0 var(--spacing-lg) var(--spacing-2xl);
+  }
 
   @include media.desktop-up {
     &.with-side {
-      grid-template-columns: minmax(0, 1fr) 360px;
+      grid-template-columns: minmax(0, 1fr) var(--size-chat-column);
       grid-template-areas:
         'back back'
         'stage side'
         'info side';
-      grid-template-rows: auto auto 1fr;
+      grid-template-rows: auto auto auto;
       column-gap: var(--spacing-lg);
+      row-gap: var(--spacing-sm);
     }
   }
 }
@@ -36,9 +47,15 @@
 
 .watch-layout-info {
   grid-area: info;
+  min-width: 0;
 }
 
 .watch-layout-side {
   grid-area: side;
   min-width: 0;
+
+  @include media.desktop-up {
+    position: sticky;
+    top: var(--spacing-sm);
+  }
 }

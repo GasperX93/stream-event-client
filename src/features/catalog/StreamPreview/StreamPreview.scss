@@ -1,52 +1,59 @@
-.stream-card {
+// msrs-client's stream thumbnail: a dark frame with a thin border, a play mark on hover, the LIVE badge
+// top right and the duration bottom right.
+.stream-thumbnail {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
-  border-radius: var(--radius-md);
   text-decoration: none;
   color: var(--color-text);
 
-  &:hover,
-  &:focus-visible {
-    .stream-card-media {
-      border-color: var(--color-primary);
-    }
-
-    .stream-card-play {
+  &:hover {
+    .stream-thumbnail-play {
       opacity: 1;
     }
 
-    .stream-card-title {
+    .stream-thumbnail-title {
       color: var(--color-primary);
     }
   }
 
-  &:focus-visible {
-    outline-offset: 4px;
+  &.compact {
+    width: var(--size-thumbnail-width);
+
+    .stream-thumbnail-media {
+      height: var(--size-thumbnail-height);
+    }
+  }
+
+  // msrs-client keeps the space of the thumbnail's hidden title under the picture.
+  &.fill {
+    margin-bottom: var(--spacing-base);
+
+    .stream-thumbnail-media {
+      aspect-ratio: 210 / 180;
+    }
   }
 }
 
-.stream-card-media {
+.stream-thumbnail-media {
   position: relative;
   overflow: hidden;
-  aspect-ratio: 16 / 9;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  transition: border-color var(--duration-fast) ease;
+  border-radius: var(--radius-base);
+  background: var(--color-background);
 }
 
-// `cover` for the same reason on both: a thumbnail arrives in whatever aspect its uploader had, and
-// letterboxing would make a row of cards ragged.
-.stream-card-picture {
+// `cover`, because a thumbnail arrives in whatever aspect its uploader had, and letterboxing would make
+// a row of cards ragged.
+.stream-thumbnail-picture {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.stream-card-placeholder,
-.stream-card-loading {
+.stream-thumbnail-placeholder,
+.stream-thumbnail-loading,
+.stream-thumbnail-play {
   position: absolute;
   inset: 0;
   display: flex;
@@ -54,94 +61,70 @@
   justify-content: center;
 }
 
-.stream-card-placeholder {
-  background: linear-gradient(135deg, var(--color-surface-raised) 0%, var(--color-surface) 100%);
-  color: var(--color-border-strong);
-}
+.stream-thumbnail-placeholder {
+  background: var(--color-video);
+  color: var(--color-primary);
 
-.stream-card-loading {
-  background: var(--color-surface);
-}
-
-.stream-card-badge,
-.stream-card-duration {
-  position: absolute;
-  z-index: var(--z-index-player-overlay);
-  padding: var(--spacing-2xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  line-height: var(--line-height-normal);
-  box-shadow: var(--shadow-badge);
-}
-
-.stream-card-badge {
-  top: var(--spacing-sm);
-  left: var(--spacing-sm);
-  letter-spacing: var(--letter-spacing-wide);
-  text-transform: uppercase;
-
-  // Red says "happening now", so an announcement must not borrow it.
-  &.live {
-    background: var(--color-live);
-    color: var(--color-on-live);
-  }
-
-  &.upcoming {
-    background: var(--color-badge);
-    color: var(--color-on-badge);
+  svg {
+    width: var(--size-placeholder-icon);
+    height: var(--size-placeholder-icon);
   }
 }
 
-.stream-card-duration {
-  right: var(--spacing-sm);
-  bottom: var(--spacing-sm);
+.stream-thumbnail-loading {
+  background: var(--color-background);
+}
+
+.stream-thumbnail-play {
   background: var(--color-overlay);
   color: var(--color-text);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) ease;
+
+  svg {
+    width: var(--size-play-icon);
+    height: var(--size-play-icon);
+    filter: drop-shadow(var(--shadow-icon));
+  }
+}
+
+.stream-thumbnail-live,
+.stream-thumbnail-duration {
+  position: absolute;
+  right: var(--spacing-sm);
+  padding: var(--spacing-2xs) var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  line-height: normal;
+}
+
+// Our darker red rather than msrs-client's, which carries light text at only 3.6:1.
+.stream-thumbnail-live {
+  top: var(--spacing-sm);
+  background: var(--color-live);
+  color: var(--color-on-live);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+.stream-thumbnail-duration {
+  bottom: var(--spacing-sm);
+  background: var(--color-badge-dark);
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
   font-variant-numeric: tabular-nums;
 }
 
-.stream-card-play {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  margin: -24px 0 0 -24px;
-  border-radius: var(--radius-full);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  opacity: 0;
-  transition: opacity var(--duration-fast) ease;
-
-  // A phone has no hover, so the promise to play is shown there all the time.
-  @media (hover: none) {
-    opacity: 0.9;
-  }
-}
-
-.stream-card-body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-}
-
-.stream-card-title {
+.stream-thumbnail-title {
   display: -webkit-box;
+  margin: var(--spacing-sm) 0 var(--spacing-xs);
   overflow: hidden;
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-md);
-  letter-spacing: normal;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   transition: color var(--duration-fast) ease;
-}
-
-.stream-card-meta {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
 }

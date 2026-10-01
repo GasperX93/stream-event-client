@@ -1,0 +1,54 @@
+// The picture twice: once blurred and dimmed to fill the box, once whole on top of it.
+.scheduled-placeholder {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-md);
+  background: var(--color-video);
+}
+
+.scheduled-placeholder-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(var(--blur-backdrop)) brightness(0.3) saturate(1.2);
+  // Pushes the blur's soft edge outside the box.
+  transform: scale(1.2);
+}
+
+.scheduled-placeholder-image {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.scheduled-placeholder-overlay {
+  position: absolute;
+  left: var(--spacing-base);
+  bottom: var(--spacing-base);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2xs);
+  max-width: calc(100% - 2 * var(--spacing-base));
+  padding: calc(var(--spacing-sm) + var(--spacing-2xs)) var(--spacing-base);
+  border-radius: var(--radius-base);
+  background: var(--color-scrim);
+  backdrop-filter: blur(var(--blur-sm));
+  -webkit-backdrop-filter: blur(var(--blur-sm));
+}
+
+.scheduled-placeholder-relative {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-on-scrim);
+}
+
+.scheduled-placeholder-absolute {
+  font-size: var(--font-size-sm);
+  color: var(--color-on-scrim-secondary);
+}

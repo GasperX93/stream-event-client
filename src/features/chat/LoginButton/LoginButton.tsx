@@ -10,7 +10,10 @@ import './LoginButton.scss';
 
 const KEY_ESCAPE = 'Escape';
 
-/** The chat name in the header: an offer to join when there is none, the name and a menu when there is. */
+/**
+ * The chat name in the header, written as a plain bold link the way msrs-client writes its login: an
+ * offer to join when there is none, the name and a menu when there is.
+ */
 export function LoginButton() {
   const { session, setIsLoginModalOpen, logout } = useChatUser();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -42,9 +45,9 @@ export function LoginButton() {
 
   if (!session) {
     return (
-      <Button variant={ButtonVariant.SECONDARY} className="login-button" onClick={() => setIsLoginModalOpen(true)}>
+      <button type="button" className="login-button" onClick={() => setIsLoginModalOpen(true)}>
         Join chat
-      </Button>
+      </button>
     );
   }
 
@@ -55,19 +58,16 @@ export function LoginButton() {
 
   return (
     <div className="login-button-container" ref={containerRef}>
-      <Button
-        variant={ButtonVariant.SECONDARY}
+      <button
+        type="button"
         className="login-button"
         aria-haspopup="true"
         aria-expanded={isMenuOpen}
         aria-controls={menuId}
         onClick={() => setIsMenuOpen((open) => !open)}
       >
-        <span className="login-button-name">{session.username}</span>
-        <span className="login-button-chevron" aria-hidden="true">
-          ▾
-        </span>
-      </Button>
+        {session.username}
+      </button>
 
       {isMenuOpen && (
         <div id={menuId} className="login-dropdown">

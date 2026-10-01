@@ -1,11 +1,9 @@
 import { useId, useState } from 'react';
 
+import { QUICK_REACTIONS } from '../../../reactions';
 import { EmojiPickerDialog } from '../../EmojiPicker/EmojiPickerDialog';
 
 import './MessageActions.scss';
-
-/** Offered first, so a common reaction needs no picker and no download. */
-export const QUICK_REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
 
 interface MessageActionsProps {
   onReact: (emoji: string) => void;
@@ -13,7 +11,10 @@ interface MessageActionsProps {
   disabled?: boolean;
 }
 
-/** What can be done with a message, folded behind one button so a phone screen is not all buttons. */
+/**
+ * What can be done with a message, folded behind one button in the empty side of its row, so a phone
+ * screen is not all buttons.
+ */
 export function MessageActions({ onReact, onOpenThread, disabled = false }: MessageActionsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -58,18 +59,19 @@ export function MessageActions({ onReact, onOpenThread, disabled = false }: Mess
             disabled={disabled}
             onClick={() => setIsPickerOpen(true)}
           >
-            <span aria-hidden="true">＋</span>
+            <span aria-hidden="true">😊</span>
           </button>
           {onOpenThread && (
             <button
               type="button"
-              className="message-action message-action-text"
+              className="message-action"
+              aria-label="Reply in a thread"
               onClick={() => {
                 setIsOpen(false);
                 onOpenThread();
               }}
             >
-              Reply in a thread
+              <span aria-hidden="true">💬</span>
             </button>
           )}
         </div>

@@ -24,8 +24,8 @@ import {
   StreamState,
 } from '@/features/catalog/stream';
 import { formatDuration } from '@/features/catalog/format';
-import { scheduledStartLabel } from '@/features/catalog/scheduledStart';
 import { previewSegmentUrl } from '@/features/catalog/thumbnailManifest';
+import { watchPath } from '@/features/catalog/watchPath';
 import { PlayIcon } from '@/shared/components/Icons/PlayIcon';
 import { Spinner } from '@/shared/components/Spinner/Spinner';
 
@@ -35,7 +35,15 @@ import './StreamPreview.scss';
 
 const thumbnailQueue = new Pqueue({ concurrency: 1 });
 
+/**
+ * `fill` takes the width of a card or featured block, which carries the title and its own link beside
+ * the picture. `compact` is msrs-client's fixed 210 by 180 thumbnail with the title under it, as search
+ * results show it.
+ */
+export type ThumbnailVariant = 'fill' | 'compact';
+
 interface StreamPreviewProps {
+  variant: ThumbnailVariant;
   owner: string;
   topic: string;
   state?: StreamState;
@@ -48,14 +56,13 @@ interface StreamPreviewProps {
   renditions?: Rendition[];
   /** A Swarm reference to a still image the publisher uploaded. Absent or '' when there is none. */
   thumbnail?: string;
-  /** Only ever set on a scheduled entry, and null there until a time is fixed. */
-  scheduledStartTime?: string | number | null;
 }
 
 /** The preview plays one segment, so the target duration only has to be at least that long. */
 const PREVIEW_TARGET_DURATION_SECONDS = 10;
 
 export const StreamPreview = ({
+  variant,
   owner,
   topic,
   state,
@@ -65,7 +72,6 @@ export const StreamPreview = ({
   index,
   renditions,
   thumbnail,
-  scheduledStartTime,
 }: StreamPreviewProps) => {
   const { gatewayUrl } = useAppContext();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -74,14 +80,13 @@ export const StreamPreview = ({
   /**
    * The thumbnail reference the browser could not load, which demotes this card out of `image` mode.
    * Held in state rather than handled in the `onError` branch directly, so the decision stays in
-   * `previewMode` — a scheduled card must not fall back to a probe, and that rule lives in one place
+   * `previewMode`. A scheduled card must not fall back to a probe, and that rule lives in one place
    * with a test rather than in two handlers.
    *
    * ⛔ The reference and not a boolean, because a card outlives the picture it was given. `StreamList`
-   * keys a card by topic, and in admin mode the topic belongs to the declaration and outlives every
-   * session on it, so a publisher replacing a broken thumbnail re-renders this same mounted component
+   * keys a card by topic, and a topic outlives every broadcast published under it, so a publisher replacing a broken thumbnail re-renders this same mounted component
    * with a new `thumbnail` prop. A boolean latched on the first failure never cleared, and the card
-   * went on probing — or, for a scheduled stream, went on showing the placeholder for ever, since a
+   * went on probing, or, for a scheduled stream, went on showing the placeholder for ever, since a
    * scheduled card is never probed. Comparing against the current reference makes the failure a fact
    * about one picture rather than about the card.
    */
@@ -90,7 +95,8 @@ export const StreamPreview = ({
 
   const mode = previewMode({ thumbnail, state, imageFailed });
   const isScheduled = state === STREAM_STATUS_SCHEDULED;
-  const startsAt = scheduledStartLabel(scheduledStartTime);
+  const isLive = state === STREAM_STATUS_LIVE;
+  const fillsCard = variant === 'fill';
 
   // Read through a ref, not a dependency: the catalog poll hands back a fresh array every time, and
   // `slotsKey` is what the effect reacts to. The player keys its ladder the same way.
@@ -127,7 +133,7 @@ export const StreamPreview = ({
 
         // Split from the check below, because the two used to share an early return and only one of
         // them is a reason to leave the spinner up. An aborted card is being unmounted and nobody is
-        // looking at it; a card with nothing to show is on screen and has to say so.
+        // looking at it. A card with nothing to show is on screen and has to say so.
         if (abort.signal.aborted) {
           return;
         }
@@ -219,8 +225,15 @@ export const StreamPreview = ({
   const showsPlaceholder = mode === 'placeholder' || (mode === 'probe' && !isLoading && !isDataAvailable);
 
   return (
-    <Link className="stream-card" to={`/watch/${mediatype}/${owner}/${topic}`}>
-      <div className="stream-card-media">
+    <Link
+      className={`stream-thumbnail ${variant}`}
+      to={watchPath({ mediatype, owner, topic })}
+      // In a card the title and the call to watch sit beside the picture, so the picture is a second,
+      // pointer-only way in, still named for the stream it opens.
+      aria-label={fillsCard ? title : undefined}
+      tabIndex={fillsCard ? -1 : undefined}
+    >
+      <div className="stream-thumbnail-media">
         {/*
           The picture, from exactly one of the three sources `previewMode` names. The video element is
           mounted only for a probe: `videoRef` is what the effect attaches hls.js to, so rendering it
@@ -231,11 +244,11 @@ export const StreamPreview = ({
             // Keyed by the reference so a replaced thumbnail mounts a new element rather than having its
             // `src` swapped underneath. React updates attributes in place, so without this an error for
             // the picture just replaced could arrive after the prop changed and be recorded against the
-            // new reference — demoting a card for a failure that was never its own.
+            // new reference, demoting a card for a failure that was never its own.
             key={thumbnail}
-            className="stream-card-picture"
+            className="stream-thumbnail-picture"
             src={thumbnailImageUrl(gatewayUrl, thumbnail)}
-            // Empty because the title below already names the stream, and the link reads it out.
+            // Empty because the title names the stream, and the link reads it out.
             alt=""
             onError={() => setFailedThumbnail(thumbnail)}
           />
@@ -243,7 +256,7 @@ export const StreamPreview = ({
         {mode === 'probe' && (
           <video
             ref={videoRef}
-            className="stream-card-picture"
+            className="stream-thumbnail-picture"
             controls={false}
             muted
             playsInline
@@ -253,33 +266,24 @@ export const StreamPreview = ({
         )}
         {showsPlaceholder && <PreviewPlaceholder />}
         {isLoading && (
-          <div className="stream-card-loading">
+          <div className="stream-thumbnail-loading">
             <Spinner />
           </div>
         )}
 
-        {state === STREAM_STATUS_LIVE && <span className="stream-card-badge live">Live</span>}
-        {isScheduled && <span className="stream-card-badge upcoming">Upcoming</span>}
-        {duration && (
-          <span className="stream-card-duration">{formatDuration(Number.parseFloat(String(duration)))}</span>
-        )}
-        {/* Nothing to play yet on an announced broadcast, so the card does not promise one. */}
+        {/* Nothing to play yet on an announced broadcast, so the thumbnail does not promise one. */}
         {!isScheduled && !isLoading && (
-          <span className="stream-card-play" aria-hidden="true">
+          <span className="stream-thumbnail-play" aria-hidden="true">
             <PlayIcon />
           </span>
         )}
+        {isLive && !isLoading && <span className="stream-thumbnail-live">Live</span>}
+        {duration && !isLive && !isLoading && (
+          <span className="stream-thumbnail-duration">{formatDuration(Number.parseFloat(String(duration)))}</span>
+        )}
       </div>
 
-      {/*
-        The caption belongs to the card, not to the frame. It used to render only when a frame had
-        been captured, so a stream whose preview failed — and every scheduled stream, which has no
-        frame to capture — showed an untitled picture nobody could identify.
-      */}
-      <div className="stream-card-body">
-        <h3 className="stream-card-title">{title}</h3>
-        {isScheduled && startsAt && <p className="stream-card-meta">Starts {startsAt}</p>}
-      </div>
+      {!fillsCard && <h3 className="stream-thumbnail-title">{title}</h3>}
     </Link>
   );
 };

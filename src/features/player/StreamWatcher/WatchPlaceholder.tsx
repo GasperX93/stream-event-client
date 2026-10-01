@@ -6,32 +6,31 @@ import {
 } from '@/features/catalog/watchPageView';
 import { Spinner } from '@/shared/components/Spinner/Spinner';
 
+import { ScheduledPlaceholder } from './ScheduledPlaceholder';
+
 interface WatchPlaceholderProps {
   view: WatchPageView;
-  /** The scheduled start, already worded for a person, or null when the entry names none. */
-  startsAt: string | null;
+  /** The announced start in epoch milliseconds, or null when the entry names none. */
+  scheduledStart: number | null;
+  /** The picture the publisher gave the stream, or null when there is none. */
+  thumbnailUrl: string | null;
 }
 
 /**
  * What the watch page says in place of the player, and nothing once the player is showing. A shared link opens
  * before the catalog has been read, and a first read over a cold gateway takes a while.
  */
-export function WatchPlaceholder({ view, startsAt }: WatchPlaceholderProps) {
+export function WatchPlaceholder({ view, scheduledStart, thumbnailUrl }: WatchPlaceholderProps) {
   if (view === WATCH_VIEW_LOADING) {
     return (
       <WatchNotice>
         <Spinner />
-        <p>Loading this stream…</p>
+        <p className="watch-notice-title">Loading this stream…</p>
       </WatchNotice>
     );
   }
   if (view === WATCH_VIEW_NOT_STARTED) {
-    return (
-      <WatchNotice>
-        <p className="watch-notice-title">This stream has not started yet.</p>
-        {startsAt && <p className="watch-notice-detail">Scheduled for {startsAt}</p>}
-      </WatchNotice>
-    );
+    return <ScheduledPlaceholder scheduledStart={scheduledStart} thumbnailUrl={thumbnailUrl} />;
   }
   if (view === WATCH_VIEW_UNAVAILABLE) {
     return (
@@ -44,8 +43,8 @@ export function WatchPlaceholder({ view, startsAt }: WatchPlaceholderProps) {
 }
 
 /**
- * Stands where the player would, in the player's shape, so a viewer who followed a link to an
- * announced broadcast, or to one unpublished while they waited, lands on the page they expected.
+ * Stands where the player would, in the player's shape, so a viewer who followed a link to a stream
+ * that is loading or gone lands on the page they expected.
  */
 export function WatchNotice({ children }: { children: React.ReactNode }) {
   return (

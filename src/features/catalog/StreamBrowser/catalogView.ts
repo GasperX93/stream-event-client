@@ -6,8 +6,7 @@
  * down and a viewer who is early to an event saw identical pixels, and only one of them could act on
  * what they were seeing.
  *
- * Pure so it can be tested: this package runs vitest with `environment: 'node'` and no jsdom, so
- * a rule left inside the component is a rule nothing covers.
+ * Pure, so the rule is tested without rendering the page.
  */
 
 type CatalogView =

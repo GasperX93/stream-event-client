@@ -1,0 +1,144 @@
+@use '@/design/media';
+
+.featured-stream {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  width: 100%;
+  line-height: normal;
+
+  @include media.tablet-up {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--spacing-xl);
+  }
+}
+
+.featured-stream-body {
+  @include media.tablet-up {
+    flex: 1 1 55%;
+    min-width: 0;
+  }
+}
+
+.featured-stream-media {
+  @include media.tablet-up {
+    display: flex;
+    flex: 0 0 40%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+// Dark on the orange rather than msrs-client's black, the same neutral every other text on it uses.
+.featured-stream-badge {
+  display: inline-block;
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-2xs-xs) var(--spacing-sm-md);
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-badge);
+  text-transform: uppercase;
+  color: var(--color-on-primary);
+
+  &.live {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs-sm);
+
+    &::before {
+      content: '';
+      width: var(--size-badge-dot);
+      height: var(--size-badge-dot);
+      border-radius: var(--radius-full);
+      background: var(--color-on-primary);
+      animation: featured-live-pulse var(--duration-pulse-fast) ease-in-out infinite;
+    }
+  }
+}
+
+@keyframes featured-live-pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.featured-stream-date {
+  margin-bottom: var(--spacing-xs-sm);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
+}
+
+.featured-stream-title {
+  margin-bottom: var(--spacing-sm);
+  font-size: var(--font-size-title);
+  line-height: normal;
+  letter-spacing: var(--letter-spacing-snug);
+
+  @include media.tablet-up {
+    font-size: var(--font-size-3xl);
+  }
+}
+
+.featured-stream-description {
+  max-width: var(--size-featured-description-width);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+  white-space: pre-line;
+  color: var(--color-text-secondary);
+}
+
+.featured-stream-countdown-wrap {
+  margin-top: var(--spacing-base-lg);
+}
+
+.featured-stream-starts-in {
+  margin-bottom: var(--spacing-xs-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
+}
+
+.featured-stream-countdown {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-base);
+}
+
+.featured-stream-countdown-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-2xs);
+}
+
+.featured-stream-countdown-divider {
+  width: 1px;
+  height: var(--size-countdown-divider);
+  background: var(--color-border);
+}
+
+.featured-stream-countdown-number {
+  font-size: var(--font-size-figure);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-compact);
+}
+
+.featured-stream-countdown-label {
+  font-size: var(--font-size-label-sm);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.featured-stream-live-note {
+  margin-top: var(--spacing-base-lg);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+}

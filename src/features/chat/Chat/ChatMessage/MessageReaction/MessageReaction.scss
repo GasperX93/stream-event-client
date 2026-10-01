@@ -2,21 +2,27 @@
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-xs);
-  min-height: 32px;
-  padding: 0 var(--spacing-sm);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  background: var(--color-surface-raised);
-  font-size: var(--font-size-sm);
+  min-height: var(--size-reaction-height);
+  margin: var(--spacing-2xs);
+  padding: var(--spacing-2xs) calc(var(--spacing-xs) + var(--spacing-2xs));
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-md);
+  background: var(--color-reaction);
+  font-size: var(--font-size-xs);
   cursor: pointer;
-  transition: border-color var(--duration-fast) ease;
+  transition:
+    background-color var(--duration-base) ease,
+    border-color var(--duration-base) ease,
+    transform var(--duration-base) ease;
 
   &:hover:not(:disabled) {
-    border-color: var(--color-border-strong);
+    border-color: var(--color-hairline-strong);
+    background: var(--color-button-secondary);
+    transform: scale(1.05);
   }
 
   &.user-reaction {
-    border-color: var(--color-primary);
+    border-color: var(--color-reaction-own);
   }
 
   &:disabled {
@@ -25,7 +31,13 @@
   }
 }
 
+.reaction-emoji,
 .reaction-count {
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-xs);
+  line-height: var(--line-height-none);
+}
+
+.reaction-count {
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
 }

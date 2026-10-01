@@ -1,95 +1,18 @@
-// The design tokens, with the Swarm Brand v3.0 values: near-black surfaces, the orange #f47a20 as a
-// sparing accent, Vend Sans headings, Geist body text and JetBrains Mono labels. `theme.scss` emits
-// every entry below once on `:root` as `--<group>-<name>`, and components read only those variables.
+// The design's scales: sizes, spacing, type steps, radii, timing. They hold for every theme, and
+// `theme.scss` emits them once on `:root` as `--<group>-<name>`. What a theme decides, its colours and
+// its typefaces, is in `themes/`, one file per theme.
 //
-// To add a token, add it to its map here and read it as `var(--<group>-<name>)`. The tokens test
-// fails on a variable a stylesheet reads that is not defined here, on a token nothing reads, and on a
-// text colour that falls below 4.5:1 against its background.
+// To add a token, add it to its map here or to every theme, and read it as `var(--<group>-<name>)`.
+// The tokens test fails on a variable a stylesheet reads that nothing defines, on a token nothing
+// reads, on a theme missing a variable another theme has, and on a text colour below 4.5:1.
 
-$color: (
-  'background': #151517,
-  'surface': #1b1b1c,
-  'surface-raised': #252626,
-  'surface-glass': rgba(27, 27, 28, 0.88),
-  'input': #242424,
-  'border': #333333,
-  'border-strong': #4c4c4c,
-  'overlay': rgba(0, 0, 0, 0.75),
-  // Behind a letterboxed picture, where anything but black reads as part of the video.
-  'video': #000000,
-  'primary': #f47a20,
-  'primary-hover': #f79c5a,
-  // Light text on the orange measures 2.6:1, so anything written on it is the darkest neutral.
-  'on-primary': #151517,
-  'text': #fafafa,
-  'text-secondary': rgba(250, 250, 250, 0.72),
-  'text-tertiary': rgba(250, 250, 250, 0.5),
-  'button-secondary': rgba(250, 250, 250, 0.1),
-  'button-secondary-hover': rgba(250, 250, 250, 0.16),
-  // Badges are light pills with the darkest neutral on them.
-  'badge': rgba(250, 250, 250, 0.9),
-  'on-badge': #242424,
-  // The brand's #fb2c36 carries white text at 3.6:1, so the badge uses its darker step.
-  'live': #b91c1c,
-  'on-live': #fafafa,
-  'error-text': #ff8a8a,
-  'warning': #f28b0a,
-  'spinner-track': rgba(250, 250, 250, 0.15),
-  // A chat name's colour, behind its initial in light text. The chat picks one by hashing the name.
-  'name-1': #b91c1c,
-  'name-2': #b45309,
-  'name-3': #047857,
-  'name-4': #1d4ed8,
-  'name-5': #c2410c,
-  'name-6': #7e22ce,
-  'name-7': #be123c,
-  'name-8': #0f766e,
-  'name-9': #6d28d9,
-  'name-10': #0369a1,
-  'name-11': #a21caf,
-  'name-12': #a16207,
-  'name-13': #0e7490,
-  'name-14': #be185d,
-  'name-15': #15803d,
-  'name-16': #4338ca,
-);
-
-$font-family: (
-  'base': (
-    'Geist',
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    Arial,
-    sans-serif,
-  ),
-  'heading': (
-    'Vend Sans',
-    'Geist',
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    Arial,
-    sans-serif,
-  ),
-  'mono': (
-    'JetBrains Mono',
-    ui-monospace,
-    'SFMono-Regular',
-    Menlo,
-    Monaco,
-    monospace,
-  ),
-);
-
-// Only these weights are bundled: Geist 400 and 600, Vend Sans 600, JetBrains Mono 500. Another
-// weight needs its file imported in `fonts.ts`, or the browser fakes it.
+// Only these weights are bundled: Geist 400, 500, 600 and 700, and JetBrains Mono 500.
+// Another weight needs its file imported in `fonts.ts`, or the browser fakes it.
 $font-weight: (
   'normal': 400,
   'medium': 500,
   'semibold': 600,
+  'bold': 700,
 );
 
 $font-size: (
@@ -103,59 +26,139 @@ $font-size: (
   '2xl': 20px,
   '3xl': 24px,
   '4xl': 32px,
+  // The steps msrs-client writes in rem off the browser's 16px, which sit between the ones above.
+  'label-sm': 10.4px,
+  'label': 11.2px,
+  'lead': 16.8px,
+  'title-sm': 18.4px,
+  'title': 22px,
+  'figure': 28px,
+  'display': 48px,
 );
 
 $line-height: (
+  'compact': 1.1,
+  'none': 1,
   'tight': 1.2,
+  'snug': 1.3,
   'normal': 1.5,
+  'relaxed': 1.6,
+  'tagline': 20px,
 );
 
+// As the Swarm theme of msrs-client sets them, plus the two its uppercase labels and badges use.
 $letter-spacing: (
   'tight': -0.02em,
-  'wide': 0.05em,
-  'wider': 0.08em,
+  'snug': -0.01em,
+  'wide': 0.025em,
+  'label': 0.08em,
+  'badge': 0.1em,
 );
 
+// The in-between steps are named for the two steps they sit between.
 $spacing: (
   '2xs': 2px,
+  '2xs-xs': 3px,
   'xs': 4px,
+  'xs-sm': 6px,
   'sm': 8px,
+  'sm-md': 10px,
   'md': 12px,
+  'md-base': 14px,
   'base': 16px,
+  'base-lg': 20px,
   'lg': 24px,
   'xl': 32px,
   '2xl': 40px,
   '3xl': 48px,
+  '4xl': 64px,
 );
 
 // Brand v3.0 draws rectangular controls with a small radius, not pills.
 $radius: (
   'sm': 4px,
   'base': 8px,
+  'input': 10px,
   'md': 12px,
   'full': 9999px,
 );
 
 $shadow: (
   'modal': 0 16px 48px rgba(0, 0, 0, 0.6),
-  'badge': 0 1px 2px rgba(0, 0, 0, 0.4),
+  'dropdown': 0 8px 24px rgba(0, 0, 0, 0.5),
+  // Read through `drop-shadow()`, which takes no spread.
+  'icon': 0 2px 4px rgba(0, 0, 0, 0.5),
+  'lg': 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+);
+
+$blur: (
+  'sm': 4px,
+  'base': 8px,
+  // Enough to turn a picture into a wash of its own colours.
+  'backdrop': 40px,
 );
 
 $duration: (
   'fast': 150ms,
   'base': 200ms,
+  'pulse': 1.6s,
+  'pulse-fast': 1.4s,
 );
 
 $size: (
-  'header-height': 56px,
-  'header-height-desktop': 72px,
+  'header-height': 120px,
   'logo-height': 24px,
   'logo-height-desktop': 32px,
   'content-max-width': 1200px,
+  'hero-subtitle-width': 640px,
+  'featured-description-width': 520px,
+  'search-width': 320px,
+  'search-icon': 18px,
+  'search-clear': 20px,
+  'search-clear-icon': 16px,
+  'thumbnail-width': 210px,
+  'thumbnail-height': 180px,
+  'play-icon': 48px,
+  'placeholder-icon': 64px,
+  'live-dot': 8px,
+  'badge-dot': 7px,
+  'agenda-dot': 5px,
+  'countdown-divider': 32px,
+  'pagination-button': 28px,
+  'pagination-icon': 18px,
+  'pagination-info': 45px,
+  'dropdown-min-width': 150px,
+  'login-name-width': 96px,
+  'login-name-width-desktop': 200px,
+  'gateway-name-width': 120px,
+  'gateway-name-width-desktop': 260px,
+  'footer-max-width': 1152px,
+  'footer-logo-height': 26px,
   'focus-ring': 2px,
-  'avatar': 32px,
-  'chat-height': 480px,
-  'chat-height-desktop': 640px,
+  'avatar': 24px,
+  'tooltip-max-width': 200px,
+  'watch-max-width': 1440px,
+  'watch-description-max-width': 900px,
+  'chat-column': 400px,
+  // Stacked under the video: most of a phone's screen, never more than the chat needs.
+  'chat-height': min(70vh, 560px),
+  // The same, measured against the visible part of the screen, which iOS Safari's `vh` is not.
+  'chat-height-dynamic': min(70dvh, 560px),
+  // Beside the video: the window's height less the 120px header, the back link and the gap above the
+  // chat. Change it with `header-height`.
+  'chat-height-desktop': calc(100vh - 170px),
+  'chat-min-height-desktop': 320px,
+  // Wide enough to aim at with a finger, where the Swarm design draws the control smaller.
+  'touch-target': 44px,
+  'dialog-max-width': 500px,
+  'dialog-offset-top': 10vh,
+  'dialog-button-height': 40px,
+  'dialog-button-height-phone': 36px,
+  'modal-input-height': 40px,
+  'chat-control': 32px,
+  'reaction-height': 20px,
+  'sender-input-height': 30px,
+  'chat-quick-emoji': 28px,
 );
 
 $z-index: (
@@ -167,8 +170,6 @@ $z-index: (
 
 // Every group above, under the prefix its variables carry.
 $groups: (
-  'color': $color,
-  'font-family': $font-family,
   'font-weight': $font-weight,
   'font-size': $font-size,
   'line-height': $line-height,
@@ -176,6 +177,7 @@ $groups: (
   'spacing': $spacing,
   'radius': $radius,
   'shadow': $shadow,
+  'blur': $blur,
   'duration': $duration,
   'size': $size,
   'z-index': $z-index,

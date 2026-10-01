@@ -1,52 +1,49 @@
+@use '@/design/touch';
+
+// The viewer's own messages mirror everyone else's: the initial on the right, the bubble beside it.
 .chat-message {
   position: relative;
   display: flex;
   align-items: flex-start;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-xs) var(--spacing-base);
+  width: 100%;
+  padding: var(--spacing-xs);
 
-  &:hover,
-  &:focus-within {
-    background: var(--color-button-secondary);
+  &.own-message {
+    flex-direction: row-reverse;
   }
-
-  &.not-received .chat-message-text {
-    color: var(--color-text-secondary);
-  }
-}
-
-.chat-message-body {
-  flex: 1;
-  min-width: 0;
-}
-
-.chat-message-author {
-  font-size: var(--font-size-xs);
-  line-height: var(--line-height-tight);
-}
-
-.chat-message-name {
-  font-weight: var(--font-weight-semibold);
-
-  .own-message & {
-    color: var(--color-primary);
-  }
-}
-
-.chat-message-id {
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-2xs);
-  color: var(--color-text-tertiary);
 }
 
 .chat-message-text {
-  font-size: var(--font-size-base);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  max-width: 70%;
+  font-size: var(--font-size-sm);
   line-height: var(--line-height-normal);
   overflow-wrap: anywhere;
-  white-space: pre-wrap;
+  color: var(--color-text);
+
+  .own-message & {
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .message {
+    margin: 0 var(--spacing-xs) var(--spacing-2xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-base);
+    background: var(--color-message);
+    white-space: pre-wrap;
+  }
+
+  .not-received & .message {
+    opacity: 0.6;
+  }
 }
 
 .chat-message-status {
+  margin: var(--spacing-2xs) var(--spacing-xs) 0;
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 
@@ -56,13 +53,29 @@
 }
 
 .chat-message-retry {
-  min-height: 32px;
-  padding: 0 var(--spacing-xs);
-  border: none;
+  @include touch.touch-target;
+
+  position: relative;
+  margin-left: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
   background: none;
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-primary);
-  text-decoration: underline;
+  color: var(--color-text-tertiary);
   cursor: pointer;
+  transition:
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
+
+  &:hover {
+    border-color: var(--color-border);
+    background: var(--color-message);
+    color: var(--color-text-secondary);
+  }
+
+  .error & {
+    border-color: var(--color-error-border);
+    color: var(--color-error-text);
+  }
 }

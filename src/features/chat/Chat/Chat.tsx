@@ -4,7 +4,6 @@ import { FeedStatus } from '@solarpunkltd/swarm-chat-js';
 
 import type { ChatConfig } from '@/config/runtimeConfig';
 import { Button, ButtonVariant } from '@/shared/components/Button/Button';
-import { Spinner } from '@/shared/components/Spinner/Spinner';
 
 import { chatSettings } from '../chatSettings';
 import { useChatUser } from '../User';
@@ -99,9 +98,9 @@ export function Chat({ chat, topic }: ChatProps) {
   );
 
   const joinButton = (label: string) => (
-    <Button className="chat-login-prompt" onClick={askForName}>
+    <button type="button" className="chat-login-prompt" onClick={askForName}>
       {label}
-    </Button>
+    </button>
   );
 
   const threadParent = threadId ? messages.find((message) => message.id === threadId) : undefined;
@@ -109,7 +108,7 @@ export function Chat({ chat, topic }: ChatProps) {
   const body = () => {
     if (status === CHAT_UNREACHABLE) {
       return (
-        <div className="chat-state" role="status">
+        <div className="chat-state chat-state-error" role="status">
           <p className="chat-state-title">The chat cannot be reached right now.</p>
           <p className="chat-state-detail">
             The video is not affected. Messages show here again once the chat answers.
@@ -123,10 +122,9 @@ export function Chat({ chat, topic }: ChatProps) {
 
     if (status === CHAT_LOADING) {
       return (
-        <div className="chat-state" role="status">
-          <Spinner />
-          <p className="chat-state-detail">Loading the chat…</p>
-        </div>
+        <p className="chat-loading" role="status">
+          Loading the chat…
+        </p>
       );
     }
 
@@ -157,14 +155,14 @@ export function Chat({ chat, topic }: ChatProps) {
       <>
         <FeedNotice status={feedStatus} />
         {hasOlder && (
-          <Button
-            variant={ButtonVariant.SECONDARY}
+          <button
+            type="button"
             className="chat-load-more"
             disabled={isLoadingOlder}
             onClick={() => void fetchOlderMessages()}
           >
             {isLoadingOlder ? 'Loading older messages…' : 'Load older messages'}
-          </Button>
+          </button>
         )}
         {messages.length > 0 ? (
           <ScrollableMessageList
