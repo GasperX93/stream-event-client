@@ -104,9 +104,10 @@ so the chat, the player and the picker can each be read, tested and replaced on 
    picks its theme with `theme` in `config.json`, `swarm` being the only one and the default. Each
    theme carries its logo, page copy and footer links in `src/design/themes.ts`. A switcher for
    viewers, the provider and the stored choice do not come along.
-3. **The chat loads after the video.** The chat and its libraries are a separate file of the
-   bundle, fetched after the player starts, so the first frame never waits for them. The emoji
-   picker is fetched the first time it is opened.
+3. **The chat loads beside the video.** The chat and its libraries are a separate file of the
+   bundle, about 33 KB, fetched as the watch page opens. It first waited for the video's first frame,
+   which kept the chat away for about 6 s on the live site, and the owner moved it beside the video
+   on 2026-10-01. The emoji picker is fetched the first time it is opened.
 4. **A lighter login.** msrs-client makes the chat key by hashing a random id with `viem`, a large
    library brought in for one hash. Here the key is 32 random bytes from the browser's own crypto,
    so `viem`, `wagmi`, the MetaMask SDK, `crypto-js`, `msgpack-lite`, `pako` and `bs58` stay out.

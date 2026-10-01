@@ -74,8 +74,8 @@ One chat per stream, beside the video on a desktop and under it on a phone, wher
 Anyone can read it. Writing asks once for a display name, 1 to 20 characters, and there is no
 password, wallet or account. A viewer can send a message, react with an emoji, reply in a thread,
 load older messages, and retry a message that did not send. The chat and its library are a file of
-the bundle of their own, fetched once the video is playing, and the emoji picker is fetched the first
-time it opens.
+the bundle of their own, fetched as the watch page opens, beside the video rather than after it, and
+the emoji picker is fetched the first time it opens.
 
 **What it needs, outside this repository.** Two services, set up apart from this app:
 
