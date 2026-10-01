@@ -10,7 +10,7 @@ minimumReleaseAgeStrict: true
 
 # Our own chat library, published by us and read against the copy it was tested as before it was let in younger.
 minimumReleaseAgeExclude:
-  - '@solarpunkltd/swarm-chat-js@7.1.0'
+  - '@solarpunkltd/swarm-chat-js@7.2.0'
 
 # The dependencies whose install scripts run, true, or are skipped, false. Both are optional native helpers that the
 # dev server and the build work without.
