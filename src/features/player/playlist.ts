@@ -5,7 +5,7 @@ import { buildMasterPlaylist, buildSwarmUri, parseSwarmUri } from '@/shared/mast
 import { absoluteGatewayUrl } from '@/features/player/gatewayUrl';
 
 /**
- * Playlist text and feed URIs — the pure half of the Swarm HLS loader.
+ * Playlist text and feed URIs, the pure half of the Swarm HLS loader.
  *
  * Kept apart from `ManifestManagement` so it can be exercised without a Bee node, a gateway URL or
  * a browser: this is the code that decides what hls.js actually parses, and getting a tag or a URI
@@ -22,10 +22,10 @@ export { buildMasterPlaylist, buildSwarmUri, parseManifest, parseSwarmUri, type 
  * Where segment references are fetched from, as an absolute URL.
  *
  * Absolute is the whole point. These strings are written into a media playlist, and hls.js
- * resolves every URI in a playlist against that playlist's own URL — which here is
+ * resolves every URI in a playlist against that playlist's own URL, which here is
  * `swarm://<owner>/<topic>`. A root-relative `/bee/bytes/<ref>` resolved against that inherits the
  * scheme *and* the owner, arriving at the fragment loader as
- * `swarm://<owner>/bee/bytes/<ref>`; strip the scheme and what is left still carries the owner as
+ * `swarm://<owner>/bee/bytes/<ref>`. Strip the scheme and what is left still carries the owner as
  * a path segment, so the request goes to `<origin>//<owner>/bee/bytes/<ref>` and a dev server
  * answers it with index.html. A URI that already carries a scheme is returned untouched instead.
  */
@@ -47,7 +47,7 @@ export function isMasterPlaylist(text: string): boolean {
  * The variant feeds a master points at, in the order it lists them.
  *
  * Read off the master rather than out of the catalog, because these are the feeds hls.js will
- * actually request — polling any other set would leave the rungs it asks for un-walked while
+ * actually request: polling any other set would leave the rungs it asks for un-walked while
  * keeping ones it never touches at the live edge. The owner comes from the URIs for the same
  * reason: the master is what says where its own variants live.
  */

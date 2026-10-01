@@ -21,7 +21,7 @@ import { waitFor } from './helpers/waiting';
  * `fetchSource` is the one hls.js calls from `loadSource`, so once a stream can be a ladder it is the
  * read every mount makes and every restart comes back through. That makes it the place a gateway
  * outage is met, which is why the guards asserted below belong to it and not only to
- * `handleInitialFetch` — the path it replaced on this route.
+ * `handleInitialFetch`: the path it replaced on this route.
  */
 
 const BEE_URL = 'http://bee.test';

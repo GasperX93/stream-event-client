@@ -1,7 +1,7 @@
 /**
  * Every preview card used to take its frame by fetching the stream's manifest feed and decoding the
- * first segment it found. A scheduled entry has no manifest feed — the topic is an announcement, and
- * nothing is written under it until the broadcast starts — so that fetch was a guaranteed miss that
+ * first segment it found. A scheduled entry has no manifest feed: the topic is an announcement, and
+ * nothing is written under it until the broadcast starts, so that fetch was a guaranteed miss that
  * cost a slot on a queue of concurrency 1, and on the deployed build left the card spinning for good.
  * The image the broadcaster had uploaded went unread either way.
  */
@@ -39,7 +39,7 @@ describe('where a preview card gets its picture', () => {
   });
 
   // ⛔ The rule the whole module exists for. There is no manifest behind a scheduled topic, so a probe
-  // there can only end as a wasted queue slot and a placeholder — before the fetch or after it.
+  // there can only end as a wasted queue slot and a placeholder, before the fetch or after it.
   it('never probes a scheduled stream that has no image', () => {
     assert.equal(previewMode({ state: 'scheduled' }), 'placeholder');
   });
@@ -61,8 +61,8 @@ describe('where a preview card gets its picture', () => {
  * `StreamList` keys a card by topic. In admin mode the topic belongs to the declaration and outlives
  * every session on it, so a publisher who replaces an unfetchable thumbnail re-renders the same
  * mounted component with a new reference and no remount. Recorded as a boolean, the first failure
- * latched: the replacement picture was never rendered, and for a scheduled entry — which is never
- * probed — the card stayed a placeholder for as long as the list was open.
+ * latched: the replacement picture was never rendered, and for a scheduled entry, which is never
+ * probed, the card stayed a placeholder for as long as the list was open.
  */
 describe('whether a recorded image failure still applies', () => {
   const OTHER_REF = 'a'.repeat(64);

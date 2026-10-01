@@ -1469,7 +1469,7 @@ describe('the probe landing on the recording instead of the manifest that ended 
     fetcher.beeUrl = BEE_URL;
     requested = [];
 
-    // Slot 6 is the closing manifest and cannot be fetched; slot 7 is the recording and can.
+    // Slot 6 is the closing manifest and cannot be fetched. Slot 7 is the recording and can.
     globalThis.fetch = async (input: RequestInfo | URL) => {
       const index = requestedIndex(String(input));
       assert.notEqual(index, undefined, `a slot outside the fixture was requested: ${String(input)}`);

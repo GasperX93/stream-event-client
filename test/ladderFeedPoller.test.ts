@@ -62,7 +62,7 @@ class FakeGateway {
   public stripFeedIndexHeader = false;
   /**
    * Status a missing path is refused with. Set to 404 to model a slot the publisher has not written
-   * yet, the way the real fetcher does; left undefined it throws a transport-style error, which is a
+   * yet, the way the real fetcher does. Left undefined it throws a transport-style error, which is a
    * gateway that is not answering at all.
    */
   public missingSlotStatus?: number;
@@ -613,7 +613,7 @@ describe('LadderFeedPoller', () => {
       await waitFor(() => gateway.requests.filter((p) => p.startsWith('soc/')).length >= 3, 'repeated attempts');
       assert.equal(segmentCount(state, topic), 1, 'a miss must not lose what is already there');
 
-      // The uploader publishes the next index; the walk picks it up without being asked to.
+      // The uploader publishes the next index. The walk picks it up without being asked to.
       gateway.publishSoc(topic, 1, manifest(2));
       await waitFor(() => segmentCount(state, topic) === 2, 'the newly published index');
     } finally {
@@ -643,7 +643,7 @@ describe('LadderFeedPoller', () => {
   it('survives a throw that is not a failed fetch, rather than dying silently', async () => {
     // A gateway behind a proxy that strips Swarm-Feed-Index, or a truncated body, throws from
     // outside the fetch. Before this was handled, the walk's promise rejected, the rung stayed in
-    // `polled` so nothing restarted it, and ready() never settled — the loader then awaited a
+    // `polled` so nothing restarted it, and ready() never settled. The loader then awaited a
     // level that would never load or error.
     const topic = Topic.fromString('group-1-720p');
     const gateway = new FakeGateway();
@@ -677,7 +677,7 @@ describe('LadderFeedPoller', () => {
 
     await waitFor(() => state.getIndex(topic.toString()) !== null, 'bootstrap');
 
-    // Arm the block before publishing, so the walk cannot consume index 1 before it is held —
+    // Arm the block before publishing, so the walk cannot consume index 1 before it is held,
     // otherwise there is nothing in flight at teardown and the test proves nothing.
     const held = socPath(topic, 1);
     const attemptsBeforeHold = gateway.requests.filter((p) => p === held).length;
@@ -765,7 +765,7 @@ describe('LadderFeedPoller feed health', () => {
     const seen: FeedState[] = [];
     const unsubscribe = health.subscribe(topic.toString(), (feedState) => seen.push(feedState));
 
-    // Backoff held at zero so the outage is reached quickly; this test is about the state reaching a
+    // Backoff held at zero so the outage is reached quickly. This test is about the state reaching a
     // subscriber, not the pacing, which the test above covers.
     const poller = new LadderFeedPoller(state, gateway.fetchResource, POLL_MS, health, () => 0);
     poller.start(OWNER, [topic]);
