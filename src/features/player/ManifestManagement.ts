@@ -246,7 +246,7 @@ export class ManifestStateManager {
    *
    * The one thing about a topic that has to outlive the topic, so that a fetch issued before a
    * teardown can tell that it was. The follow-up path can compare feed indices instead, because it
-   * pins one before it starts; the initial path has no index yet by definition, and after a teardown
+   * pins one before it starts. The initial path has no index yet by definition, and after a teardown
    * a resurrected topic and a genuinely new one are otherwise identical.
    */
   generation(topicId: string): number {
@@ -363,8 +363,8 @@ interface LadderSource {
  * Resolved when the master is actually asked for, not when the ladder is registered.
  *
  * The uploader keeps correcting each rung's measured bandwidth, and those corrections are worth
- * having — but only up to the moment hls.js reads the master, which for a live stream is once. A
- * supplier picks up whatever has landed by then; a snapshot taken at registration could not.
+ * having, but only up to the moment hls.js reads the master, which for a live stream is once. A
+ * supplier picks up whatever has landed by then. A snapshot taken at registration could not.
  */
 type LadderResolver = () => LadderSource;
 
@@ -373,7 +373,7 @@ type LadderResolver = () => LadderSource;
  *
  * `resolve` is present only on the fallback path, where the ladder came from the stream catalog
  * rather than from a published master. `topics` is recorded rather than re-derived, because it is
- * what has to be stopped again — see {@link ManifestFetcher.registerLadder}.
+ * what has to be stopped again. See {@link ManifestFetcher.registerLadder}.
  */
 interface RegisteredLadder {
   resolve?: LadderResolver;
@@ -517,7 +517,7 @@ export class ManifestFetcher {
    *
    * This is the fallback path, for an entry whose `topic` points at the lowest rung because it was
    * written before the uploader published masters. It pre-starts the rung walks from the catalog's
-   * rendition list so such a stream is still a ladder; {@link fetchSource} then answers the
+   * rendition list so such a stream is still a ladder, {@link fetchSource} then answers the
    * top-level request with a locally built master when the feed turns out to hold a media playlist.
    *
    * Registering costs nothing when the source *does* have a published master: the topics are the
@@ -529,7 +529,7 @@ export class ManifestFetcher {
 
     // The topics are recorded, not re-derived on the way out. React assigns refs during render,
     // which happens before the previous effect's cleanup runs, so a resolver read at unregister
-    // time already sees the *next* stream's ladder — which would stop the rungs just started and
+    // time already sees the *next* stream's ladder, which would stop the rungs just started and
     // leave the previous stream's walk loops running forever.
     this.trackLadder(sourceUrl, topics, resolve);
     this.poller.start(ladder.owner, topics, groupHexOf(sourceUrl));
@@ -539,7 +539,7 @@ export class ManifestFetcher {
    * Stops every rung this source was walking and discards what they accumulated.
    *
    * The clearing belongs here rather than in the player, because with a published master the rung
-   * topics are discovered from the playlist and the player never sees them — it would have nothing
+   * topics are discovered from the playlist and the player never sees them. It would have nothing
    * to clear, and the next session would resume the previous one's playlists. Done synchronously
    * with the stop, so a response still in flight cannot recreate the state it lands after.
    */
@@ -558,14 +558,14 @@ export class ManifestFetcher {
   }
 
   /**
-   * Answers the top-level playlist request for `url` — the one hls.js makes once, from
+   * Answers the top-level playlist request for `url`, the one hls.js makes once, from
    * `loadSource`.
    *
    * The source feed is read first and its content decides what this is. A multivariant playlist
-   * means the uploader published a master for a ladder, and it is returned as it stands; the rungs
+   * means the uploader published a master for a ladder, and it is returned as it stands. The rungs
    * it names start being walked here, before hls.js has parsed it and asked for any of them. A
    * media playlist means either a single-rendition stream, or a catalog entry from before masters
-   * existed — the fallback in {@link registerLadder} covers the second.
+   * existed: the fallback in {@link registerLadder} covers the second.
    */
   async fetchSource(url: string): Promise<string> {
     const source = parseSwarmUri(url);
@@ -574,7 +574,7 @@ export class ManifestFetcher {
 
     // Guarded exactly as {@link handleInitialFetch} is, and for the same reasons. Once a stream can
     // be a ladder this is the head read every mount makes, and the restart a fatal player error
-    // triggers comes back through here rather than through there — so an unguarded read here would
+    // triggers comes back through here rather than through there, so an unguarded read here would
     // be an unbounded restart loop against a dead gateway, with nothing recorded for the overlay to
     // report and no backoff accumulating to slow it down.
     const generation = this.stateManager.generation(hexTopic);
@@ -720,14 +720,14 @@ export class ManifestFetcher {
     const hexTopic = topic.toString();
 
     // Read before the wait rather than after it. Everything from here to the write is one window,
-    // and the backoff can hold it open for seconds — so a teardown landing during the wait has to be
+    // and the backoff can hold it open for seconds, so a teardown landing during the wait has to be
     // caught by the same guard that catches one landing during the fetch. See
     // {@link assertTopicSurvived}.
     const generation = this.stateManager.generation(hexTopic);
     await this.awaitFeedBackoff(hexTopic);
 
     // Every status counts as a failure here, 404 included. On the follow-up path a 404 means the
-    // publisher has not written the next slot yet, which is ordinary; this request asks for the
+    // publisher has not written the next slot yet, which is ordinary. This request asks for the
     // feed's head, so nothing being there is the gateway having no answer at all.
     //
     // So does anything else that stops this call producing a playlist. The alternative is worse than
@@ -1061,7 +1061,7 @@ export class ManifestFetcher {
   /**
    * Records a ladder against its source, merging topics rather than replacing them.
    *
-   * Both paths can fire for one source — the catalog registers the ladder as the player mounts, and
+   * Both paths can fire for one source: the catalog registers the ladder as the player mounts, and
    * the published master names the same rungs a moment later. Replacing would leave whichever set
    * lost the race running with nothing to stop it at teardown.
    */
@@ -1085,7 +1085,7 @@ export class ManifestFetcher {
 
   /**
    * Logged because a master is otherwise hard to see. The published one arrives as a feed read that
-   * looks like every other feed read, and the synthesised one never becomes a request at all — so
+   * looks like every other feed read, and the synthesised one never becomes a request at all, so
    * devtools' network panel, the first place anyone looks for a playlist, shows nothing useful
    * either way. Once per distinct master, which for a live session is once.
    */

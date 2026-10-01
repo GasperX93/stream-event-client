@@ -72,7 +72,7 @@ describe('escalating a fatal media error instead of retrying it forever', () => 
    *
    * The whole ladder is a subtraction of two clock readings, so a clock that can jump breaks it in
    * both directions, and the two failures are opposite. `feedState.ts` already documents this for its
-   * own deadlines; the player called this one with `Date.now()`, the one non-monotonic clock in the
+   * own deadlines. The player called this one with `Date.now()`, the one non-monotonic clock in the
    * package, which an NTP correction moves under a viewer mid-session.
    */
   describe('a clock that jumps, which is why the caller owes this a monotonic one', () => {

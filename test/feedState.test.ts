@@ -1041,7 +1041,7 @@ describe('FeedHealthTracker on a ladder, where the faults land on rungs and the 
     assert.deepEqual(seen, [FEED_STATE_LIVE, FEED_STATE_RECONNECTING, FEED_STATE_LIVE]);
   });
 
-  /** The publisher stopping is the group's business; one rung caught up with it is not. */
+  /** The publisher stopping is the group's business. One rung caught up with it is not. */
   it('calls the group stalled only once every rung has sat on an unserved slot', () => {
     const { tracker, clock } = makeLadder();
 

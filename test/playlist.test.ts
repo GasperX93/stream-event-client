@@ -56,7 +56,7 @@ describe('absoluteBytesBase', () => {
   it('absolutises the dev proxy path, which is otherwise resolved against swarm://', () => {
     // The bug this exists to prevent: a root-relative "/bee/bytes/<ref>" in a media playlist whose
     // own URL is swarm://<owner>/<topic> resolves to swarm://<owner>/bee/bytes/<ref>, and the
-    // fragment loader then requests <origin>//<owner>/bee/bytes/<ref> — which a dev server answers
+    // fragment loader then requests <origin>//<owner>/bee/bytes/<ref>, which a dev server answers
     // with index.html rather than a segment.
     assert.equal(absoluteBytesBase('/bee', origin), 'http://localhost:5173/bee/bytes');
   });

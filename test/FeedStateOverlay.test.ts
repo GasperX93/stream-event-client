@@ -39,7 +39,7 @@ describe('FeedStateOverlay', () => {
     assert.match(textOf(render(FEED_STATE_RECONNECTING)), /Reconnecting/);
   });
 
-  // Two messages rather than one. A gateway that is not answering usually comes back on its own; a
+  // Two messages rather than one. A gateway that is not answering usually comes back on its own. A
   // feed that has stopped advancing while its gateway answers usually does not, and telling a viewer
   // the player is reconnecting when it is connected fine points them at the wrong thing.
   it('says something different when the gateway answers but the feed is not advancing', () => {

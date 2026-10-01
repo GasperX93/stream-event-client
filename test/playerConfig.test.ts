@@ -21,7 +21,7 @@ const NO_LOADERS = { pLoader: undefined, fLoader: undefined };
  * Line and block comments removed.
  *
  * The component guard below is about what the component *sets*, and both this file and the component
- * discuss these keys in prose — including, deliberately, the wrong values a second copy of the
+ * discuss these keys in prose, including, deliberately, the wrong values a second copy of the
  * tuning had drifted to. Matching those made the guard fire on the very comment recording why it
  * exists. A `//` inside a string literal would be stripped too, which no source here has.
  */
@@ -201,7 +201,7 @@ describe('SwarmHlsPlayer hls.js tuning', () => {
       });
     }
 
-    // Proves the checks above can fail. Stripping comments is what makes them readable; it must not
+    // Proves the checks above can fail. Stripping comments is what makes them readable. It must not
     // be what makes them pass.
     it('still sees a tuning value the component sets, and only ignores one it talks about', () => {
       assert.match(stripComments('const c = { liveSyncDuration: 10 };'), /\bliveSyncDuration\s*:/);

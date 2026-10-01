@@ -135,7 +135,7 @@ export const UNSERVED_SLOT_STALL_MS = 8_000;
  * Nothing has to be excused afterwards, which is what the previous three fixes were each doing.
  *
  * ⭐ **Four, because a healthy rung is never more than one or two behind the leader.** Rungs of one
- * ladder are cut by one encoder on one keyframe cadence, so they advance together; what separates
+ * ladder are cut by one encoder on one keyframe cadence, so they advance together. What separates
  * them is the stagger in which they are uploaded and read, which is under a segment. Four is twice
  * the widest healthy gap, and the ladder has to deliver four whole segments that this rung did not
  * before anything is said.

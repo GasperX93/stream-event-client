@@ -13,14 +13,14 @@ import { isSlotNotWrittenYet, probePastRefusal, shouldProbePastRefusal } from '.
  * Keeps every rung of a ladder at the live edge, whether or not it is the one playing.
  *
  * A Swarm feed is walked one SOC at a time: to reach index N you have to ask for N-1 first. While
- * hls.js drives that walk, it only ever advances the level it is currently playing — it does not
+ * hls.js drives that walk. It only ever advances the level it is currently playing. It does not
  * poll the playlists of levels it is not using. A rung switched away from therefore stops
  * advancing, and coming back to it two minutes later leaves it eighty indices behind, catching up
  * at one index per playlist refresh. That is minutes to reach live, which is not a switch.
  *
  * So the walk is inverted: this owns it for all four rungs at once, on its own clock, and the
  * loader becomes a read of whatever state is already there. The cost is four small SOC lookups per
- * segment interval instead of one — negligible next to the segments themselves, and it is what
+ * segment interval instead of one, negligible next to the segments themselves, and it is what
  * makes a switch cost nothing.
  */
 const DEFAULT_POLL_INTERVAL_MS = 750;
@@ -34,8 +34,8 @@ const DEFAULT_POLL_INTERVAL_MS = 750;
 const MAX_CATCH_UP_PER_PASS = 25;
 
 /**
- * Consecutive misses before saying so. A miss is the normal case — it means the next segment has
- * not been published yet — so the first several are silent, and only a run long enough to mean
+ * Consecutive misses before saying so. A miss is the normal case: it means the next segment has
+ * not been published yet, so the first several are silent, and only a run long enough to mean
  * "this feed has stopped, or the gateway is broken" is worth a line in the console.
  */
 const MISSES_BEFORE_WARNING = 20;
@@ -83,7 +83,7 @@ export class LadderFeedPoller {
     private readonly feedHealth: FeedHealthTracker = new FeedHealthTracker(),
     /**
      * The jittered backoff this rung's gateway has earned, honoured before each pass. Zero by
-     * default, so a directly built poller keeps polling at {@link pollIntervalMs}; the fetcher wires
+     * default, so a directly built poller keeps polling at {@link pollIntervalMs}. The fetcher wires
      * this to the same feed health and jitter the single-rendition path backs off through.
      */
     private readonly backoffMs: (hexTopic: string) => number = () => 0,
@@ -196,7 +196,7 @@ export class LadderFeedPoller {
 
       // Nothing thrown in here may end the walk. A rung whose loop dies is not merely stale, it is
       // unrecoverable for the session: it stays in `polled`, so nothing re-starts it, and anything
-      // awaiting its `ready()` waits for a promise that will never settle — which for the loader
+      // awaiting its `ready()` waits for a promise that will never settle, which for the loader
       // means an hls.js level request that never succeeds and never fails. Reading a truncated
       // body, or a gateway that drops the Swarm-Feed-Index header, is enough to get there.
       try {
@@ -210,7 +210,7 @@ export class LadderFeedPoller {
       }
 
       // Anything consumed this pass means more may already be waiting, so try again straight
-      // away; only an empty pass is worth sleeping on.
+      // away. Only an empty pass is worth sleeping on.
       if (advanced === 0) {
         await this.pauseFor(entry, this.pollIntervalMs);
       }
@@ -311,7 +311,7 @@ export class LadderFeedPoller {
 
       // Re-checked after every await, not just at the top of the loop. Teardown clears this
       // topic's state synchronously right after stopping the walk, so a response still in flight
-      // would otherwise land afterwards and recreate what was cleared — leaving a stale index
+      // would otherwise land afterwards and recreate what was cleared, leaving a stale index
       // behind that the next session would resume from instead of bootstrapping to the live edge.
       if (entry.stopped) {
         return steps;
@@ -524,7 +524,7 @@ export class LadderFeedPoller {
     this.recordMiss(entry, error);
     if (isSlotNotWrittenYet(error)) {
       // ⛔ Without this the `stalled` state is dead code on a ladder. The single-rendition walk has
-      // always recorded it; this one never did, so a publisher that stopped left the viewer's own
+      // always recorded it. This one never did, so a publisher that stopped left the viewer's own
       // gateway healthy, nothing counted, and the overlay stayed down over a frozen picture.
       return this.feedHealth.recordUnservedSlot(entry.hexTopic);
     }
