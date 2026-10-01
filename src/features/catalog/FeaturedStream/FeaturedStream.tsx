@@ -17,8 +17,9 @@ interface FeaturedStreamProps {
 }
 
 /**
- * The block a live stream, or the next upcoming one, gets above the cards: its badge, date, title,
- * description and a countdown to its start beside the thumbnail and the call to join.
+ * The block a live stream, or the next upcoming one, gets above the cards: its badge, title and
+ * description, then a countdown to its start, or a live note while it is live, beside the thumbnail
+ * and the call to watch.
  */
 export function FeaturedStream({ stream, now }: FeaturedStreamProps) {
   const isLive = stream.state === STREAM_STATUS_LIVE;

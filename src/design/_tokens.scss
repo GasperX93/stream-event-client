@@ -144,7 +144,8 @@ $size: (
   'chat-height': min(70vh, 560px),
   // The same, measured against the visible part of the screen, which iOS Safari's `vh` is not.
   'chat-height-dynamic': min(70dvh, 560px),
-  // Beside the video: the window's height less the header and the back link above the chat.
+  // Beside the video: the window's height less the 120px header, the back link and the gap above the
+  // chat. Change it with `header-height`.
   'chat-height-desktop': calc(100vh - 170px),
   'chat-min-height-desktop': 320px,
   // Wide enough to aim at with a finger, where the Swarm design draws the control smaller.

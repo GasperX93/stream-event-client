@@ -35,8 +35,8 @@ export function LoginModal() {
   return (
     <Dialog title="Join the chat" onClose={close}>
       <p id={descriptionId} className="login-modal-content">
-        Choose a display name of up to {DISPLAY_NAME_MAX_LENGTH} characters. It is shown on your messages, and this
-        browser remembers it.
+        Choose a display name of up to {DISPLAY_NAME_MAX_LENGTH} characters. Others see its first letter on your
+        messages and the whole name when they point at it, and this browser remembers it.
       </p>
       <div className="login-modal-input-container">
         <input

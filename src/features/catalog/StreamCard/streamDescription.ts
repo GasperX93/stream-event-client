@@ -1,6 +1,6 @@
 const AGENDA_MARKER = '- ';
 
-/** An agenda line split at its first colon or dash, so the part before it can be set in bold. */
+/** An agenda line split at its first colon or em dash, so the part before it can be set in bold. */
 export interface AgendaItem {
   lead: string | null;
   text: string;
@@ -12,7 +12,7 @@ export interface DescriptionParts {
   agenda: AgendaItem[];
 }
 
-// The lead keeps its separator, a colon as written and a dash with a space before it.
+// The lead keeps its separator: a colon as written, an em dash with a space before it.
 const AGENDA_LEAD = /^(.+?)\s*([:—])\s*(.+)$/;
 
 function agendaItem(line: string): AgendaItem {

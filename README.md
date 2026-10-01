@@ -46,11 +46,11 @@ live with the deployment, never in this repository.
 | `catalog.owner` | The Ethereum address that owns the stream list feed                                                                             |
 | `catalog.topic` | The stream list feed's topic, as text                                                                                           |
 | `chat`          | Optional. The chat's settings, below. Without it, or with `enabled` false, there is no chat anywhere on the page                |
-| `theme`         | Optional. Which of the build's themes the page wears, `swarm` today and the default. A name the build does not carry is refused |
+| `theme`         | Optional. Which of the build's themes the page wears, `swarm` by default. A name the build does not carry is refused            |
 
 A theme is a set of colours and typefaces in `src/design/themes/`, with its logo, page copy and
-footer links in `src/design/themes.ts`. Every theme defines the same variables, so switching theme leaves nothing
-unset, and the tokens test fails on a theme that misses one or on a text colour below 4.5:1.
+footer links in `src/design/themes.ts`. Every theme defines the same variables, so a deployment that picks another
+theme leaves nothing unset, and the tokens test fails on a theme that misses one or on a text colour below 4.5:1.
 
 The `chat` block. With `enabled` true every field must be filled in, and the page refuses to start
 otherwise. With `enabled` false the other fields are not read.
@@ -96,8 +96,9 @@ keys in the tree has to know it.
 **What the browser keeps.** The display name, the chat key made for it (32 random bytes from the
 browser's own crypto) and its address sit in local storage under `stream-event-client:chat-session`,
 so a reload keeps the name. Logging out removes them. The key proves only that two messages came from
-the same browser, and anyone may choose any name, so the chat shows the last digits of each sender's
-address beside the name.
+the same browser, and anyone may choose any name. So each message shows its sender's initial, and the
+name with the last six digits of the sender's address shows on hover or focus and is what a screen
+reader reads.
 
 ## Build it
 
@@ -209,22 +210,26 @@ the playlist's own URL and a URI with a scheme is the one case it leaves untouch
 
 ## The design
 
-One look, Swarm Brand v3.0 as msrs-client's Swarm theme draws it: near-black surfaces, the Swarm
-orange `#f47a20` as a sparing accent, and Geist for every heading, label and text on the browse page.
-There is no theme switcher and no second theme.
+One look today, Swarm Brand v3.0 as msrs-client's Swarm theme draws it: near-black surfaces, the
+Swarm orange `#f47a20` as a sparing accent, Geist for all text, and JetBrains Mono only for the
+configuration problem's detail and the playback quality overlay. A deployment picks its theme in
+`config.json`, and there is no switcher for viewers.
 
-- **The tokens** live in `src/design/_tokens.scss`, one Sass map per group (colour, font, spacing,
-  radius and so on). `src/design/theme.scss` emits every entry once on `:root` as a CSS custom
-  property named `--<group>-<name>`, for example `--color-primary` or `--spacing-base`, and sets the
-  page's base styles.
+- **The tokens.** The scales (sizes, spacing, type steps, radii, timing) live in
+  `src/design/_tokens.scss`, one Sass map per group. What a theme decides, its colours and typefaces,
+  lives in `src/design/themes/`, one file per theme. `src/design/theme.scss` emits the scales once on
+  `:root` and each theme under `:root[data-theme='<name>']`, the default theme on a bare `:root` too,
+  as CSS custom properties named `--<group>-<name>`, for example `--color-primary` or
+  `--spacing-base`. It also sets the page's base styles.
 - **Components read only the variables**, `var(--color-primary)`, never a Sass token or a literal
   colour. The breakpoints are the one exception, because a media query cannot read a custom
   property: they are the mixins in `src/design/_media.scss`, and every layout is written for a phone
   first and widened by them.
-- **To add a token**, add it to its map in `_tokens.scss` and read it where it is needed. The tokens
-  test (`test/designTokens.test.ts`) fails when a stylesheet reads a variable the design does not
-  define, when the design defines one nothing reads, and when a text colour falls below 4.5:1
-  against its background, so a new colour pairing goes into its list too.
+- **To add a token**, add a scale to its map in `_tokens.scss`, or a colour or typeface to every
+  theme in `src/design/themes/`, and read it where it is needed. The tokens test
+  (`test/designTokens.test.ts`) fails when a stylesheet reads a variable the design does not define,
+  when the design defines one nothing reads, when one theme lacks a variable another has, and when a
+  text colour falls below 4.5:1 against its background. A new colour pairing goes into its list too.
 - **The fonts** are bundled from `@fontsource`, only the weights used: Geist 400, 500, 600 and 700,
   and JetBrains Mono 500, imported in `src/design/fonts.ts`. The page makes no font request to a
   third party. Another weight needs its file imported there, or the browser fakes it.

@@ -1,7 +1,7 @@
 # stream-event-client: the plan
 
-Status: proposed, 2026-09-29. Written before any code. Nothing is built until the owner says go,
-and the open decisions at the end are answered.
+Status: active. Phases 1 to 4 are done, phase 5 is next. Each phase starts on the owner's go
+(decision 7).
 
 ## What this is
 
@@ -97,11 +97,13 @@ so the chat, the player and the picker can each be read, tested and replaced on 
    a setting such as switching chat off changes without a rebuild. A page that cannot read its
    config says so, instead of showing an empty list. msrs-client already did this with
    `window.__CONFIG__`.
-2. **Design tokens as CSS variables, one theme.** msrs-client keeps its tokens in Sass maps and
-   switches between four themes at runtime through a `data-theme` attribute, a React provider and
-   local storage. Here the tokens are emitted once as CSS custom properties with the Swarm values,
-   and every component reads only those variables. The provider, the switcher, the stored choice
-   and the per-theme assets do not come along.
+2. **Design tokens as CSS variables, themes picked per deployment.** msrs-client keeps its tokens in
+   Sass maps and switches between four themes at runtime through a `data-theme` attribute, a React
+   provider and local storage. Here every component reads only CSS custom properties. The scales are
+   emitted once, and each theme's colours and typefaces under its own `data-theme`. A deployment
+   picks its theme with `theme` in `config.json`, `swarm` being the only one and the default. Each
+   theme carries its logo, page copy and footer links in `src/design/themes.ts`. A switcher for
+   viewers, the provider and the stored choice do not come along.
 3. **The chat loads after the video.** The chat and its libraries are a separate file of the
    bundle, fetched after the player starts, so the first frame never waits for them. The emoji
    picker is fetched the first time it is opened.
@@ -116,9 +118,10 @@ so the chat, the player and the picker can each be read, tested and replaced on 
    list of hosts a page may reach, allows exactly that. A node on another machine would need that
    policy opened to every host, which is a later step if wanted. The monorepo's health check and its
    plain-language failures stay.
-7. **Fonts served by the app.** The Swarm theme loads Geist, Vend Sans and JetBrains Mono from
-   Google Fonts. Here they are bundled, so the page makes no third-party request and does not
-   depend on Google being reachable from the venue.
+7. **Fonts served by the app.** msrs-client's Swarm theme loads Geist, Vend Sans and JetBrains Mono
+   from Google Fonts. Here Geist and JetBrains Mono are bundled, and Vend Sans is left out because
+   msrs-client sets no heading on the browse and watch pages in it. So the page makes no third-party
+   request and does not depend on Google being reachable from the venue.
 8. **Fixes found while reading the sources**: `onKeyPress`, which React has deprecated, becomes
    `onKeyDown`. The invalid `role="main-layout"` goes. Dialogs keep focus inside and close on
    Escape. The chat hook's `any` types become real types.
@@ -240,8 +243,11 @@ week, and leave the two weeks before the event for rehearsal with the real strea
 | 1   | The viewer, standalone | The viewer, the shared pieces and the picker are in the new layout, weeb-3 is gone, decision 2 is applied, the runtime config works, every stream is listed, the toolchain is the monorepo's, dependencies are current and checked, the kept tests and CI are green                                                                                     | Done 2026-09-29, PR #1         |
 | 2   | Swarm design           | Tokens and the Swarm theme are in, every screen uses them on a phone and on a desktop, the watch page keeps a place for the chat, fonts, logo and favicon are bundled, no theme machinery is left, and the tokens test is green                                                                                                                         | Done 2026-09-29, PR #2         |
 | 3   | Chat                   | The display-name login and the chat panel work on the watch page on swarm-chat-js 7.0, reading the chat feed and its history files by polling, with the ported and new tests green. Tested against stand-ins, because the aggregator for this app is not set up yet, so a message from this app has not yet gone through a real endpoint and aggregator | Done 2026-09-30, PRs #3 and #4 |
-| 4   | Ship                   | The Docker image, nginx with the page fallback, caching, `config.json` served uncached, a content security policy that allows the gateway, the viewer's own machine and the chat endpoint, the config mounted at start, and the browser smoke test with its recorded answers in CI. A deploy to a staging host only on the owner's word                 | 2026-10-15                     |
+| 4   | Ship                   | The Docker image, nginx with the page fallback, caching, `config.json` served uncached, a content security policy that allows the gateway, the viewer's own machine and the chat endpoint, the config mounted at start, and the browser smoke test with its recorded answers in CI. A deploy to a staging host only on the owner's word                 | Done 2026-09-30, image v1.0.0  |
 | 5   | Review and docs        | A review for broken logic, races, loops that never end, unhandled errors and anything that leaves a viewer unsure what is happening, each finding fixed or recorded. Docs and comments read against the code and fixed. A check that no host, address or key is in the tree                                                                             | 2026-10-19                     |
+
+Phase 2 left no theme machinery. Theme selection per deployment came back on the owner's word of
+2026-09-30, see change 2.
 
 ## Decisions for the owner
 
@@ -311,6 +317,11 @@ week, and leave the two weeks before the event for rehearsal with the real strea
 - **Decision 7, pace** (the owner, 2026-09-29): A, each phase ends with a summary and the next starts on
   the owner's go.
 - **Stream list order** (the owner, 2026-09-29): live, then upcoming, then finished.
+- **The Swarm design, again** (the owner, 2026-09-30): the viewer follows msrs-client's Swarm site as
+  it runs, and a deployment picks its theme with a setting, with no theme beyond `swarm` added.
+  On 2026-10-01 the owner kept text on orange dark for contrast, took msrs-client's chat look with
+  the name on hover, left the footer's newsletter form out, and kept the footer's links as
+  msrs-client has them for now.
 
 ## Risks and limits
 

@@ -80,14 +80,13 @@ export const StreamPreview = ({
   /**
    * The thumbnail reference the browser could not load, which demotes this card out of `image` mode.
    * Held in state rather than handled in the `onError` branch directly, so the decision stays in
-   * `previewMode` — a scheduled card must not fall back to a probe, and that rule lives in one place
+   * `previewMode`. A scheduled card must not fall back to a probe, and that rule lives in one place
    * with a test rather than in two handlers.
    *
    * ⛔ The reference and not a boolean, because a card outlives the picture it was given. `StreamList`
-   * keys a card by topic, and in admin mode the topic belongs to the declaration and outlives every
-   * session on it, so a publisher replacing a broken thumbnail re-renders this same mounted component
+   * keys a card by topic, and a topic outlives every broadcast published under it, so a publisher replacing a broken thumbnail re-renders this same mounted component
    * with a new `thumbnail` prop. A boolean latched on the first failure never cleared, and the card
-   * went on probing — or, for a scheduled stream, went on showing the placeholder for ever, since a
+   * went on probing, or, for a scheduled stream, went on showing the placeholder for ever, since a
    * scheduled card is never probed. Comparing against the current reference makes the failure a fact
    * about one picture rather than about the card.
    */
@@ -134,7 +133,7 @@ export const StreamPreview = ({
 
         // Split from the check below, because the two used to share an early return and only one of
         // them is a reason to leave the spinner up. An aborted card is being unmounted and nobody is
-        // looking at it; a card with nothing to show is on screen and has to say so.
+        // looking at it. A card with nothing to show is on screen and has to say so.
         if (abort.signal.aborted) {
           return;
         }

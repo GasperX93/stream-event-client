@@ -11,8 +11,6 @@ import './StreamBrowser.scss';
 
 export function StreamBrowser() {
   const { streamList, isStreamListFromCurrentGateway, theme } = useAppContext();
-  // `error` and `isLoading` used to be dropped here, which is why a gateway nobody could reach looked
-  // exactly like a gateway with nothing on it.
   const { error, isLoading } = useCatalogPoll(CATALOG_POLL_INTERVAL_MS);
 
   const view = catalogViewFrom({

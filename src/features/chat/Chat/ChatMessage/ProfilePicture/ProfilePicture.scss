@@ -17,8 +17,8 @@
   user-select: none;
 }
 
-// Beside the avatar rather than above it, so the chat's scrolling list never clips it. It points at
-// the avatar from the side the message is on.
+// Beside the avatar rather than above it, so the chat's scrolling list never clips it. It sits on the
+// bubble's side of the avatar.
 .profile-picture-tooltip {
   position: absolute;
   top: 50%;
