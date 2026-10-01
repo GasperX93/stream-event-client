@@ -17,7 +17,7 @@ export function MainLayout({ children }: MainLayoutProps) {
     <div className="main-layout">
       <header className="main-layout-header">
         <Link to="/" className="main-layout-logo-link" aria-label="All streams">
-          <img src={theme.logoUrl} alt="Swarm" className="main-layout-logo" />
+          <img src={theme.logoUrl} alt={theme.logoAlt} className="main-layout-logo" />
         </Link>
         <div className="main-layout-actions">
           <DomainSelector />

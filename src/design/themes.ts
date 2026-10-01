@@ -26,6 +26,8 @@ export interface FooterSettings {
 /** What a theme decides that a stylesheet cannot: its images and its words. */
 export interface ThemeSettings {
   logoUrl: string;
+  /** What the logo says, for a reader who cannot see it. */
+  logoAlt: string;
   heroTitle: string;
   heroSubtitle: string;
   footer: FooterSettings;
@@ -78,6 +80,7 @@ const SWARM_FOOTER: FooterSettings = {
 export const THEMES: Record<ThemeName, ThemeSettings> = {
   swarm: {
     logoUrl: swarmLogoUrl,
+    logoAlt: 'Swarm',
     heroTitle: 'Devcon 8 streams',
     heroSubtitle: 'Live talks and recordings from Devcon 8, stored and delivered over the Swarm network.',
     footer: SWARM_FOOTER,

@@ -27,7 +27,7 @@ export function Footer() {
       <div className="footer-container">
         <div className="footer-middle">
           <div className="footer-brand">
-            <img className="footer-logo" src={theme.logoUrl} alt="Swarm" />
+            <img className="footer-logo" src={theme.logoUrl} alt={theme.logoAlt} />
             <p className="footer-tagline">{tagline}</p>
             <LinkList links={brandLinks} />
           </div>
