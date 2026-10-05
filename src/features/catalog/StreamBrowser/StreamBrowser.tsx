@@ -23,8 +23,12 @@ export function StreamBrowser() {
   return (
     <div className="stream-browser-page">
       <div className="stream-browser-hero">
+        {theme.heroEyebrow && <p className="stream-browser-eyebrow">{theme.heroEyebrow}</p>}
         <h1 className="stream-browser-title">{theme.heroTitle}</h1>
         <p className="stream-browser-subtitle">{theme.heroSubtitle}</p>
+        {theme.heroDate && <p className="stream-browser-date">{theme.heroDate}</p>}
+        {theme.heroTagline && <p className="stream-browser-tagline">{theme.heroTagline}</p>}
+        {theme.heroBody && <p className="stream-browser-body">{theme.heroBody}</p>}
       </div>
       <div className="stream-browser">
         {view === 'streams' ? (

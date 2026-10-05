@@ -1,4 +1,5 @@
 import swarmLogoUrl from './assets/swarm-logo.svg';
+import web3privacyLogoUrl from './assets/web3privacy-logo.png';
 import { type ThemeName } from './themeNames';
 
 export { DEFAULT_THEME, THEME_NAMES, type ThemeName } from './themeNames';
@@ -30,6 +31,11 @@ export interface ThemeSettings {
   logoAlt: string;
   heroTitle: string;
   heroSubtitle: string;
+  /** Optional lines for an event page: a label over the title, the date, a tagline and a paragraph. */
+  heroEyebrow?: string;
+  heroDate?: string;
+  heroTagline?: string;
+  heroBody?: string;
   footer: FooterSettings;
 }
 
@@ -77,6 +83,44 @@ const SWARM_FOOTER: FooterSettings = {
   ],
 };
 
+const WEB3PRIVACY_FOOTER: FooterSettings = {
+  tagline: 'Web3Privacy Now: privacy and internet freedoms, streamed over Swarm.',
+  brandLinks: [
+    { label: 'web3privacy.info', href: 'https://web3privacy.info' },
+    { label: 'Manifesto', href: 'https://docs.web3privacy.info/about-us/manifesto/' },
+    { label: 'News', href: 'https://news.web3privacy.info' },
+  ],
+  columns: [
+    {
+      title: 'Community',
+      links: [
+        { label: 'Forum', href: 'https://forum.web3privacy.info/' },
+        { label: 'YouTube', href: 'https://www.youtube.com/@Web3PrivacyNow' },
+        { label: 'Bluesky', href: 'https://bsky.app/profile/web3privacy.info' },
+        { label: 'LinkedIn', href: 'https://www.linkedin.com/company/web3privacynow' },
+      ],
+    },
+    {
+      title: 'Explore',
+      links: [
+        { label: 'Explorer', href: 'https://explorer.web3privacy.info' },
+        { label: 'Academy', href: 'https://academy.web3privacy.info' },
+        { label: 'Stacks', href: 'https://stacks.web3privacy.info' },
+        { label: 'GitHub', href: 'https://github.com/web3privacy' },
+      ],
+    },
+    {
+      title: 'Streamed on Swarm',
+      links: [
+        { label: 'ethswarm.org', href: 'https://www.ethswarm.org' },
+        { label: 'Swarm docs', href: 'https://docs.ethswarm.org' },
+      ],
+    },
+  ],
+  owner: 'Web3Privacy Now',
+  bottomLinks: [{ label: 'Hosted on Swarm', href: 'https://swarm.bzz.link/' }],
+};
+
 export const THEMES: Record<ThemeName, ThemeSettings> = {
   swarm: {
     logoUrl: swarmLogoUrl,
@@ -84,6 +128,18 @@ export const THEMES: Record<ThemeName, ThemeSettings> = {
     heroTitle: 'Devcon 8 streams',
     heroSubtitle: 'Live talks and recordings from Devcon 8, stored and delivered over the Swarm network.',
     footer: SWARM_FOOTER,
+  },
+  web3privacy: {
+    logoUrl: web3privacyLogoUrl,
+    logoAlt: 'Web3Privacy Now',
+    heroEyebrow: 'Livestream',
+    heroTitle: 'Cypherpunk Congress 3 · Mumbai 2026',
+    heroSubtitle: "The world's largest cypherpunk and human rights event",
+    heroDate: 'Nov 2, 9am (IST)',
+    heroTagline: 'Privacy loves equality',
+    heroBody:
+      '5000 people are gathering in Mumbai to celebrate privacy and internet freedoms in dialogue with Global South. Past editions featured visionaries like Richard Stallman, Chelsea Manning, Vitalik Buterin, Roger Dingledine, Eva Galperin, Renata Avila, David Chaum, Juan Benet & many others.',
+    footer: WEB3PRIVACY_FOOTER,
   },
 };
 

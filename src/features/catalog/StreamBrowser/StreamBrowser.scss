@@ -36,6 +36,37 @@
   color: var(--color-text-secondary);
 }
 
+// The optional event lines a theme can add around the title. The Swarm theme sets none of them.
+.stream-browser-eyebrow {
+  margin: 0 0 var(--spacing-base);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+.stream-browser-date {
+  margin: var(--spacing-lg) 0 0;
+  font-size: var(--font-size-lead);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+.stream-browser-tagline {
+  margin: var(--spacing-base) 0 0;
+  font-size: var(--font-size-lead);
+  color: var(--color-primary);
+}
+
+.stream-browser-body {
+  max-width: var(--size-hero-subtitle-width);
+  margin: var(--spacing-lg) auto 0;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-secondary);
+}
+
 .stream-browser {
   width: 100%;
   margin: 0 auto;

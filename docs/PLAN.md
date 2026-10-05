@@ -101,7 +101,7 @@ so the chat, the player and the picker can each be read, tested and replaced on 
    Sass maps and switches between four themes at runtime through a `data-theme` attribute, a React
    provider and local storage. Here every component reads only CSS custom properties. The scales are
    emitted once, and each theme's colours and typefaces under its own `data-theme`. A deployment
-   picks its theme with `theme` in `config.json`, `swarm` being the only one and the default. Each
+   picks its theme with `theme` in `config.json`: `swarm`, the default, or `web3privacy`. Each
    theme carries its logo, page copy and footer links in `src/design/themes.ts`. A switcher for
    viewers, the provider and the stored choice do not come along.
 3. **The chat loads beside the video.** The chat and its libraries are a separate file of the
@@ -318,6 +318,10 @@ Phase 2 left no theme machinery. Theme selection per deployment came back on the
 - **Decision 7, pace** (the owner, 2026-09-29): A, each phase ends with a summary and the next starts on
   the owner's go.
 - **Stream list order** (the owner, 2026-09-29): live, then upcoming, then finished.
+- **A Web3Privacy theme** (the owner, 2026-10-05): a second theme, `web3privacy`, for the Cypherpunk
+  Congress 3 stream page: black, white and the neon green #70ff88, Eurostile Unicase where the viewer
+  has it, the Web3Privacy Now logo, and the event's copy. A theme may now add optional hero lines (a
+  label, the date, a tagline, a paragraph); the Swarm theme sets none, so its page is unchanged.
 - **The Swarm design, again** (the owner, 2026-09-30): the viewer follows msrs-client's Swarm site as
   it runs, and a deployment picks its theme with a setting, with no theme beyond `swarm` added.
   On 2026-10-01 the owner kept text on orange dark for contrast, took msrs-client's chat look with
