@@ -319,9 +319,11 @@ Phase 2 left no theme machinery. Theme selection per deployment came back on the
   the owner's go.
 - **Stream list order** (the owner, 2026-09-29): live, then upcoming, then finished.
 - **A Web3Privacy theme** (the owner, 2026-10-05): a second theme, `web3privacy`, for the Cypherpunk
-  Congress 3 stream page: black, white and the neon green #70ff88, Eurostile Unicase where the viewer
-  has it, the Web3Privacy Now logo, and the event's copy. A theme may now add optional hero lines (a
-  label, the date, a tagline, a paragraph); the Swarm theme sets none, so its page is unchanged.
+  Congress 3 stream page, following web3privacy.info (w3pn-org-web): black, white and the neon green
+  #70ff88, Archivo with Domine headings (bundled like Geist), the Web3Privacy Now logo, the event's copy
+  and web3privacy.info's footer. A theme may now add optional hero lines (a label, the date, a tagline,
+  a paragraph), a heading typeface, and a footer with an icon row and its own bottom line; the Swarm
+  theme sets none of them, so its page is unchanged.
 - **The Swarm design, again** (the owner, 2026-09-30): the viewer follows msrs-client's Swarm site as
   it runs, and a deployment picks its theme with a setting, with no theme beyond `swarm` added.
   On 2026-10-01 the owner kept text on orange dark for contrast, took msrs-client's chat look with

@@ -1,6 +1,6 @@
 // The Web3Privacy Now theme, for the Cypherpunk Congress stream page, taken from web3privacy.info's own
 // tokens: a black page, #0a0a0a surfaces with white hairlines, white text and the neon green #70ff88
-// with its dark-green foreground for calls to action. Eurostile Unicase where the viewer has it. Same
+// with its dark-green foreground for calls to action, in Archivo with Domine headings. Same
 // groups and names as the Swarm theme; only the brand values differ.
 
 $color: (
@@ -81,16 +81,20 @@ $color: (
 );
 
 $font-family: (
+  // web3privacy.info's brand: Archivo for text, Domine for headings.
   'base': (
-    'Eurostile Unicase',
-    'Eurostile',
-    'Geist',
+    'Archivo',
     system-ui,
     -apple-system,
     'Segoe UI',
     Roboto,
     Arial,
     sans-serif,
+  ),
+  'heading': (
+    'Domine',
+    Georgia,
+    serif,
   ),
   'mono': (
     'JetBrains Mono',

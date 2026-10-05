@@ -89,6 +89,16 @@ $font-family: (
     Arial,
     sans-serif,
   ),
+  // Headings share the body's Geist, as msrs-client sets them.
+  'heading': (
+    'Geist',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    Arial,
+    sans-serif,
+  ),
   'mono': (
     'JetBrains Mono',
     ui-monospace,

@@ -52,10 +52,11 @@ export function Footer() {
                       rel="noreferrer"
                       aria-label={link.label}
                     >
-                      {/* Drawn as a mask, so the icon takes the link's colour whatever colours its file uses. */}
+                      {/* Drawn as a mask, so the icon takes the link's colour whatever colours its file uses. Quoted,
+                          because a small icon is inlined as a data URL whose quotes and spaces break a bare url(). */}
                       <span
                         className="footer-social-icon"
-                        style={{ maskImage: `url(${link.iconUrl})`, WebkitMaskImage: `url(${link.iconUrl})` }}
+                        style={{ maskImage: `url("${link.iconUrl}")`, WebkitMaskImage: `url("${link.iconUrl}")` }}
                         aria-hidden="true"
                       />
                     </a>
