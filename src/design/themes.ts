@@ -6,6 +6,7 @@ import linkedinIconUrl from './assets/social/linkedin.svg';
 import telegramIconUrl from './assets/social/telegram.svg';
 import xIconUrl from './assets/social/x.svg';
 import youtubeIconUrl from './assets/social/youtube.svg';
+import web3privacyHeroUrl from './assets/web3privacy-hero.webp';
 import web3privacyLogoUrl from './assets/web3privacy-logo.png';
 import { type ThemeName } from './themeNames';
 
@@ -54,6 +55,12 @@ export interface ThemeSettings {
   heroDate?: string;
   heroTagline?: string;
   heroBody?: string;
+  /** A photo behind the hero, under a dark overlay, as web3privacy.info shows its own. */
+  heroImageUrl?: string;
+  /** One call to action under the title. */
+  heroCta?: FooterLink;
+  /** Show the footer's icon row in the hero as well, as tiles. */
+  heroSocial?: boolean;
   footer: FooterSettings;
 }
 
@@ -154,6 +161,10 @@ export const THEMES: Record<ThemeName, ThemeSettings> = {
     heroTagline: 'Privacy loves equality',
     heroBody:
       '5000 people are gathering in Mumbai to celebrate privacy and internet freedoms in dialogue with Global South. Past editions featured visionaries like Richard Stallman, Chelsea Manning, Vitalik Buterin, Roger Dingledine, Eva Galperin, Renata Avila, David Chaum, Juan Benet & many others.',
+    // web3privacy.info's own hero photo (content CC BY-SA 4.0, Web3PrivacyNow).
+    heroImageUrl: web3privacyHeroUrl,
+    heroCta: { label: 'About Cypherpunk Congress', href: 'https://congress.web3privacy.info' },
+    heroSocial: true,
     footer: WEB3PRIVACY_FOOTER,
   },
 };

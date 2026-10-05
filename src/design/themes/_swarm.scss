@@ -109,7 +109,13 @@ $font-family: (
   ),
 );
 
+// Headings bold, as msrs-client sets them.
+$font-weight: (
+  'heading': 700,
+);
+
 $theme: (
   'color': $color,
   'font-family': $font-family,
+  'font-weight': $font-weight,
 );

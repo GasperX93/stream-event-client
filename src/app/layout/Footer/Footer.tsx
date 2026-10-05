@@ -1,5 +1,6 @@
 import { useAppContext } from '@/app/AppProvider';
 import type { FooterLink } from '@/design/themes';
+import { SocialLinks } from '@/shared/components/SocialLinks/SocialLinks';
 
 import './Footer.scss';
 
@@ -42,27 +43,7 @@ export function Footer() {
           {social ? (
             <section className="footer-social">
               <p className="footer-social-heading">{social.heading}</p>
-              <ul className="footer-social-list">
-                {social.links.map((link) => (
-                  <li key={link.href}>
-                    <a
-                      className="footer-social-link"
-                      href={link.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={link.label}
-                    >
-                      {/* Drawn as a mask, so the icon takes the link's colour whatever colours its file uses. Quoted,
-                          because a small icon is inlined as a data URL whose quotes and spaces break a bare url(). */}
-                      <span
-                        className="footer-social-icon"
-                        style={{ maskImage: `url("${link.iconUrl}")`, WebkitMaskImage: `url("${link.iconUrl}")` }}
-                        aria-hidden="true"
-                      />
-                    </a>
-                  </li>
-                ))}
-              </ul>
+              <SocialLinks links={social.links} />
             </section>
           ) : (
             // Held for the newsletter form, which waits on the owner's decision about where it posts.

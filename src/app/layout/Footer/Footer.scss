@@ -200,36 +200,3 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
 }
-
-.footer-social-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.footer-social-link {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 6px;
-  color: var(--color-text-soft);
-  transition: color var(--duration-fast) ease;
-
-  &:hover {
-    color: var(--color-primary);
-  }
-}
-
-.footer-social-icon {
-  display: block;
-  width: 27px;
-  height: 27px;
-  background-color: currentcolor;
-  mask-position: center;
-  mask-repeat: no-repeat;
-  mask-size: contain;
-}

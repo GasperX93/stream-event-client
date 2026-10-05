@@ -106,7 +106,13 @@ $font-family: (
   ),
 );
 
+// web3privacy.info sets its Domine headings in the regular weight.
+$font-weight: (
+  'heading': 400,
+);
+
 $theme: (
   'color': $color,
   'font-family': $font-family,
+  'font-weight': $font-weight,
 );

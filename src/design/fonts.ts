@@ -13,4 +13,4 @@ import '@fontsource/archivo/400.css';
 import '@fontsource/archivo/500.css';
 import '@fontsource/archivo/600.css';
 import '@fontsource/archivo/700.css';
-import '@fontsource/domine/700.css';
+import '@fontsource/domine/400.css';
