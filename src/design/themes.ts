@@ -1,4 +1,11 @@
 import swarmLogoUrl from './assets/swarm-logo.svg';
+import blueskyIconUrl from './assets/social/bluesky.svg';
+import githubIconUrl from './assets/social/github.svg';
+import instagramIconUrl from './assets/social/instagram.svg';
+import linkedinIconUrl from './assets/social/linkedin.svg';
+import telegramIconUrl from './assets/social/telegram.svg';
+import xIconUrl from './assets/social/x.svg';
+import youtubeIconUrl from './assets/social/youtube.svg';
 import web3privacyLogoUrl from './assets/web3privacy-logo.png';
 import { type ThemeName } from './themeNames';
 
@@ -9,19 +16,30 @@ export interface FooterLink {
   href: string;
 }
 
+/** A link shown as an icon alone, its label read out instead. */
+export interface SocialLink extends FooterLink {
+  iconUrl: string;
+}
+
 export interface FooterColumn {
-  title: string;
+  /** Left out by a footer whose columns are plain lists. */
+  title?: string;
   links: FooterLink[];
 }
 
 /** The footer under the browse page: the brand block, the link columns and the bottom row. */
 export interface FooterSettings {
-  tagline: string;
-  brandLinks: FooterLink[];
+  /** The brand block's words and links under the logo. A footer that leads with its logo alone leaves them out. */
+  tagline?: string;
+  brandLinks?: FooterLink[];
   columns: FooterColumn[];
   /** Who the bottom row names, followed by the year. */
   owner: string;
+  /** Said in the bottom row instead of the owner and the year, for a brand that words its own. */
+  bottomText?: string;
   bottomLinks: FooterLink[];
+  /** A row of icon links beside the columns, under a heading, in place of the newsletter's column. */
+  social?: { heading: string; links: SocialLink[] };
 }
 
 /** What a theme decides that a stylesheet cannot: its images and its words. */
@@ -83,44 +101,38 @@ const SWARM_FOOTER: FooterSettings = {
   ],
 };
 
-// The links of web3privacy.info's own footer, with Swarm credited for the stream.
+// web3privacy.info's own footer, its words, links and icons, with Swarm credited in the bottom row.
 const WEB3PRIVACY_FOOTER: FooterSettings = {
-  tagline: 'Join our privacy movement.',
-  brandLinks: [
-    { label: 'web3privacy.info', href: 'https://web3privacy.info' },
-    { label: 'Manifesto', href: 'https://docs.web3privacy.info/about-us/manifesto/' },
-    { label: 'How to get involved', href: 'https://docs.web3privacy.info/get-involved/index' },
-  ],
   columns: [
     {
-      title: 'Web3Privacy Now',
+      links: [
+        { label: 'Manifesto', href: 'https://docs.web3privacy.info/about-us/manifesto/' },
+        { label: 'How to get involved', href: 'https://docs.web3privacy.info/get-involved/index' },
+        { label: 'Grants / Support Us', href: 'https://web3privacy.info/donate' },
+      ],
+    },
+    {
       links: [
         { label: 'Events', href: 'https://web3privacy.info/events' },
-        { label: 'Grants / Support Us', href: 'https://web3privacy.info/donate' },
         { label: 'Articles', href: 'https://paragraph.com/@web3privacy-now' },
         { label: 'Talks', href: 'https://www.youtube.com/@Web3PrivacyNow' },
       ],
     },
-    {
-      title: 'Join us on',
-      links: [
-        { label: 'X', href: 'https://x.com/web3privacy' },
-        { label: 'Telegram', href: 'https://t.me/+QOj6126xlEs0OTQ0' },
-        { label: 'Bluesky', href: 'https://bsky.app/profile/web3privacy.info' },
-        { label: 'GitHub', href: 'https://github.com/web3privacy' },
-        { label: 'LinkedIn', href: 'https://www.linkedin.com/company/web3privacynow' },
-        { label: 'Instagram', href: 'https://www.instagram.com/web3privacy_now/' },
-      ],
-    },
-    {
-      title: 'Streamed on Swarm',
-      links: [
-        { label: 'ethswarm.org', href: 'https://www.ethswarm.org' },
-        { label: 'Swarm docs', href: 'https://docs.ethswarm.org' },
-      ],
-    },
   ],
+  social: {
+    heading: 'Join our privacy movement on:',
+    links: [
+      { label: 'X', href: 'https://x.com/web3privacy', iconUrl: xIconUrl },
+      { label: 'Telegram', href: 'https://t.me/+QOj6126xlEs0OTQ0', iconUrl: telegramIconUrl },
+      { label: 'YouTube', href: 'https://www.youtube.com/@Web3PrivacyNow', iconUrl: youtubeIconUrl },
+      { label: 'Bluesky', href: 'https://bsky.app/profile/web3privacy.info', iconUrl: blueskyIconUrl },
+      { label: 'GitHub', href: 'https://github.com/web3privacy', iconUrl: githubIconUrl },
+      { label: 'LinkedIn', href: 'https://www.linkedin.com/company/web3privacynow', iconUrl: linkedinIconUrl },
+      { label: 'Instagram', href: 'https://www.instagram.com/web3privacy_now/', iconUrl: instagramIconUrl },
+    ],
+  },
   owner: 'Web3PrivacyNow',
+  bottomText: 'Copyleft 2026 – Code AGPLv3+ · Content CC BY-SA 4.0 · Web3PrivacyNow',
   bottomLinks: [{ label: 'Hosted on Swarm', href: 'https://swarm.bzz.link/' }],
 };
 

@@ -119,3 +119,78 @@
     text-decoration: underline;
   }
 }
+
+// A footer laid out as web3privacy.info lays out its own: the logo on its own row, plain link
+// columns under it, and the icon row on the right. Chosen by a theme that gives its footer `social`.
+.footer--split {
+  background: var(--color-footer-end);
+  border-top: 1px solid var(--color-border);
+
+  .footer-middle {
+    @include media.tablet-up {
+      grid-template-columns: minmax(180px, 248px) minmax(180px, 248px) 1fr;
+      row-gap: var(--spacing-xl);
+    }
+  }
+
+  .footer-brand {
+    @include media.tablet-up {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .footer-link-list {
+    gap: var(--spacing-lg);
+  }
+
+  .footer-link {
+    font-weight: var(--font-weight-normal);
+    color: var(--color-text-secondary);
+  }
+}
+
+.footer-social {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+
+  @include media.tablet-up {
+    align-items: center;
+    justify-self: end;
+  }
+}
+
+.footer-social-heading {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.footer-social-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xl);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footer-social-link {
+  display: block;
+  color: var(--color-text-secondary);
+  transition: color var(--duration-fast) ease;
+
+  &:hover {
+    color: var(--color-primary);
+  }
+}
+
+.footer-social-icon {
+  display: block;
+  width: 28px;
+  height: 28px;
+  background-color: currentcolor;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}

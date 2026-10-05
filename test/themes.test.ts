@@ -51,13 +51,25 @@ describe('choosing a theme', () => {
   it('gives every theme a footer whose links all go somewhere', () => {
     for (const name of THEME_NAMES) {
       const { footer } = THEMES[name];
-      const links = [...footer.brandLinks, ...footer.columns.flatMap((column) => column.links), ...footer.bottomLinks];
+      const links = [
+        ...(footer.brandLinks ?? []),
+        ...footer.columns.flatMap((column) => column.links),
+        ...(footer.social?.links ?? []),
+        ...footer.bottomLinks,
+      ];
 
-      expect(footer.tagline.trim()).not.toBe('');
+      if (footer.tagline !== undefined) {
+        expect(footer.tagline.trim()).not.toBe('');
+      }
       expect(footer.columns.length).toBeGreaterThan(0);
       for (const column of footer.columns) {
-        expect(column.title.trim()).not.toBe('');
+        if (column.title !== undefined) {
+          expect(column.title.trim()).not.toBe('');
+        }
         expect(column.links.length).toBeGreaterThan(0);
+      }
+      for (const link of footer.social?.links ?? []) {
+        expect(link.iconUrl).toBeTruthy();
       }
       for (const link of links) {
         expect(link.label.trim()).not.toBe('');
