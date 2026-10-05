@@ -67,9 +67,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 560px;
+  min-height: 520px;
   margin-top: calc(-1 * var(--size-header-height));
-  padding: calc(var(--size-header-height) + var(--spacing-3xl)) var(--spacing-lg) var(--spacing-4xl);
+  padding: calc(var(--size-header-height) + var(--spacing-3xl)) var(--spacing-lg) var(--spacing-xl);
   overflow: hidden;
 
   .stream-browser-title {
@@ -126,10 +126,11 @@
   }
 }
 
-// The statement under the hero, as web3privacy.info opens each section: a centred serif line.
+// The statement under the hero, as web3privacy.info opens each section: a centred serif line. Pulled up
+// close to the hero, with the paragraph wide enough to sit in about two lines on a desktop.
 .stream-browser-intro {
-  max-width: 960px;
-  margin: 0 auto;
+  max-width: 1200px;
+  margin: calc(-1 * var(--spacing-2xl)) auto 0;
   padding: 0 var(--spacing-lg);
   text-align: center;
 }
@@ -140,8 +141,8 @@
 }
 
 .stream-browser-body {
-  max-width: var(--size-hero-subtitle-width);
-  margin: var(--spacing-lg) auto 0;
+  max-width: 1140px;
+  margin: var(--spacing-base) auto 0;
   font-size: var(--font-size-lg);
   line-height: var(--line-height-relaxed);
   color: var(--color-text-secondary);
