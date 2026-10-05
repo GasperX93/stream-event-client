@@ -120,16 +120,30 @@
   }
 }
 
-// A footer laid out as web3privacy.info lays out its own: the logo on its own row, plain link
-// columns under it, and the icon row on the right. Chosen by a theme that gives its footer `social`.
+// A footer laid out as web3privacy.info lays out its own (their global-footer.css): the logo on its own
+// row, plain link columns under it, the icon row on the right, and their legal line. Chosen by a theme
+// that gives its footer `social`. Sizes are theirs, in pixels, so the two footers match.
 .footer--split {
+  padding: 25px 0 24px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
   background: var(--color-footer-end);
   border-top: 1px solid var(--color-border);
 
+  .footer-container {
+    max-width: 1280px;
+    padding: 0 24px;
+  }
+
   .footer-middle {
+    grid-template-columns: 1fr;
+    gap: 20px 40px;
+    align-items: start;
+    padding: 0;
+
     @include media.tablet-up {
-      grid-template-columns: minmax(180px, 248px) minmax(180px, 248px) 1fr;
-      row-gap: var(--spacing-xl);
+      grid-template-columns: minmax(200px, auto) minmax(200px, auto) 1fr;
+      column-gap: 48px;
     }
   }
 
@@ -139,20 +153,41 @@
     }
   }
 
+  .footer-logo {
+    height: 43px;
+    max-width: 250px;
+    object-fit: contain;
+    object-position: left center;
+  }
+
   .footer-link-list {
-    gap: var(--spacing-lg);
+    gap: 6px;
   }
 
   .footer-link {
-    font-weight: var(--font-weight-normal);
-    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: 300;
+    line-height: 1.5;
+    color: inherit;
+
+    &:hover {
+      opacity: 1;
+      color: var(--color-text);
+    }
+  }
+
+  .footer-bottom {
+    margin-top: 24px;
+    padding: 0;
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
   }
 }
 
 .footer-social {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xl);
+  gap: 10px;
 
   @include media.tablet-up {
     align-items: center;
@@ -163,21 +198,25 @@
 .footer-social-heading {
   margin: 0;
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
 }
 
 .footer-social-list {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-xl);
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .footer-social-link {
-  display: block;
-  color: var(--color-text-secondary);
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  color: var(--color-text-soft);
   transition: color var(--duration-fast) ease;
 
   &:hover {
@@ -187,8 +226,8 @@
 
 .footer-social-icon {
   display: block;
-  width: 28px;
-  height: 28px;
+  width: 27px;
+  height: 27px;
   background-color: currentcolor;
   mask-position: center;
   mask-repeat: no-repeat;
