@@ -61,6 +61,14 @@
   color: var(--color-text);
 }
 
+// An event logo in place of the title's words: as wide as the title would be, never wider than the screen.
+.stream-browser-title-image {
+  display: block;
+  width: min(640px, 88vw);
+  height: auto;
+  margin: var(--spacing-sm) auto;
+}
+
 // A photo behind the hero under web3privacy.info's own overlay, darkest where it meets the page.
 .stream-browser-hero--image {
   position: relative;

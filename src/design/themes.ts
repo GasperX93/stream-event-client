@@ -6,6 +6,7 @@ import linkedinIconUrl from './assets/social/linkedin.svg';
 import telegramIconUrl from './assets/social/telegram.svg';
 import xIconUrl from './assets/social/x.svg';
 import youtubeIconUrl from './assets/social/youtube.svg';
+import web3privacyCongressLogoUrl from './assets/web3privacy-congress-logo.png';
 import web3privacyFaviconUrl from './assets/web3privacy-favicon.svg';
 import web3privacyHeroUrl from './assets/web3privacy-hero.webp';
 import web3privacyLogoUrl from './assets/web3privacy-logo.png';
@@ -53,6 +54,8 @@ export interface ThemeSettings {
   pageTitle?: string;
   faviconUrl?: string;
   heroTitle: string;
+  /** The event's logo shown in place of the title's words, which stay as its text for a screen reader. */
+  heroTitleImageUrl?: string;
   heroSubtitle: string;
   /** Optional lines for an event page: a label over the title, the date, a tagline and a paragraph. */
   heroEyebrow?: string;
@@ -163,6 +166,8 @@ export const THEMES: Record<ThemeName, ThemeSettings> = {
     faviconUrl: web3privacyFaviconUrl,
     heroEyebrow: 'Livestream',
     heroTitle: 'Cypherpunk Congress 3 · Mumbai 2026',
+    // The congress's own logo, white on a transparent ground (from Web3Privacy's banner).
+    heroTitleImageUrl: web3privacyCongressLogoUrl,
     heroSubtitle: "The world's largest cypherpunk and human rights event",
     heroDate: 'Nov 2, 9am (IST)',
     heroTagline: 'Privacy loves equality',

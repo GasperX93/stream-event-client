@@ -32,7 +32,13 @@ export function StreamBrowser() {
         )}
         <div className="stream-browser-hero-content">
           {theme.heroEyebrow && <p className="stream-browser-eyebrow">{theme.heroEyebrow}</p>}
-          <h1 className="stream-browser-title">{theme.heroTitle}</h1>
+          <h1 className="stream-browser-title">
+            {theme.heroTitleImageUrl ? (
+              <img className="stream-browser-title-image" src={theme.heroTitleImageUrl} alt={theme.heroTitle} />
+            ) : (
+              theme.heroTitle
+            )}
+          </h1>
           <p className="stream-browser-subtitle">{theme.heroSubtitle}</p>
           {theme.heroDate && <p className="stream-browser-date">{theme.heroDate}</p>}
           {theme.heroSocial && theme.footer.social && <SocialLinks links={theme.footer.social.links} variant="tiles" />}
