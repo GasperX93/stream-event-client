@@ -1,6 +1,7 @@
-// The Web3Privacy Now theme, for the Cypherpunk Congress stream page: black surfaces, white text and
-// the neon green #70ff88 the Web3Privacy site uses for its calls to action, in Eurostile Unicase where
-// the viewer has it. Same groups and names as the Swarm theme; only the brand values differ.
+// The Web3Privacy Now theme, for the Cypherpunk Congress stream page, taken from web3privacy.info's own
+// tokens: a black page, #0a0a0a surfaces with white hairlines, white text and the neon green #70ff88
+// with its dark-green foreground for calls to action. Eurostile Unicase where the viewer has it. Same
+// groups and names as the Swarm theme; only the brand values differ.
 
 $color: (
   'background': #000000,
@@ -11,12 +12,12 @@ $color: (
   'surface-hover': rgba(250, 250, 250, 0.08),
   'input': #141414,
   'input-focus': #1c1c1c,
-  'border': #262626,
-  'border-strong': #4c4c4c,
+  'border': rgba(255, 255, 255, 0.1),
+  'border-strong': rgba(255, 255, 255, 0.2),
   'overlay': rgba(0, 0, 0, 0.75),
   // The page colour at no opacity, where the header fades into the page.
   'background-clear': rgba(0, 0, 0, 0),
-  'footer-end': #000000,
+  'footer-end': #0a0a0a,
   // Behind a dialog, over a page that stays blurred beneath it.
   'overlay-modal': rgba(0, 0, 0, 0.7),
   // A chat message's bubble, and a notice that sits in the flow of the page.
@@ -42,12 +43,12 @@ $color: (
   'video': #000000,
   'primary': #70ff88,
   'primary-hover': #8cff9e,
-  // The green is light, so anything written on it is black.
-  'on-primary': #000000,
+  // web3privacy.info writes on its green in this dark green rather than black.
+  'on-primary': #122014,
   'text': #ffffff,
   'text-secondary': rgba(250, 250, 250, 0.72),
   'text-tertiary': rgba(250, 250, 250, 0.5),
-  'text-muted': #8a8a8a,
+  'text-muted': #a7b0bd,
   'text-soft': rgba(255, 255, 255, 0.885),
   'button-secondary': rgba(250, 250, 250, 0.1),
   'button-secondary-hover': rgba(250, 250, 250, 0.16),
@@ -56,7 +57,7 @@ $color: (
   // The brand's #fb2c36 carries white text at 3.6:1, so the badge uses its darker step.
   'live': #b91c1c,
   'on-live': #fafafa,
-  'error-text': #ff8a8a,
+  'error-text': #ff8b80,
   'warning': #f28b0a,
   'spinner-track': rgba(250, 250, 250, 0.15),
   // A chat name's colour, behind its initial in light text. The chat picks one by hashing the name.

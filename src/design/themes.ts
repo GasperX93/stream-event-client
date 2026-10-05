@@ -83,30 +83,33 @@ const SWARM_FOOTER: FooterSettings = {
   ],
 };
 
+// The links of web3privacy.info's own footer, with Swarm credited for the stream.
 const WEB3PRIVACY_FOOTER: FooterSettings = {
-  tagline: 'Web3Privacy Now: privacy and internet freedoms, streamed over Swarm.',
+  tagline: 'Join our privacy movement.',
   brandLinks: [
     { label: 'web3privacy.info', href: 'https://web3privacy.info' },
     { label: 'Manifesto', href: 'https://docs.web3privacy.info/about-us/manifesto/' },
-    { label: 'News', href: 'https://news.web3privacy.info' },
+    { label: 'How to get involved', href: 'https://docs.web3privacy.info/get-involved/index' },
   ],
   columns: [
     {
-      title: 'Community',
+      title: 'Web3Privacy Now',
       links: [
-        { label: 'Forum', href: 'https://forum.web3privacy.info/' },
-        { label: 'YouTube', href: 'https://www.youtube.com/@Web3PrivacyNow' },
-        { label: 'Bluesky', href: 'https://bsky.app/profile/web3privacy.info' },
-        { label: 'LinkedIn', href: 'https://www.linkedin.com/company/web3privacynow' },
+        { label: 'Events', href: 'https://web3privacy.info/events' },
+        { label: 'Grants / Support Us', href: 'https://web3privacy.info/donate' },
+        { label: 'Articles', href: 'https://paragraph.com/@web3privacy-now' },
+        { label: 'Talks', href: 'https://www.youtube.com/@Web3PrivacyNow' },
       ],
     },
     {
-      title: 'Explore',
+      title: 'Join us on',
       links: [
-        { label: 'Explorer', href: 'https://explorer.web3privacy.info' },
-        { label: 'Academy', href: 'https://academy.web3privacy.info' },
-        { label: 'Stacks', href: 'https://stacks.web3privacy.info' },
+        { label: 'X', href: 'https://x.com/web3privacy' },
+        { label: 'Telegram', href: 'https://t.me/+QOj6126xlEs0OTQ0' },
+        { label: 'Bluesky', href: 'https://bsky.app/profile/web3privacy.info' },
         { label: 'GitHub', href: 'https://github.com/web3privacy' },
+        { label: 'LinkedIn', href: 'https://www.linkedin.com/company/web3privacynow' },
+        { label: 'Instagram', href: 'https://www.instagram.com/web3privacy_now/' },
       ],
     },
     {
@@ -117,7 +120,7 @@ const WEB3PRIVACY_FOOTER: FooterSettings = {
       ],
     },
   ],
-  owner: 'Web3Privacy Now',
+  owner: 'Web3PrivacyNow',
   bottomLinks: [{ label: 'Hosted on Swarm', href: 'https://swarm.bzz.link/' }],
 };
 
