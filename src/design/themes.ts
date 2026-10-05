@@ -6,6 +6,7 @@ import linkedinIconUrl from './assets/social/linkedin.svg';
 import telegramIconUrl from './assets/social/telegram.svg';
 import xIconUrl from './assets/social/x.svg';
 import youtubeIconUrl from './assets/social/youtube.svg';
+import web3privacyFaviconUrl from './assets/web3privacy-favicon.svg';
 import web3privacyHeroUrl from './assets/web3privacy-hero.webp';
 import web3privacyLogoUrl from './assets/web3privacy-logo.png';
 import { type ThemeName } from './themeNames';
@@ -48,6 +49,9 @@ export interface ThemeSettings {
   logoUrl: string;
   /** What the logo says, for a reader who cannot see it. */
   logoAlt: string;
+  /** The tab's title and icon, for a theme that is not the page's built-in Swarm ones. */
+  pageTitle?: string;
+  faviconUrl?: string;
   heroTitle: string;
   heroSubtitle: string;
   /** Optional lines for an event page: a label over the title, the date, a tagline and a paragraph. */
@@ -154,6 +158,9 @@ export const THEMES: Record<ThemeName, ThemeSettings> = {
   web3privacy: {
     logoUrl: web3privacyLogoUrl,
     logoAlt: 'Web3Privacy Now',
+    pageTitle: 'Cypherpunk Congress 3 · Livestream',
+    // web3privacy.info's own icon: the bar of the logo on a black tile.
+    faviconUrl: web3privacyFaviconUrl,
     heroEyebrow: 'Livestream',
     heroTitle: 'Cypherpunk Congress 3 · Mumbai 2026',
     heroSubtitle: "The world's largest cypherpunk and human rights event",
@@ -169,7 +176,27 @@ export const THEMES: Record<ThemeName, ThemeSettings> = {
   },
 };
 
-/** Marks the page with the theme, which is what every themed variable is selected on. */
+/**
+ * Marks the page with the theme, which is what every themed variable is selected on, and gives the tab
+ * the theme's title and icon when it has its own. `index.html` carries the Swarm ones, so a theme without
+ * them leaves the tab as it is.
+ */
 export function applyTheme(name: ThemeName, root: HTMLElement = document.documentElement): void {
   root.dataset.theme = name;
+
+  const { pageTitle, faviconUrl } = THEMES[name];
+  const doc = root.ownerDocument;
+  if (pageTitle) {
+    doc.title = pageTitle;
+  }
+  if (faviconUrl) {
+    let icon = doc.querySelector<HTMLLinkElement>('link[rel~="icon"]');
+    if (!icon) {
+      icon = doc.createElement('link');
+      icon.rel = 'icon';
+      doc.head.append(icon);
+    }
+    icon.type = 'image/svg+xml';
+    icon.href = faviconUrl;
+  }
 }

@@ -39,6 +39,27 @@ describe('choosing a theme', () => {
     expect(root.dataset.theme).toBe(DEFAULT_THEME);
   });
 
+  it("gives the tab the theme's own title and icon, and leaves the built-in ones otherwise", () => {
+    document.head.innerHTML = '<link rel="icon" type="image/png" href="./favicon.png" />';
+    document.title = 'Built-in title';
+    const icon = () => document.querySelector<HTMLLinkElement>('link[rel~="icon"]');
+
+    applyTheme(DEFAULT_THEME, document.documentElement);
+    expect(document.title).toBe(THEMES[DEFAULT_THEME].pageTitle ?? 'Built-in title');
+    expect(icon()?.getAttribute('href')).toBe(THEMES[DEFAULT_THEME].faviconUrl ?? './favicon.png');
+
+    for (const name of THEME_NAMES) {
+      const { pageTitle, faviconUrl } = THEMES[name];
+      applyTheme(name, document.documentElement);
+      if (pageTitle) {
+        expect(document.title).toBe(pageTitle);
+      }
+      if (faviconUrl) {
+        expect(icon()?.getAttribute('href')).toBe(faviconUrl);
+      }
+    }
+  });
+
   it('gives every theme its logo and page copy', () => {
     for (const name of THEME_NAMES) {
       expect(THEMES[name].logoUrl).toBeTruthy();
